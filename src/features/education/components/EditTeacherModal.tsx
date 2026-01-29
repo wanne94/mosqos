@@ -1,0 +1,205 @@
+import { useState, useEffect, useCallback } from 'react'
+import { supabase } from '../../../lib/supabase/client'
+import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { useEscapeKey } from '../../../hooks/useEscapeKey'
+import { useOrganization } from '../../../hooks/useOrganization'
+
+const DEFAULT_COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16',
+  '#F97316', '#6366F1', '#14B8A6', '#F43F5E', '#A855F7', '#EAB308', '#22C55E', '#0EA5E9',
+  '#64748B', '#78716C', '#DC2626', '#059669', '#0284C7', '#7C3AED', '#C026D3', '#DB2777',
+  '#EA580C', '#D97706', '#CA8A04', '#65A30D', '#16A34A', '#0891B2', '#0D9488', '#0369A1',
+  '#2563EB', '#1D4ED8', '#1E40AF', '#1E3A8A', '#9333EA', '#A21CAF', '#BE185D', '#B91C1C',
+  '#C2410C', '#B45309', '#854D0E', '#713F12', '#365314', '#14532D', '#164E63', '#155E75',
+  '#0C4A6E', '#1E293B', '#0F172A',
+]
+
+interface EditTeacherModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSave: () => void
+  teacherId: number
+  teacher: {
+    id?: number
+    teacher_id?: number
+    member_id?: number
+    first_name: string
+    last_name: string
+    teacher_color?: string
+  } | null
+}
+
+export default function EditTeacherModal({ isOpen, onClose, onSave, teacherId, teacher }: EditTeacherModalProps) {
+  const { t } = useTranslation()
+  const { currentOrganizationId } = useOrganization()
+  const [loading, setLoading] = useState(false)
+  const [initialColor, setInitialColor] = useState(DEFAULT_COLORS[0])
+  const [selectedColor, setSelectedColor] = useState(DEFAULT_COLORS[0])
+  const isDirty = selectedColor !== initialColor
+
+  useEscapeKey(
+    onClose,
+    isDirty,
+    t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?',
+    isOpen
+  )
+
+  const handleClose = useCallback(() => {
+    if (isDirty) {
+      if (window.confirm(t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?')) {
+        onClose()
+      }
+    } else {
+      onClose()
+    }
+  }, [isDirty, onClose, t])
+
+  useEffect(() => {
+    if (isOpen && teacher) {
+      const color = teacher.teacher_color || DEFAULT_COLORS[0]
+      setInitialColor(color)
+      setSelectedColor(color)
+    }
+  }, [isOpen, teacher])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!teacherId || !teacher) {
+      alert(t('common.invalidTeacher') || 'Invalid teacher selected')
+      return
+    }
+
+    setLoading(true)
+
+    try {
+      let teacherTableId = teacher.teacher_id
+
+      if (!teacherTableId) {
+        const { data: teacherRecord, error: findError } = await supabase
+          .from('teachers')
+          .select('id')
+          .eq('organization_id', currentOrganizationId)
+          .eq('member_id', teacherId)
+          .maybeSingle()
+
+        if (findError) {
+          console.error('Error finding teacher record:', findError)
+          throw findError
+        }
+
+        if (!teacherRecord) {
+          throw new Error('Teacher record not found')
+        }
+
+        teacherTableId = teacherRecord.id
+      }
+
+      const { error } = await supabase
+        .from('teachers')
+        .update({ teacher_color: selectedColor })
+        .eq('organization_id', currentOrganizationId)
+        .eq('id', teacherTableId)
+
+      if (error) throw error
+
+      alert(t('education.teacherUpdated') || 'Teacher updated successfully!')
+      onSave()
+      onClose()
+    } catch (error) {
+      console.error('Error updating teacher:', error)
+      alert(t('common.failedToUpdate') || `Failed to update teacher: ${(error as any).message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isOpen || !teacher) return null
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
+        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            {t('education.editTeacher') || 'Edit Teacher'}
+          </h2>
+          <button
+            onClick={handleClose}
+            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              {t('education.teacher') || 'Teacher'}
+            </label>
+            <p className="text-slate-900 dark:text-slate-100 font-medium">
+              {teacher.first_name} {teacher.last_name}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+              {t('education.teacherColor') || 'Color Code'} <span className="text-red-500">*</span>
+            </label>
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {DEFAULT_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setSelectedColor(color)}
+                    className={`w-10 h-10 rounded-lg border-2 transition-all ${
+                      selectedColor === color
+                        ? 'border-slate-900 dark:border-slate-100 scale-110'
+                        : 'border-slate-300 dark:border-slate-600 hover:border-slate-500'
+                    }`}
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-3">
+                <input
+                  type="color"
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  className="w-16 h-10 rounded border border-slate-300 dark:border-slate-600 cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={selectedColor}
+                  onChange={(e) => setSelectedColor(e.target.value)}
+                  placeholder="#3B82F6"
+                  className="flex-1 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
+                  pattern="^#[0-9A-Fa-f]{6}$"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
+            >
+              {t('common.cancel') || 'Cancel'}
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (t('common.saving') || 'Saving...') : (t('common.save') || 'Save')}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}

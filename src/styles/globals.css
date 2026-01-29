@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* Custom CSS Variables */
+:root {
+  /* Colors */
+  --color-primary: #0F766E;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #F1F5F9;
+  --color-secondary-foreground: #0F172A;
+  --color-accent: #F59E0B;
+  --color-accent-foreground: #FFFFFF;
+  --color-destructive: #EF4444;
+  --color-destructive-foreground: #FFFFFF;
+  --color-muted: #F1F5F9;
+  --color-muted-foreground: #64748B;
+  --color-background: #FFFFFF;
+  --color-foreground: #0F172A;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #0F172A;
+  --color-border: #E2E8F0;
+  --color-input: #E2E8F0;
+  --color-ring: #0F766E;
+
+  /* Radius */
+  --radius: 0.5rem;
+
+  /* Font */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Dark mode */
+.dark {
+  --color-primary: #14B8A6;
+  --color-primary-foreground: #FFFFFF;
+  --color-secondary: #1E293B;
+  --color-secondary-foreground: #F8FAFC;
+  --color-accent: #FBBF24;
+  --color-accent-foreground: #0F172A;
+  --color-muted: #334155;
+  --color-muted-foreground: #94A3B8;
+  --color-background: #0F172A;
+  --color-foreground: #F8FAFC;
+  --color-card: #1E293B;
+  --color-card-foreground: #F8FAFC;
+  --color-border: #334155;
+  --color-input: #334155;
+}
+
+/* Ramadan mode */
+.ramadan {
+  --color-primary: #7C3AED;
+  --color-accent: #F59E0B;
+}
+
+/* Base styles */
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* RTL support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .rtl\:space-x-reverse > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-muted-foreground);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-foreground);
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+
+/* Utility classes */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
