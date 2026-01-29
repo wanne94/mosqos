@@ -90,7 +90,7 @@ CREATE INDEX IF NOT EXISTS idx_trips_code ON public.trips(organization_id, code)
 CREATE INDEX IF NOT EXISTS idx_trips_open ON public.trips(organization_id)
     WHERE status = 'open' AND available_spots > 0;
 CREATE INDEX IF NOT EXISTS idx_trips_upcoming ON public.trips(organization_id, start_date)
-    WHERE status IN ('open', 'closed', 'full') AND start_date > CURRENT_DATE;
+    WHERE status IN ('open', 'closed', 'full');
 
 -- Triggers for trips
 DROP TRIGGER IF EXISTS set_updated_at_trips ON public.trips;

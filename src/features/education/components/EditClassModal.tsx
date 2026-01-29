@@ -68,8 +68,8 @@ export default function EditClassModal({ isOpen, onClose, onSave, classId }: Edi
 
       if (data) {
         const initial = {
-          name: data.name || '',
-          description: data.description || '',
+          name: (data as any).name || '',
+          description: (data as any).description || '',
         }
         setInitialFormData(initial)
         setFormData(initial)
@@ -102,7 +102,7 @@ export default function EditClassModal({ isOpen, onClose, onSave, classId }: Edi
 
       const { error } = await supabase
         .from('courses')
-        .update(classData)
+        .update(classData as any)
         .eq('id', classId)
         .eq('organization_id', currentOrganizationId)
 

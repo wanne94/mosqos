@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
-import { supabase } from '@/lib/supabase/client'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 
 interface Organization {
   id: string
@@ -29,8 +29,18 @@ interface OrganizationContextType {
 
 const OrganizationContext = createContext<OrganizationContextType | undefined>(undefined)
 
+// Mock organization for dev mode
+const DEV_ORGANIZATION: Organization = {
+  id: 'dev-org-id',
+  name: 'Green Lane Masjid',
+  slug: 'green-lane-masjid',
+  logo_url: null,
+  settings: {},
+  country_id: null,
+}
+
 export function OrganizationProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
+  const { user, isDevMode } = useAuth()
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
 
@@ -46,7 +56,78 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    // Dev mode: use mock data
+    if (isDevMode) {
+      const userRole = user.user_metadata?.role as string
+
+      // Platform admin doesn't need organization membership
+      if (userRole === 'admin') {
+        setOrganizations([])
+        setCurrentOrganization(null)
+        setIsLoading(false)
+        return
+      }
+
+      // Imam (owner) and member users have access to dev organization
+      const membership: OrganizationMembership = {
+        organization: DEV_ORGANIZATION,
+        isOwner: userRole === 'imam',
+        isDelegate: userRole === 'imam',
+        permissions: userRole === 'imam' ? ['*'] : [],
+      }
+
+      setOrganizations([membership])
+
+      // Auto-set current organization for non-platform routes
+      if (slug === DEV_ORGANIZATION.slug || slug) {
+        setCurrentOrganization(DEV_ORGANIZATION)
+      }
+
+      setIsLoading(false)
+      return
+    }
+
     try {
+      // First check if user is a platform admin
+      const { data: platformAdmin } = await supabase
+        .from('platform_admins')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      const isPlatformAdmin = !!platformAdmin
+
+      // Platform admins can access ALL organizations
+      if (isPlatformAdmin) {
+        // Fetch all active organizations
+        const { data: allOrgs } = await supabase
+          .from('organizations')
+          .select('*')
+          .eq('is_active', true)
+          .order('name')
+
+        const memberships: OrganizationMembership[] = (allOrgs || []).map((org: Organization) => ({
+          organization: org,
+          isOwner: true, // Platform admins have full access
+          isDelegate: true,
+          permissions: ['*'],
+        }))
+
+        setOrganizations(memberships)
+
+        // Set current organization based on slug
+        if (slug) {
+          const org = memberships.find(m => m.organization.slug === slug)
+          if (org) {
+            setCurrentOrganization(org.organization)
+          }
+        }
+
+        setIsLoading(false)
+        return
+      }
+
+      // Non-platform admin: fetch user's organization memberships
       // Fetch organizations where user is owner
       const { data: ownedOrgs } = await supabase
         .from('organization_owners')

@@ -24,7 +24,6 @@ export default function EvaluationHistoryModal({
   isOpen,
   onClose,
   memberId,
-  classId,
   studentName,
   className,
 }: EvaluationHistoryModalProps) {

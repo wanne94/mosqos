@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { PermissionCode } from '../types/permissions.types'
 
 // Module-level permission flags for backward compatibility
@@ -102,6 +102,34 @@ async function fetchUserPermissions(): Promise<{
   isPlatformAdmin: boolean
   permissionCodes: string[]
 }> {
+  // Check for dev mode BEFORE calling Supabase
+  // This ensures we don't try to authenticate with a placeholder Supabase instance
+  const DEV_MODE_KEY = 'mosqos_dev_user'
+  const savedDevUser = localStorage.getItem(DEV_MODE_KEY)
+
+  if (savedDevUser && !isSupabaseConfigured()) {
+    // Development mode: Return role based on email
+    const devUsers: Record<string, { role: string; mappedRole: string }> = {
+      'admin@mosqos.com': { role: 'admin', mappedRole: 'platform_admin' },
+      'imam@mosqos.com': { role: 'imam', mappedRole: 'owner' },
+      'member@mosqos.com': { role: 'member', mappedRole: 'member' },
+    }
+
+    const devUserData = devUsers[savedDevUser as keyof typeof devUsers]
+    const mappedRole = devUserData?.mappedRole || 'member'
+    const originalRole = devUserData?.role || 'member'
+
+    return {
+      role: mappedRole,
+      memberId: mappedRole === 'member' ? 'dev-member-id' : null,
+      permissions: mappedRole !== 'member' ? FULL_MODULE_PERMISSIONS : EMPTY_MODULE_PERMISSIONS,
+      organizationId: originalRole !== 'admin' ? 'dev-org-id' : null,
+      isPlatformAdmin: mappedRole === 'platform_admin',
+      permissionCodes: mappedRole !== 'member' ? ['*'] : [],
+    }
+  }
+
+  // Continue with normal Supabase flow for production
   const {
     data: { user },
     error: authError,
@@ -115,6 +143,26 @@ async function fetchUserPermissions(): Promise<{
       organizationId: null,
       isPlatformAdmin: false,
       permissionCodes: [],
+    }
+  }
+
+  // Fallback dev mode check (in case user was created differently)
+  if (user.id.startsWith('dev-')) {
+    const devRole = user.user_metadata?.role as string
+    const roleMapping: Record<string, string> = {
+      admin: 'platform_admin',
+      imam: 'owner',
+      member: 'member',
+    }
+    const mappedRole = roleMapping[devRole] || 'member'
+
+    return {
+      role: mappedRole,
+      memberId: mappedRole === 'member' ? 'dev-member-id' : null,
+      permissions: mappedRole !== 'member' ? FULL_MODULE_PERMISSIONS : EMPTY_MODULE_PERMISSIONS,
+      organizationId: devRole !== 'admin' ? 'dev-org-id' : null,
+      isPlatformAdmin: mappedRole === 'platform_admin',
+      permissionCodes: mappedRole !== 'member' ? ['*'] : [],
     }
   }
 

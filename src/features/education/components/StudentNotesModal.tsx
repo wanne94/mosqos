@@ -86,7 +86,7 @@ export default function StudentNotesModal({
 
     setSaving(true)
     try {
-      const { error } = await supabase.from('student_notes').insert([
+      const { error } = await (supabase.from('student_notes') as any).insert([
         {
           organization_id: currentOrganizationId,
           enrollment_id: enrollment.id,

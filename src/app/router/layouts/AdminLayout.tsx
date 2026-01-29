@@ -1,9 +1,7 @@
 import { Outlet, Link, useParams, useLocation } from 'react-router-dom'
 import { useState } from 'react'
 import {
-  LayoutDashboard,
   Users,
-  Home,
   DollarSign,
   GraduationCap,
   FileText,
@@ -11,28 +9,30 @@ import {
   Scissors,
   Heart,
   Bell,
-  Shield,
   Settings,
   Menu,
   X,
   LogOut,
   ChevronDown,
+  BarChart3,
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
+import { usePermissions } from '@/features/permissions/hooks/usePermissions'
+import { RoleDisplay, RoleDisplaySkeleton } from '@/shared/components/RoleDisplay'
 
 const navItems = [
-  { path: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { path: 'members', label: 'Members', icon: Users },
-  { path: 'households', label: 'Households', icon: Home },
-  { path: 'donations', label: 'Donations', icon: DollarSign },
+  { path: 'people', label: 'People', icon: Users },
+  { path: 'donors', label: 'Donors', icon: DollarSign },
+  { path: 'expenses', label: 'Expenses', icon: DollarSign },
   { path: 'education', label: 'Education', icon: GraduationCap },
   { path: 'cases', label: 'Cases', icon: FileText },
   { path: 'umrah', label: 'Umrah', icon: Plane },
   { path: 'qurbani', label: 'Qurbani', icon: Scissors },
   { path: 'services', label: 'Islamic Services', icon: Heart },
   { path: 'announcements', label: 'Announcements', icon: Bell },
-  { path: 'permissions', label: 'Permissions', icon: Shield },
+  { path: 'billing', label: 'Billing', icon: DollarSign },
+  { path: 'reports', label: 'Reports', icon: BarChart3 },
   { path: 'settings', label: 'Settings', icon: Settings },
 ]
 
@@ -41,6 +41,7 @@ export default function AdminLayout() {
   const location = useLocation()
   const { signOut, user } = useAuth()
   const { currentOrganization } = useOrganization()
+  const { role, loading: roleLoading } = usePermissions()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
@@ -135,6 +136,9 @@ export default function AdminLayout() {
                 <div className="absolute right-0 mt-2 w-48 bg-card border rounded-md shadow-lg z-20">
                   <div className="px-4 py-3 border-b">
                     <p className="text-sm font-medium truncate">{user?.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {roleLoading ? <RoleDisplaySkeleton /> : <RoleDisplay role={role} />}
+                    </p>
                   </div>
                   <div className="p-1">
                     <button

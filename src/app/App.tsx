@@ -6,6 +6,7 @@ import { AuthProvider } from './providers/AuthProvider'
 import { OrganizationProvider } from './providers/OrganizationProvider'
 import { ThemeProvider } from './providers/ThemeProvider'
 import { AppRoutes } from './router/routes'
+import '@/lib/i18n/config'
 
 // Create a client
 const queryClient = new QueryClient({

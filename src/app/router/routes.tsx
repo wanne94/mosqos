@@ -1,21 +1,44 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { lazy } from 'react'
 import { useAuth } from '../providers/AuthProvider'
+import { PlatformAdminGuard, OrganizationAdminGuard } from './guards'
 
 // Layouts
 const PublicLayout = lazy(() => import('./layouts/PublicLayout'))
 const AuthLayout = lazy(() => import('./layouts/AuthLayout'))
 const AdminLayout = lazy(() => import('./layouts/AdminLayout'))
 const PlatformLayout = lazy(() => import('./layouts/PlatformLayout'))
+const PortalLayout = lazy(() => import('./layouts/PortalLayout'))
 
 // Public Pages
 const LandingPage = lazy(() => import('@/features/auth/pages/LandingPage'))
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const SignupPage = lazy(() => import('@/features/auth/pages/SignupPage'))
 
+// Platform Pages
+const PlatformDashboardPage = lazy(() => import('@/features/platform/pages/DashboardPage'))
+const OrganizationsPage = lazy(() => import('@/features/platform/pages/OrganizationsPage'))
+const PlansPage = lazy(() => import('@/features/platform/pages/PlansPage'))
+const DiscountCodesPage = lazy(() => import('@/features/platform/pages/DiscountCodesPage'))
+const AnalyticsPage = lazy(() => import('@/features/platform/pages/AnalyticsPage'))
+
 // Admin Pages
-const DashboardPage = lazy(() => import('@/features/platform/pages/DashboardPage'))
-const MembersPage = lazy(() => import('@/features/members/pages/MembersPage'))
+const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
+const DonorsPage = lazy(() => import('@/features/donations/pages/DonorsPage'))
+const ExpensesPage = lazy(() => import('@/features/expenses/pages/ExpensesPage'))
+const EducationPage = lazy(() => import('@/features/education/pages/EducationPage'))
+const ClassEditPage = lazy(() => import('@/features/education/pages/ClassEditPage'))
+const AdminCasesPage = lazy(() => import('@/features/cases/pages/CasesPage'))
+const UmrahPage = lazy(() => import('@/features/umrah/pages/UmrahPage'))
+const BillingPage = lazy(() => import('@/features/billing/pages/BillingPage'))
+const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
+const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
+
+// Portal Pages
+const PortalDashboardPage = lazy(() => import('@/features/portal/pages/DashboardPage'))
+const ProfilePage = lazy(() => import('@/features/portal/pages/ProfilePage'))
+const RecurringDonationsPage = lazy(() => import('@/features/portal/pages/RecurringDonationsPage'))
+const PortalCasesPage = lazy(() => import('@/features/portal/pages/CasesPage'))
 
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -88,14 +111,17 @@ export function AppRoutes() {
         path="/platform"
         element={
           <ProtectedRoute>
-            <PlatformLayout />
+            <PlatformAdminGuard>
+              <PlatformLayout />
+            </PlatformAdminGuard>
           </ProtectedRoute>
         }
       >
-        <Route index element={<DashboardPage />} />
-        <Route path="organizations" element={<div>Organizations</div>} />
-        <Route path="plans" element={<div>Plans</div>} />
-        <Route path="analytics" element={<div>Analytics</div>} />
+        <Route index element={<PlatformDashboardPage />} />
+        <Route path="organizations" element={<OrganizationsPage />} />
+        <Route path="plans" element={<PlansPage />} />
+        <Route path="discount-codes" element={<DiscountCodesPage />} />
+        <Route path="analytics" element={<AnalyticsPage />} />
       </Route>
 
       {/* Organization Admin Routes */}
@@ -103,26 +129,28 @@ export function AppRoutes() {
         path="/:slug/admin"
         element={
           <ProtectedRoute>
-            <AdminLayout />
+            <OrganizationAdminGuard>
+              <AdminLayout />
+            </OrganizationAdminGuard>
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="members" element={<MembersPage />} />
-        <Route path="members/:id" element={<div>Member Detail</div>} />
-        <Route path="households" element={<div>Households</div>} />
-        <Route path="donations" element={<div>Donations</div>} />
-        <Route path="funds" element={<div>Funds</div>} />
-        <Route path="pledges" element={<div>Pledges</div>} />
-        <Route path="education" element={<div>Education</div>} />
-        <Route path="cases" element={<div>Cases</div>} />
-        <Route path="umrah" element={<div>Umrah</div>} />
-        <Route path="qurbani" element={<div>Qurbani</div>} />
-        <Route path="services" element={<div>Islamic Services</div>} />
-        <Route path="announcements" element={<div>Announcements</div>} />
-        <Route path="permissions" element={<div>Permissions</div>} />
-        <Route path="settings" element={<div>Settings</div>} />
+        <Route index element={<Navigate to="people" replace />} />
+        <Route path="people" element={<PeoplePage />} />
+        <Route path="donors" element={<DonorsPage />} />
+        <Route path="expenses" element={<ExpensesPage />} />
+        <Route path="education" element={<EducationPage />} />
+        <Route path="education/class/:id" element={<ClassEditPage />} />
+        <Route path="cases" element={<AdminCasesPage />} />
+        <Route path="umrah" element={<UmrahPage />} />
+        <Route path="billing" element={<BillingPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+
+        {/* Placeholder routes for future pages */}
+        <Route path="qurbani" element={<div className="p-6">Qurbani - Coming Soon</div>} />
+        <Route path="services" element={<div className="p-6">Islamic Services - Coming Soon</div>} />
+        <Route path="announcements" element={<div className="p-6">Announcements - Coming Soon</div>} />
       </Route>
 
       {/* Member Portal Routes */}
@@ -130,14 +158,14 @@ export function AppRoutes() {
         path="/:slug/portal"
         element={
           <ProtectedRoute>
-            <div>Portal Layout</div>
+            <PortalLayout />
           </ProtectedRoute>
         }
       >
-        <Route index element={<div>Portal Dashboard</div>} />
-        <Route path="profile" element={<div>My Profile</div>} />
-        <Route path="donations" element={<div>My Donations</div>} />
-        <Route path="family" element={<div>My Family</div>} />
+        <Route index element={<PortalDashboardPage />} />
+        <Route path="profile" element={<ProfilePage />} />
+        <Route path="recurring-donations" element={<RecurringDonationsPage />} />
+        <Route path="cases" element={<PortalCasesPage />} />
       </Route>
 
       {/* 404 */}

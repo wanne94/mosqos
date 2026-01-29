@@ -10,13 +10,17 @@ import {
   X,
   LogOut,
   ChevronDown,
+  Tag,
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
+import { usePermissions } from '@/features/permissions/hooks/usePermissions'
+import { RoleDisplay, RoleDisplaySkeleton } from '@/shared/components/RoleDisplay'
 
 const navItems = [
   { path: '/platform', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { path: '/platform/organizations', label: 'Organizations', icon: Building2 },
   { path: '/platform/plans', label: 'Plans', icon: CreditCard },
+  { path: '/platform/discount-codes', label: 'Discount Codes', icon: Tag },
   { path: '/platform/analytics', label: 'Analytics', icon: BarChart3 },
   { path: '/platform/settings', label: 'Settings', icon: Settings },
 ]
@@ -24,6 +28,7 @@ const navItems = [
 export default function PlatformLayout() {
   const location = useLocation()
   const { signOut, user } = useAuth()
+  const { role, loading: roleLoading } = usePermissions()
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
@@ -121,7 +126,9 @@ export default function PlatformLayout() {
                 <div className="absolute right-0 mt-2 w-48 bg-card border rounded-md shadow-lg z-20">
                   <div className="px-4 py-3 border-b">
                     <p className="text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground">Platform Admin</p>
+                    <p className="text-xs text-muted-foreground">
+                      {roleLoading ? <RoleDisplaySkeleton /> : <RoleDisplay role={role} />}
+                    </p>
                   </div>
                   <div className="p-1">
                     <button

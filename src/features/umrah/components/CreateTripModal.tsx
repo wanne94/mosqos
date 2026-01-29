@@ -31,7 +31,6 @@ const initialFormData: FormData = {
 
 export default function CreateTripModal({ isOpen, onClose, onSave }: CreateTripModalProps) {
   const { t } = useTranslation()
-  const { currentOrganizationId } = useOrganization()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const isDirty = useFormDirty(formData, initialFormData)

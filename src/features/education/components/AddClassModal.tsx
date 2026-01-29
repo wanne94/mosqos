@@ -73,7 +73,7 @@ export default function AddClassModal({ isOpen, onClose, onSave }: AddClassModal
         organization_id: currentOrganizationId,
       }
 
-      const { error } = await supabase.from('courses').insert([classData])
+      const { error } = await supabase.from('courses').insert(classData as any)
 
       if (error) throw error
 

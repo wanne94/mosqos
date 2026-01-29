@@ -289,7 +289,7 @@ export default function AddClassFromScheduleModal({
           description: cls.description,
         }))
 
-        const { error } = await supabase.from('scheduled_classes').insert(scheduledClassesToInsert)
+        const { error } = await supabase.from('scheduled_classes').insert(scheduledClassesToInsert as any)
         if (error) throw error
       }
 

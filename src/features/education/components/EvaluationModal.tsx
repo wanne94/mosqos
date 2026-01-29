@@ -100,7 +100,7 @@ export default function EvaluationModal({
         evaluation_date: formData.evaluation_date,
       }
 
-      const { error } = await supabase.from('evaluations').insert([evaluationData])
+      const { error } = await (supabase.from('evaluations') as any).insert([evaluationData])
 
       if (error) throw error
 

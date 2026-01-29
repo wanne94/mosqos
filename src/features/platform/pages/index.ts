@@ -1,0 +1,5 @@
+export { default as DashboardPage } from './DashboardPage'
+export { default as OrganizationsPage } from './OrganizationsPage'
+export { default as PlansPage } from './PlansPage'
+export { default as DiscountCodesPage } from './DiscountCodesPage'
+export { default as AnalyticsPage } from './AnalyticsPage'
