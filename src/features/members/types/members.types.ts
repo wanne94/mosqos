@@ -1,4 +1,4 @@
-import type { Json } from '@/shared/types/supabase.types'
+import type { Json } from '@/shared/types/database.types'
 
 // ============================================================================
 // Core Member Types

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Building2, Search, Users, Calendar, ChevronRight } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
-import type { Database } from '@/shared/types/supabase.types'
+import type { Database } from '@/shared/types/database.types'
 
 type OrganizationCountry = {
   id: string
@@ -21,11 +21,11 @@ type OrganizationSubscription = {
   id: string
   status: string
   plan_id: string | null
-  organization_subscription_plans?: SubscriptionPlan | null
+  subscription_plans?: SubscriptionPlan | null
 }
 
 type Organization = Database['public']['Tables']['organizations']['Row'] & {
-  organization_countries?: OrganizationCountry | null
+  countries?: OrganizationCountry | null
   organization_subscriptions?: OrganizationSubscription[] | null
   memberCount: string | number
 }
@@ -60,10 +60,10 @@ export default function OrganizationsPage() {
         .from('organizations')
         .select(`
           *,
-          organization_countries (id, code, name),
+          countries (id, code, name),
           organization_subscriptions (
             id, status, plan_id,
-            organization_subscription_plans (id, name, slug)
+            subscription_plans (id, name, slug)
           )
         `)
         .order('created_at', { ascending: false })
@@ -85,7 +85,7 @@ export default function OrganizationsPage() {
     queryKey: ['organization-countries'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('organization_countries')
+        .from('countries')
         .select('*')
         .eq('is_active', true)
         .order('name')
@@ -100,7 +100,7 @@ export default function OrganizationsPage() {
     queryKey: ['subscription-plans'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('organization_subscription_plans')
+        .from('subscription_plans')
         .select('*')
         .eq('is_active', true)
         .order('sort_order')
@@ -117,7 +117,7 @@ export default function OrganizationsPage() {
 
     const matchesCountry = !filterCountry || org.country_id === filterCountry
     const matchesPlan = !filterPlan ||
-      org.organization_subscriptions?.[0]?.organization_subscription_plans?.slug === filterPlan
+      org.organization_subscriptions?.[0]?.subscription_plans?.slug === filterPlan
 
     return matchesSearch && matchesCountry && matchesPlan
   })
@@ -148,11 +148,11 @@ export default function OrganizationsPage() {
   }
 
   const getPlanBadge = (subscription: OrganizationSubscription | undefined) => {
-    if (!subscription?.organization_subscription_plans) {
+    if (!subscription?.subscription_plans) {
       return null
     }
 
-    const plan = subscription.organization_subscription_plans
+    const plan = subscription.subscription_plans
     const colors: Record<string, string> = {
       free: 'bg-slate-600 dark:bg-slate-700 text-slate-300 dark:text-slate-400',
       basic: 'bg-blue-500/20 text-blue-600 dark:text-blue-400',
@@ -267,9 +267,9 @@ export default function OrganizationsPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-semibold truncate">{org.name}</h3>
-                    {org.organization_countries && (
-                      <span className="text-lg" title={org.organization_countries.name}>
-                        {getCountryFlag(org.organization_countries.code)}
+                    {org.countries && (
+                      <span className="text-lg" title={org.countries.name}>
+                        {getCountryFlag(org.countries.code)}
                       </span>
                     )}
                   </div>
