@@ -599,6 +599,17 @@ Based on `Startplan.md`:
 5. Add to router
 6. Add translations to i18n files
 
+### When Planning Implementation
+- **Parallel Agent Execution** - Always plan for multiple agents to work in parallel on independent tasks
+- Structure implementation plans so that independent components (services, hooks, components, types) can be developed simultaneously by different agents
+- Identify dependencies early to maximize parallelization opportunities
+- Example: When implementing a new feature, plan for agents to work in parallel on:
+  - Database migrations and types
+  - Service layer (API calls)
+  - React hooks
+  - UI components
+  - i18n translations
+
 ### When Debugging
 1. Check Supabase logs for database errors
 2. Check React Query DevTools for cache issues
