@@ -43,7 +43,7 @@ COMMENT ON FUNCTION public.is_platform_admin(UUID) IS 'Checks if a user is a pla
 -- ============================================================================
 
 CREATE TABLE public.countries (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Core fields
     code VARCHAR(3) NOT NULL UNIQUE,              -- ISO 3166-1 alpha-2/3 (US, TR, DE)
@@ -94,7 +94,7 @@ COMMENT ON COLUMN public.countries.prayer_calculation_method IS 'Default prayer 
 -- ============================================================================
 
 CREATE TABLE public.organizations (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Core identity
     name VARCHAR(255) NOT NULL,
@@ -184,7 +184,7 @@ COMMENT ON COLUMN public.organizations.setup_progress IS 'Onboarding wizard prog
 -- ============================================================================
 
 CREATE TABLE public.platform_admins (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
 
     -- Admin metadata
@@ -208,7 +208,7 @@ COMMENT ON COLUMN public.platform_admins.user_id IS 'Reference to auth.users - m
 -- ============================================================================
 
 CREATE TABLE public.subscription_plans (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     -- Core identity
     name VARCHAR(100) NOT NULL,
@@ -273,7 +273,7 @@ COMMENT ON COLUMN public.subscription_plans.features IS 'Feature flags and modul
 -- ============================================================================
 
 CREATE TABLE public.plan_pricing (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     plan_id UUID NOT NULL REFERENCES public.subscription_plans(id) ON DELETE CASCADE,
     country_id UUID NOT NULL REFERENCES public.countries(id) ON DELETE CASCADE,
 
@@ -317,7 +317,7 @@ COMMENT ON COLUMN public.plan_pricing.stripe_price_id_yearly IS 'Stripe Price ID
 -- ============================================================================
 
 CREATE TABLE public.organization_subscriptions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL UNIQUE REFERENCES public.organizations(id) ON DELETE CASCADE,
     plan_id UUID NOT NULL REFERENCES public.subscription_plans(id) ON DELETE RESTRICT,
 

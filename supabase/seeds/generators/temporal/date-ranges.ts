@@ -101,3 +101,37 @@ export function formatDbDate(date: Date): string {
 export function formatDbDateTime(date: Date): string {
   return date.toISOString();
 }
+
+/**
+ * Add weeks to a date
+ */
+export function addWeeks(date: Date, weeks: number): Date {
+  return addDays(date, weeks * 7);
+}
+
+/**
+ * Add years to a date
+ */
+export function addYears(date: Date, years: number): Date {
+  const result = new Date(date);
+  result.setFullYear(result.getFullYear() + years);
+  return result;
+}
+
+/**
+ * Format time for database (HH:mm:ss)
+ */
+export function formatDbTime(hours: number, minutes: number = 0): string {
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:00`;
+}
+
+/**
+ * Generate random time between hours
+ */
+export function randomTimeBetween(startHour: number, endHour: number): string {
+  const hour = startHour + Math.floor(Math.random() * (endHour - startHour));
+  const minutes = Math.random() < 0.5 ? 0 : 30;
+  return formatDbTime(hour, minutes);
+}
+
+export { subYears, subMonths, addDays } from 'date-fns';

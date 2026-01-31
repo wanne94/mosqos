@@ -53,26 +53,24 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {isDevMode && (
-        <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
-            Development Mode - Test Credentials:
-          </p>
-          <div className="space-y-1">
-            {DEV_CREDENTIALS.map((cred) => (
-              <button
-                key={cred.email}
-                type="button"
-                onClick={() => fillCredentials(cred.email, cred.password)}
-                className="block w-full text-left text-xs p-2 rounded hover:bg-amber-100 dark:hover:bg-amber-900 transition"
-              >
-                <span className="font-medium text-amber-700 dark:text-amber-300">{cred.role}:</span>{' '}
-                <span className="text-amber-600 dark:text-amber-400">{cred.email}</span>
-              </button>
-            ))}
-          </div>
+      <div className="mb-6 p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
+        <p className="text-sm font-medium text-amber-800 dark:text-amber-200 mb-2">
+          Test Credentials:
+        </p>
+        <div className="space-y-1">
+          {DEV_CREDENTIALS.map((cred) => (
+            <button
+              key={cred.email}
+              type="button"
+              onClick={() => fillCredentials(cred.email, cred.password)}
+              className="block w-full text-left text-xs p-2 rounded hover:bg-amber-100 dark:hover:bg-amber-900 transition"
+            >
+              <span className="font-medium text-amber-700 dark:text-amber-300">{cred.role}:</span>{' '}
+              <span className="text-amber-600 dark:text-amber-400">{cred.email}</span>
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

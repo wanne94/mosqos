@@ -24,7 +24,7 @@ export const supabase = createClient<Database>(
 export const isSupabaseConfigured = () => {
   const isRealUrl = supabaseUrl &&
     !supabaseUrl.includes('placeholder') &&
-    supabaseUrl.includes('.supabase.co')
+    (supabaseUrl.includes('.supabase.co') || supabaseUrl.includes('localhost') || supabaseUrl.includes('127.0.0.1'))
   const isRealKey = supabaseAnonKey &&
     supabaseAnonKey !== 'placeholder-key' &&
     supabaseAnonKey.length > 20
