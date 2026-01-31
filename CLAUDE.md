@@ -61,6 +61,14 @@ Multi-tenant SaaS application for mosque/community management with mobile suppor
 #### Payments
 - **Provider**: Stripe (subscriptions, one-time payments)
 
+#### MCP Servers
+- **Supabase Local MCP** - Direct database access through MCP protocol
+  - Endpoint: http://127.0.0.1:54331/mcp
+  - Mode: Read-only (recommended for safety)
+  - Configuration: `.mcp.json` (gitignored)
+  - Usage: `@supabase-local <query>` in Claude Code
+  - Example: `@supabase-local List all tables`
+
 ---
 
 ## 🏗️ Architecture Overview
@@ -173,7 +181,8 @@ src/
 │   ├── i18n/                     # i18n configuration
 │   ├── stripe/                   # Stripe integration
 │   ├── stores/                   # Zustand stores
-│   └── offline/                  # Offline/PWA logic
+│   ├── offline/                  # Offline/PWA logic
+│   └── mcp/                      # MCP server integrations
 │
 └── styles/                       # Global styles
     └── globals.css

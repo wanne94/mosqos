@@ -51,7 +51,7 @@ export default function PlansPage() {
     queryKey: ['platform-subscription-plans'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('organization_subscription_plans')
+        .from('subscription_plans')
         .select('*')
         .order('sort_order')
 
@@ -64,7 +64,7 @@ export default function PlansPage() {
   const updatePricingMutation = useMutation({
     mutationFn: async ({ planId, monthly, yearly }: { planId: string; monthly: number; yearly: number }) => {
       const { error } = await (supabase
-        .from('organization_subscription_plans') as any)
+        .from('subscription_plans') as any)
         .update({
           price_monthly: monthly,
           price_yearly: yearly,
@@ -94,7 +94,7 @@ export default function PlansPage() {
       }
 
       const { error } = await (supabase
-        .from('organization_subscription_plans') as any)
+        .from('subscription_plans') as any)
         .update({
           features: updatedFeatures,
           updated_at: new Date().toISOString()

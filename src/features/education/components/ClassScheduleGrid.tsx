@@ -92,7 +92,7 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
         (data || []).map(async (classItem) => {
           if (classItem.teacher_ids && Array.isArray(classItem.teacher_ids) && classItem.teacher_ids.length > 0) {
             const { data: teachersData, error: teachersError } = await supabase
-              .from('organization_members')
+              .from('teachers')
               .select('id, first_name, last_name')
               .eq('organization_id', currentOrganizationId)
               .in('id', classItem.teacher_ids)
@@ -120,7 +120,7 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
   const fetchMembers = async () => {
     try {
       const { data, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('id, first_name, last_name')
         .eq('organization_id', currentOrganizationId)
         .order('first_name', { ascending: true })

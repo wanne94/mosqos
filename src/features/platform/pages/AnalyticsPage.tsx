@@ -34,10 +34,10 @@ export default function AnalyticsPage() {
         .from('organizations')
         .select(`
           id, created_at,
-          organization_countries (code, name),
+          countries (code, name),
           organization_subscriptions (
             status,
-            organization_subscription_plans (name, slug)
+            subscription_plans (name, slug)
           )
         `)
 
@@ -49,8 +49,8 @@ export default function AnalyticsPage() {
       // Group by country
       const countryGroups: Record<string, CountryGroup> = {}
       orgData.forEach((org: any) => {
-        const code = org.organization_countries?.code || 'Unknown'
-        const name = org.organization_countries?.name || 'Unknown'
+        const code = org.countries?.code || 'Unknown'
+        const name = org.countries?.name || 'Unknown'
         if (!countryGroups[code]) {
           countryGroups[code] = { code, name, count: 0 }
         }
@@ -62,8 +62,8 @@ export default function AnalyticsPage() {
       const planGroups: Record<string, PlanGroup> = {}
       orgData.forEach((org: any) => {
         const subscriptions = org.organization_subscriptions || []
-        const plan = subscriptions[0]?.organization_subscription_plans?.name || 'No Plan'
-        const slug = subscriptions[0]?.organization_subscription_plans?.slug || 'none'
+        const plan = subscriptions[0]?.subscription_plans?.name || 'No Plan'
+        const slug = subscriptions[0]?.subscription_plans?.slug || 'none'
         if (!planGroups[slug]) {
           planGroups[slug] = { name: plan, slug, count: 0 }
         }
@@ -89,13 +89,10 @@ export default function AnalyticsPage() {
         })
       }
 
-      // Fetch total members
-      const { data: metrics } = await supabase
-        .from('organization_metrics')
-        .select('member_count')
-
-      const metricsData = (metrics || []) as any[]
-      const totalMembers = metricsData.reduce((sum: number, m: any) => sum + (m.member_count || 0), 0)
+      // Fetch total members (count directly from members table)
+      const { count: totalMembers } = await supabase
+        .from('members')
+        .select('*', { count: 'exact', head: true })
 
       // Active subscriptions
       const activeCount = orgData.filter((org: any) => {
@@ -105,7 +102,7 @@ export default function AnalyticsPage() {
 
       const totalStats: TotalStats = {
         organizations: orgData.length,
-        members: totalMembers,
+        members: totalMembers || 0,
         activeSubscriptions: activeCount
       }
 

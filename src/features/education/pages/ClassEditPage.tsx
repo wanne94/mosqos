@@ -4,7 +4,7 @@ import { ArrowLeft, Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../../lib/supabase/client'
-import { useToast } from '../../../hooks/useToast'
+import { toast } from 'sonner'
 import type { ScheduledClass, Course } from '../types/education.types'
 
 interface FormData {
@@ -25,7 +25,6 @@ export default function ClassEditPage() {
   const { classroomId, classId } = useParams<{ classroomId: string; classId: string }>()
   const navigate = useNavigate()
   const { t } = useTranslation(['classroom', 'common'])
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   const [teacherDropdownOpen, setTeacherDropdownOpen] = useState(false)
@@ -138,11 +137,11 @@ export default function ClassEditPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['scheduled_class'] })
       queryClient.invalidateQueries({ queryKey: ['classrooms'] })
-      toast({ title: t('common.success'), description: t('classroom.classUpdated'), variant: 'default' })
+      toast.success(t('common.success'), { description: t('classroom.classUpdated') })
       navigate(`/admin/education/classrooms/${classroomId}`)
     },
     onError: (error: Error) => {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' })
+      toast.error(t('common.error'), { description: error.message })
     },
   })
 
@@ -155,11 +154,11 @@ export default function ClassEditPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classrooms'] })
-      toast({ title: t('common.success'), description: t('classroom.classDeleted'), variant: 'default' })
+      toast.success(t('common.success'), { description: t('classroom.classDeleted') })
       navigate(`/admin/education/classrooms/${classroomId}`)
     },
     onError: (error: Error) => {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' })
+      toast.error(t('common.error'), { description: error.message })
     },
   })
 
@@ -212,13 +211,13 @@ export default function ClassEditPage() {
       e.preventDefault()
 
       if (!formData.name.trim()) {
-        toast({ title: t('common.error'), description: 'Class name is required', variant: 'destructive' })
+        toast.error(t('common.error'), { description: 'Class name is required' })
         return
       }
 
       updateMutation.mutate(formData)
     },
-    [formData, updateMutation, toast, t]
+    [formData, updateMutation, t]
   )
 
   const handleDelete = useCallback(() => {

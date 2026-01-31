@@ -73,18 +73,26 @@ export default function PaymentSetupForm({ onComplete, onSkip }: PaymentSetupFor
         }
       }
 
+      // Store payment config in organizations.payment_config JSONB column
+      const paymentConfigData = {
+        provider,
+        ...(isIyzico ? {
+          iyzico_api_key: paymentConfig.iyzico_api_key || null,
+          iyzico_secret_key: paymentConfig.iyzico_secret_key || null,
+          iyzico_merchant_id: paymentConfig.iyzico_merchant_id || null,
+        } : {
+          publishable_key: paymentConfig.stripe_publishable_key || null,
+          secret_key: paymentConfig.stripe_secret_key || null,
+        }),
+      }
+
       const updateData = {
-        payment_provider: provider,
+        payment_config: paymentConfigData,
         stripe_account_id: paymentConfig.stripe_account_id || null,
-        stripe_secret_key: paymentConfig.stripe_secret_key || null,
-        stripe_publishable_key: paymentConfig.stripe_publishable_key || null,
-        iyzico_api_key: paymentConfig.iyzico_api_key || null,
-        iyzico_secret_key: paymentConfig.iyzico_secret_key || null,
-        iyzico_merchant_id: paymentConfig.iyzico_merchant_id || null,
       }
 
       const { error: updateError } = await supabase
-        .from('organization_settings')
+        .from('organizations')
         .update(updateData as any)
         .eq('id', currentOrganizationId)
 

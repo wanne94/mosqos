@@ -71,7 +71,7 @@ export default function RegisterPilgrimModal({ isOpen, onClose, onSave }: Regist
   const fetchMembers = async () => {
     try {
       const { data, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('id, first_name, last_name')
         .eq('organization_id', currentOrganizationId)
         .order('first_name', { ascending: true })

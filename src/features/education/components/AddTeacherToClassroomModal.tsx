@@ -86,10 +86,10 @@ export default function AddTeacherToClassroomModal({
   const fetchTeachers = async () => {
     try {
       const { data, error } = await supabase
-        .from('organization_members')
-        .select('id, first_name, last_name, role, teacher_color')
+        .from('teachers')
+        .select('id, first_name, last_name, specialization')
         .eq('organization_id', currentOrganizationId)
-        .not('teacher_color', 'is', null)
+        .eq('is_active', true)
         .order('first_name', { ascending: true })
 
       if (error) throw error

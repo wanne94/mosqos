@@ -21,6 +21,7 @@ const OrganizationsPage = lazy(() => import('@/features/platform/pages/Organizat
 const PlansPage = lazy(() => import('@/features/platform/pages/PlansPage'))
 const DiscountCodesPage = lazy(() => import('@/features/platform/pages/DiscountCodesPage'))
 const AnalyticsPage = lazy(() => import('@/features/platform/pages/AnalyticsPage'))
+const PlatformSettingsPage = lazy(() => import('@/features/platform/pages/SettingsPage'))
 
 // Admin Pages
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
@@ -122,6 +123,7 @@ export function AppRoutes() {
         <Route path="plans" element={<PlansPage />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
+        <Route path="settings" element={<PlatformSettingsPage />} />
       </Route>
 
       {/* Organization Admin Routes */}

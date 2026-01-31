@@ -50,7 +50,7 @@ export function DonationsTab({ memberId }: DonationsTabProps) {
       setLoading(true)
 
       const { data: member, error: memberError } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('household_id')
         .eq('id', memberId)
         .eq('organization_id', currentOrganization.id)

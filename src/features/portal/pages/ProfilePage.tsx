@@ -71,40 +71,51 @@ export default function ProfilePage() {
 
       if (!user || !currentOrganizationId) return
 
-      // Fetch current member
-      const { data: memberData, error: memberError } = await supabase
+      // Fetch current member via organization_members -> members join
+      const { data: orgMemberData, error: memberError } = await supabase
         .from('organization_members')
-        .select('*')
+        .select(`
+          id,
+          role,
+          member_id,
+          members:member_id (*)
+        `)
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganizationId)
         .single()
 
       if (memberError) throw memberError
-      if (!memberData) return
+      if (!orgMemberData) return
 
-      setMember(memberData as Member)
+      // Extract member profile from the join
+      const memberProfile = orgMemberData.members as any
+      if (memberProfile) {
+        setMember({
+          ...memberProfile,
+          role: orgMemberData.role,
+        } as Member)
 
-      // Fetch household if member has one
-      if (memberData.household_id) {
-        const { data: householdData, error: householdError } = await supabase
-          .from('households')
-          .select('id, name, address, city, state, zip_code')
-          .eq('id', memberData.household_id)
-          .single()
+        // Fetch household if member has one
+        if (memberProfile.household_id) {
+          const { data: householdData, error: householdError } = await supabase
+            .from('households')
+            .select('id, name, address, city, state, zip_code')
+            .eq('id', memberProfile.household_id)
+            .single()
 
-        if (!householdError && householdData) {
-          setHousehold(householdData as Household)
+          if (!householdError && householdData) {
+            setHousehold(householdData as Household)
 
-          // Fetch family members
-          const { data: familyData, error: familyError } = await supabase
-            .from('organization_members')
-            .select('id, first_name, last_name, role')
-            .eq('household_id', memberData.household_id)
-            .neq('id', memberData.id)
-            .order('role', { ascending: true })
+            // Fetch family members from the members table
+            const { data: familyData, error: familyError } = await supabase
+              .from('members')
+              .select('id, first_name, last_name')
+              .eq('household_id', memberProfile.household_id)
+              .neq('id', memberProfile.id)
 
-          if (!familyError) {
-            setFamilyMembers((familyData || []) as Member[])
+            if (!familyError) {
+              setFamilyMembers((familyData || []) as Member[])
+            }
           }
         }
       }

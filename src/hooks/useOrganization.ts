@@ -20,17 +20,17 @@ export function useOrganization(): UseOrganizationReturn {
   const fetchOrganizationName = async () => {
     try {
       const { data, error } = await supabase
-        .from('organization_settings')
-        .select('organization_name')
-        .eq('id', 1)
+        .from('organizations')
+        .select('name')
+        .eq('id', currentOrganizationId)
         .maybeSingle()
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error fetching organization name:', error)
       }
 
-      if (data?.organization_name) {
-        setOrganizationName(data.organization_name)
+      if (data?.name) {
+        setOrganizationName(data.name)
       }
     } catch (error) {
       console.error('Error fetching organization name:', error)

@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Users, BookOpen, GraduationCap, Building2 } from 'lucide-react'
 import { useOrganization } from '../../../hooks/useOrganization'
-import { useToast } from '../../../hooks/useToast'
+import { toast } from 'sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../../lib/supabase/client'
 import {
@@ -42,7 +42,6 @@ export default function EducationPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { currentOrganizationId } = useOrganization()
-  const { toast } = useToast()
   const queryClient = useQueryClient()
 
   // State
@@ -182,11 +181,11 @@ export default function EducationPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teachers'] })
-      toast({ title: t('education.teachersRemoved'), variant: 'default' })
+      toast.success(t('education.teachersRemoved'))
       setSelectedTeachers(new Set())
     },
     onError: (error: Error) => {
-      toast({ title: t('education.failedToRemove'), description: error.message, variant: 'destructive' })
+      toast.error(t('education.failedToRemove'), { description: error.message })
     },
   })
 
@@ -197,11 +196,11 @@ export default function EducationPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['courses'] })
-      toast({ title: t('education.coursesRemoved'), variant: 'default' })
+      toast.success(t('education.coursesRemoved'))
       setSelectedCourses(new Set())
     },
     onError: (error: Error) => {
-      toast({ title: t('education.failedToRemove'), description: error.message, variant: 'destructive' })
+      toast.error(t('education.failedToRemove'), { description: error.message })
     },
   })
 
@@ -212,11 +211,11 @@ export default function EducationPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['classrooms'] })
-      toast({ title: t('classroom.classroomsRemoved'), variant: 'default' })
+      toast.success(t('classroom.classroomsRemoved'))
       setSelectedClassrooms(new Set())
     },
     onError: (error: Error) => {
-      toast({ title: t('classroom.failedToRemove'), description: error.message, variant: 'destructive' })
+      toast.error(t('classroom.failedToRemove'), { description: error.message })
     },
   })
 

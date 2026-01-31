@@ -44,3 +44,6 @@ coverage
 # Misc
 *.pem
 .vercel
+
+# MCP Configuration
+.mcp.json

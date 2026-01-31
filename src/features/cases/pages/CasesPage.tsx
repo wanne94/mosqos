@@ -29,10 +29,10 @@ export default function CasesPage() {
       if (!currentOrganizationId) return []
 
       const { data, error } = await supabase
-        .from('organization_cases')
+        .from('service_cases')
         .select(`
           *,
-          organization_members:member_id (
+          members:member_id (
             id,
             first_name,
             last_name,

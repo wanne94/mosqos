@@ -104,7 +104,7 @@ export default function EnrollStudentModal({ isOpen, onClose, onSave }: EnrollSt
 
       // Fetch all members, excluding those who are teachers
       const { data, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('id, first_name, last_name')
         .order('first_name', { ascending: true })
 
@@ -117,7 +117,7 @@ export default function EnrollStudentModal({ isOpen, onClose, onSave }: EnrollSt
 
       setMembers(availableMembers)
     } catch (error) {
-      console.error('Error fetching organization_members:', error)
+      console.error('Error fetching members:', error)
       setMembers([])
     }
   }

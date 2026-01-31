@@ -120,8 +120,8 @@ export default function AddStudentToClassroomModal({
       }
 
       const { data: enrolledMembers, error: membersError } = await supabase
-        .from('organization_members')
-        .select('id, first_name, last_name, role')
+        .from('members')
+        .select('id, first_name, last_name, membership_type')
         .eq('organization_id', currentOrganizationId)
         .in('id', Array.from(enrolledStudentIds))
         .order('first_name', { ascending: true })

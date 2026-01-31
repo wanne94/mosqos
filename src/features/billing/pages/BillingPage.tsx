@@ -27,7 +27,7 @@ export default function BillingPage() {
 
       const { data, error } = await supabase
         .from('organization_subscriptions')
-        .select('*, plan:organization_subscription_plans(*)')
+        .select('*, plan:subscription_plans(*)')
         .eq('organization_id', currentOrganizationId)
         .maybeSingle()
 
@@ -42,7 +42,7 @@ export default function BillingPage() {
     queryKey: ['plans'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('organization_subscription_plans')
+        .from('subscription_plans')
         .select('*')
         .eq('is_active', true)
         .order('sort_order')
@@ -60,7 +60,7 @@ export default function BillingPage() {
 
       const { data, error } = await supabase
         .from('plan_pricing')
-        .select('*, plan:organization_subscription_plans(*), country:organization_countries(*)')
+        .select('*, plan:subscription_plans(*), country:countries(*)')
         .eq('country_id', currentOrganization.country_id)
 
       if (error) throw error

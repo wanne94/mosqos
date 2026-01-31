@@ -52,12 +52,12 @@ export default function PilgrimDetailModal({ isOpen, onClose, pilgrim, trip }: P
     try {
       setLoading(true)
       const { data, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select(`
           *,
           households:household_id (
             id,
-            family_name,
+            name,
             address,
             city,
             state,

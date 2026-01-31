@@ -52,8 +52,8 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
         // If parent, find all children in the same household
         if (householdId) {
           const { data: householdMembers, error: membersError } = await supabase
-            .from('organization_members')
-            .select('id, first_name, last_name, role')
+            .from('members')
+            .select('id, first_name, last_name, membership_type')
             .eq('household_id', householdId)
             .eq('organization_id', currentOrganizationId)
 
@@ -63,13 +63,11 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
             // Filter for children/students (case-insensitive check)
             // Exclude the parent themselves and only include children/students
             const children = (householdMembers || []).filter(
-              (member) =>
+              (member: any) =>
                 member.id !== memberId && // Exclude the parent
-                member.role &&
-                (member.role.toLowerCase() === 'child' ||
-                  member.role.toLowerCase() === 'student' ||
-                  member.role.toLowerCase() === 'son' ||
-                  member.role.toLowerCase() === 'daughter')
+                member.membership_type &&
+                (member.membership_type.toLowerCase() === 'student' ||
+                  member.membership_type.toLowerCase() === 'individual')
             )
             studentIds = children.map((child) => ({
               id: child.id,

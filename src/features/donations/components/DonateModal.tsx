@@ -79,7 +79,7 @@ export function DonateModal({
 
     try {
       const { data: member, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('first_name, last_name, email, phone')
         .eq('id', memberId)
         .eq('organization_id', currentOrganization.id)
@@ -107,21 +107,31 @@ export function DonateModal({
     if (!currentOrganization) return
 
     try {
+      // Get payment config from organizations.payment_config JSONB column
       const { data, error } = await supabase
-        .from('organization_settings')
-        .select('stripe_publishable_key, payment_provider')
-        .eq('organization_id', currentOrganization.id)
+        .from('organizations')
+        .select('payment_config, stripe_account_id')
+        .eq('id', currentOrganization.id)
         .maybeSingle()
 
       if (error) throw error
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (data && typeof data === 'object') {
-        const settings = data as any
-        if (settings.payment_provider === 'stripe' && settings.stripe_publishable_key) {
+        const org = data as any
+        const paymentConfig = org.payment_config || {}
+        if (paymentConfig.provider === 'stripe' && paymentConfig.publishable_key) {
           setStripeConfig({
-            publishableKey: settings.stripe_publishable_key,
+            publishableKey: paymentConfig.publishable_key,
           })
+        } else if (org.stripe_account_id) {
+          // Fallback to env variable if connected via Stripe Connect
+          const envKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
+          if (envKey) {
+            setStripeConfig({ publishableKey: envKey })
+          } else {
+            setError('Payment processing is not configured.')
+          }
         } else {
           setError('Payment processing is not configured.')
         }

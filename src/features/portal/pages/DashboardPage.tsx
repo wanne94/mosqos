@@ -61,21 +61,33 @@ export default function DashboardPage() {
 
       if (!user || !currentOrganizationId) return
 
-      // Get current member based on user
-      const { data: member, error: memberError } = await supabase
+      // Get current member based on user - join through organization_members to get member profile
+      const { data: orgMember, error: memberError } = await supabase
         .from('organization_members')
-        .select('id, first_name, last_name')
+        .select(`
+          id,
+          member_id,
+          members:member_id (
+            id,
+            first_name,
+            last_name
+          )
+        `)
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganizationId)
         .single()
 
       if (memberError) throw memberError
-      if (!member) return
+      if (!orgMember) return
 
-      setMemberId(member.id)
+      // Extract member data from the join
+      const memberData = orgMember.members as any
+      const memberIdValue = memberData?.id || orgMember.member_id
+
+      setMemberId(memberIdValue)
       setStats((prev) => ({
         ...prev,
-        memberName: `${member.first_name} ${member.last_name}`,
+        memberName: memberData ? `${memberData.first_name} ${memberData.last_name}` : 'Member',
       }))
 
       // Fetch member's donations

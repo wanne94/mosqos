@@ -68,18 +68,18 @@ export default function CasesPage() {
 
       if (!user || !currentOrganizationId) return
 
-      // Get current member
-      const { data: member, error: memberError } = await supabase
+      // Get current member via organization_members -> member_id join
+      const { data: orgMember, error: memberError } = await supabase
         .from('organization_members')
-        .select('id')
+        .select('id, member_id')
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganizationId)
         .single()
 
       if (memberError) throw memberError
-      if (!member) return
+      if (!orgMember || !orgMember.member_id) return
 
-      setMemberId(member.id)
+      setMemberId(orgMember.member_id)
 
       // Fetch member's cases
       const { data, error } = await supabase
@@ -116,9 +116,9 @@ export default function CasesPage() {
     setSubmitting(true)
 
     try {
-      // Get member's household_id
+      // Get member's household_id and name from members table
       const { data: member, error: memberError } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('household_id, first_name, last_name')
         .eq('id', memberId)
         .single()

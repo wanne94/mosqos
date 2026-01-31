@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { toast } from 'sonner'
+import { getPostLoginRedirectUrl } from '@/features/auth/services/postLoginRedirect'
 
 const DEV_CREDENTIALS = [
   { email: 'admin@mosqos.com', password: 'admin123', role: 'Admin' },
@@ -31,7 +32,8 @@ export default function LoginPage() {
         toast.error(error.message)
       } else {
         toast.success('Welcome back!')
-        navigate('/platform')
+        const redirectUrl = await getPostLoginRedirectUrl(email)
+        navigate(redirectUrl)
       }
     } catch (err) {
       toast.error('An unexpected error occurred')

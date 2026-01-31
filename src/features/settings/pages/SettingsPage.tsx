@@ -63,8 +63,8 @@ export default function SettingsPage() {
       if (!currentOrganization?.id) throw new Error('No organization')
 
       const { data, error } = await supabase
-        .from('organization')
-        .select('name, contact_email, contact_phone, address, city, state, zip_code, website')
+        .from('organizations')
+        .select('name, contact_email, contact_phone, address_line1, city, state, postal_code, website')
         .eq('id', currentOrganization.id)
         .maybeSingle()
 
@@ -77,10 +77,10 @@ export default function SettingsPage() {
         organization_name: orgData.name || '',
         contact_email: orgData.contact_email || '',
         contact_phone: orgData.contact_phone || '',
-        address: orgData.address || '',
+        address: (orgData as any).address_line1 || '',
         city: orgData.city || '',
         state: orgData.state || '',
-        zip_code: orgData.zip_code || '',
+        zip_code: (orgData as any).postal_code || '',
         website: orgData.website || '',
       }
     },
@@ -121,26 +121,39 @@ export default function SettingsPage() {
     queryFn: async () => {
       if (!currentOrganization?.id) return []
 
+      // Fetch members with their organization_members link
       const { data, error } = await supabase
         .from('organization_members')
         .select(`
           id,
-          first_name,
-          last_name,
-          email,
-          system_role,
-          permissions,
+          role,
           user_id,
-          households:household_id (
+          members:member_id (
             id,
-            name
+            first_name,
+            last_name,
+            email,
+            households:household_id (
+              id,
+              name
+            )
           )
         `)
         .eq('organization_id', currentOrganization.id)
-        .order('first_name', { ascending: true })
 
       if (error) throw error
-      return data || []
+
+      // Transform data to expected format
+      return (data || []).map((om: any) => ({
+        id: om.members?.id || om.id,
+        first_name: om.members?.first_name || '',
+        last_name: om.members?.last_name || '',
+        email: om.members?.email || null,
+        system_role: om.role || 'member',
+        permissions: {},
+        user_id: om.user_id,
+        households: om.members?.households || null,
+      }))
     },
     enabled: !!currentOrganization?.id && activeTab === 'access'
   })

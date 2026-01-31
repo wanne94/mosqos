@@ -117,7 +117,7 @@ export function DonationInvoice({ isOpen, onClose, donation, household, fund }: 
       }
 
       const { data: members, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('email, first_name, last_name')
         .eq('organization_id', currentOrganization.id)
         .eq('household_id', household.id)

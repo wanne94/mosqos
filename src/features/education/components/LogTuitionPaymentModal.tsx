@@ -184,9 +184,9 @@ export default function LogTuitionPaymentModal({
         return
       }
 
-      // Get household_id from member
+      // Get household_id from members table
       const { data: memberData, error: memberError } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('household_id')
         .eq('id', enrollment.member_id)
         .eq('organization_id', currentOrganizationId)

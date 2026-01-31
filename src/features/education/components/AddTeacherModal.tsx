@@ -90,8 +90,8 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       const teacherMemberIds = (existingTeachers || []).map(t => t.member_id)
 
       const { data, error } = await supabase
-        .from('organization_members')
-        .select('id, first_name, last_name, role')
+        .from('members')
+        .select('id, first_name, last_name, membership_type')
         .eq('organization_id', currentOrganizationId)
         .order('first_name', { ascending: true })
 

@@ -4,22 +4,40 @@ import { Plus, Copy, Trash2, Check, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase/client'
 import { ConfirmDeleteModal } from '@/shared/components/ConfirmDeleteModal'
 
-interface DiscountCode {
+type DiscountType = 'percentage' | 'fixed' | 'trial_extension' | 'free_months'
+
+interface Coupon {
   id: string
   code: string
-  discount_percent: number
-  max_uses: number | null
-  expires_at: string | null
+  name: string
+  description: string | null
+  discount_type: DiscountType
+  discount_value: number
+  duration_months: number | null
+  currency: string
+  usage_limit: number | null
+  usage_limit_per_org: number
+  current_usage: number
   is_active: boolean
-  uses_count: number
+  starts_at: string | null
+  expires_at: string | null
   created_at: string
 }
 
 interface FormData {
   code: string
-  discount_percent: string
-  max_uses: string
+  name: string
+  discount_type: DiscountType
+  discount_value: string
+  usage_limit: string
   expires_at: string
+}
+
+const DISCOUNT_TYPE_LABELS: Record<DiscountType, string> = {
+  percentage: 'Percentage Off',
+  fixed: 'Fixed Amount Off',
+  trial_extension: 'Trial Extension (Days)',
+  free_months: 'Free Months'
 }
 
 export default function DiscountCodesPage() {
@@ -28,60 +46,66 @@ export default function DiscountCodesPage() {
   const [deleteCodeId, setDeleteCodeId] = useState<string | null>(null)
   const [formData, setFormData] = useState<FormData>({
     code: '',
-    discount_percent: '',
-    max_uses: '',
+    name: '',
+    discount_type: 'percentage',
+    discount_value: '',
+    usage_limit: '',
     expires_at: ''
   })
 
-  // Fetch discount codes
+  // Fetch coupons
   const { data: codes = [], isLoading } = useQuery({
-    queryKey: ['platform-discount-codes'],
+    queryKey: ['platform-coupons'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('discount_codes')
+        .from('coupons')
         .select('*')
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return (data || []) as DiscountCode[]
+      return (data || []) as Coupon[]
     },
   })
 
-  // Create discount code mutation
+  // Create coupon mutation
   const createCodeMutation = useMutation({
     mutationFn: async (data: FormData) => {
-      const { error } = await (supabase
-        .from('discount_codes') as any)
+      const { error } = await supabase
+        .from('coupons')
         .insert([{
           code: data.code.toUpperCase(),
-          discount_percent: parseFloat(data.discount_percent),
-          max_uses: data.max_uses ? parseInt(data.max_uses) : null,
+          name: data.name || data.code.toUpperCase(),
+          discount_type: data.discount_type,
+          discount_value: parseFloat(data.discount_value),
+          usage_limit: data.usage_limit ? parseInt(data.usage_limit) : null,
           expires_at: data.expires_at || null,
           is_active: true,
-          uses_count: 0
+          current_usage: 0,
+          usage_limit_per_org: 1,
+          currency: 'USD'
         }])
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platform-discount-codes'] })
+      queryClient.invalidateQueries({ queryKey: ['platform-coupons'] })
       setShowCreateModal(false)
-      setFormData({ code: '', discount_percent: '', max_uses: '', expires_at: '' })
+      setFormData({ code: '', name: '', discount_type: 'percentage', discount_value: '', usage_limit: '', expires_at: '' })
     },
   })
 
   // Toggle active mutation
   const toggleActiveMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      const { error } = await (supabase
-        .from('discount_codes') as any)
+      const { error } = await supabase
+        .from('coupons')
         .update({ is_active: !isActive })
         .eq('id', id)
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platform-discount-codes'] })
+      queryClient.invalidateQueries({ queryKey: ['platform-coupons'] })
     },
   })
 
@@ -89,14 +113,14 @@ export default function DiscountCodesPage() {
   const deleteCodeMutation = useMutation({
     mutationFn: async (codeId: string) => {
       const { error } = await supabase
-        .from('discount_codes')
+        .from('coupons')
         .delete()
         .eq('id', codeId)
 
       if (error) throw error
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['platform-discount-codes'] })
+      queryClient.invalidateQueries({ queryKey: ['platform-coupons'] })
       setDeleteCodeId(null)
     },
   })
@@ -111,11 +135,11 @@ export default function DiscountCodesPage() {
   }
 
   const handleCreateCode = () => {
-    if (!formData.code || !formData.discount_percent) return
+    if (!formData.code || !formData.discount_value) return
     createCodeMutation.mutate(formData)
   }
 
-  const handleToggleActive = (code: DiscountCode) => {
+  const handleToggleActive = (code: Coupon) => {
     toggleActiveMutation.mutate({ id: code.id, isActive: code.is_active })
   }
 
@@ -132,6 +156,51 @@ export default function DiscountCodesPage() {
     }
   }
 
+  const formatDiscountValue = (coupon: Coupon): string => {
+    switch (coupon.discount_type) {
+      case 'percentage':
+        return `${coupon.discount_value}%`
+      case 'fixed':
+        return `$${coupon.discount_value}`
+      case 'trial_extension':
+        return `${coupon.discount_value} days`
+      case 'free_months':
+        return `${coupon.discount_value} months`
+      default:
+        return `${coupon.discount_value}`
+    }
+  }
+
+  const getDiscountValuePlaceholder = (type: DiscountType): string => {
+    switch (type) {
+      case 'percentage':
+        return '20'
+      case 'fixed':
+        return '10.00'
+      case 'trial_extension':
+        return '14'
+      case 'free_months':
+        return '1'
+      default:
+        return ''
+    }
+  }
+
+  const getDiscountValueLabel = (type: DiscountType): string => {
+    switch (type) {
+      case 'percentage':
+        return 'Discount Percentage'
+      case 'fixed':
+        return 'Discount Amount ($)'
+      case 'trial_extension':
+        return 'Trial Extension (Days)'
+      case 'free_months':
+        return 'Free Months'
+      default:
+        return 'Discount Value'
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -143,7 +212,7 @@ export default function DiscountCodesPage() {
   const stats = {
     total: codes.length,
     active: codes.filter(c => c.is_active).length,
-    totalUses: codes.reduce((sum, c) => sum + (c.uses_count || 0), 0),
+    totalUses: codes.reduce((sum, c) => sum + (c.current_usage || 0), 0),
     expired: codes.filter(c => c.expires_at && new Date(c.expires_at) < new Date()).length
   }
 
@@ -191,9 +260,11 @@ export default function DiscountCodesPage() {
             <thead>
               <tr className="border-b border-border dark:border-slate-700">
                 <th className="text-left p-4 text-muted-foreground font-medium">Code</th>
+                <th className="text-left p-4 text-muted-foreground font-medium">Name</th>
+                <th className="text-center p-4 text-muted-foreground font-medium">Type</th>
                 <th className="text-center p-4 text-muted-foreground font-medium">Discount</th>
                 <th className="text-center p-4 text-muted-foreground font-medium">Uses</th>
-                <th className="text-center p-4 text-muted-foreground font-medium">Max Uses</th>
+                <th className="text-center p-4 text-muted-foreground font-medium">Limit</th>
                 <th className="text-center p-4 text-muted-foreground font-medium">Expires</th>
                 <th className="text-center p-4 text-muted-foreground font-medium">Status</th>
                 <th className="text-center p-4 text-muted-foreground font-medium">Actions</th>
@@ -202,14 +273,14 @@ export default function DiscountCodesPage() {
             <tbody>
               {codes.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                  <td colSpan={9} className="p-8 text-center text-muted-foreground">
                     No discount codes yet. Create your first one!
                   </td>
                 </tr>
               ) : (
                 codes.map(code => {
                   const isExpired = code.expires_at && new Date(code.expires_at) < new Date()
-                  const isMaxedOut = code.max_uses && code.uses_count >= code.max_uses
+                  const isMaxedOut = code.usage_limit && code.current_usage >= code.usage_limit
 
                   return (
                     <tr key={code.id} className="border-b border-border dark:border-slate-700/50">
@@ -225,17 +296,25 @@ export default function DiscountCodesPage() {
                           </button>
                         </div>
                       </td>
+                      <td className="p-4">
+                        <span className="text-sm">{code.name}</span>
+                      </td>
                       <td className="p-4 text-center">
-                        <span className="text-green-600 dark:text-green-400 font-bold text-lg">
-                          {code.discount_percent}%
+                        <span className="text-xs px-2 py-1 bg-muted dark:bg-slate-700 rounded-full">
+                          {code.discount_type.replace('_', ' ')}
                         </span>
                       </td>
                       <td className="p-4 text-center">
-                        <span>{code.uses_count || 0}</span>
+                        <span className="text-green-600 dark:text-green-400 font-bold text-lg">
+                          {formatDiscountValue(code)}
+                        </span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span>{code.current_usage || 0}</span>
                       </td>
                       <td className="p-4 text-center">
                         <span className="text-muted-foreground">
-                          {code.max_uses || 'Unlimited'}
+                          {code.usage_limit || 'Unlimited'}
                         </span>
                       </td>
                       <td className="p-4 text-center">
@@ -314,30 +393,61 @@ export default function DiscountCodesPage() {
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  Discount Percentage
+                  Name (Optional)
                 </label>
                 <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  step="1"
-                  value={formData.discount_percent}
-                  onChange={(e) => setFormData({ ...formData, discount_percent: e.target.value })}
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   className="w-full px-4 py-2 bg-background dark:bg-slate-700 border border-border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="20"
+                  placeholder="Summer Sale 2024"
                 />
-                <p className="text-xs text-muted-foreground mt-1">Enter a value between 1 and 100</p>
+                <p className="text-xs text-muted-foreground mt-1">A friendly name for this coupon</p>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  Max Uses (Optional)
+                  Discount Type
+                </label>
+                <select
+                  value={formData.discount_type}
+                  onChange={(e) => setFormData({ ...formData, discount_type: e.target.value as DiscountType, discount_value: '' })}
+                  className="w-full px-4 py-2 bg-background dark:bg-slate-700 border border-border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                >
+                  {Object.entries(DISCOUNT_TYPE_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  {getDiscountValueLabel(formData.discount_type)}
                 </label>
                 <input
                   type="number"
                   min="1"
-                  value={formData.max_uses}
-                  onChange={(e) => setFormData({ ...formData, max_uses: e.target.value })}
+                  max={formData.discount_type === 'percentage' ? '100' : undefined}
+                  step={formData.discount_type === 'fixed' ? '0.01' : '1'}
+                  value={formData.discount_value}
+                  onChange={(e) => setFormData({ ...formData, discount_value: e.target.value })}
+                  className="w-full px-4 py-2 bg-background dark:bg-slate-700 border border-border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                  placeholder={getDiscountValuePlaceholder(formData.discount_type)}
+                />
+                {formData.discount_type === 'percentage' && (
+                  <p className="text-xs text-muted-foreground mt-1">Enter a value between 1 and 100</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  Usage Limit (Optional)
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={formData.usage_limit}
+                  onChange={(e) => setFormData({ ...formData, usage_limit: e.target.value })}
                   className="w-full px-4 py-2 bg-background dark:bg-slate-700 border border-border dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                   placeholder="Unlimited"
                 />
@@ -360,7 +470,7 @@ export default function DiscountCodesPage() {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={handleCreateCode}
-                  disabled={!formData.code || !formData.discount_percent || createCodeMutation.isPending}
+                  disabled={!formData.code || !formData.discount_value || createCodeMutation.isPending}
                   className="flex-1 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {createCodeMutation.isPending ? 'Creating...' : 'Create Code'}
@@ -368,7 +478,7 @@ export default function DiscountCodesPage() {
                 <button
                   onClick={() => {
                     setShowCreateModal(false)
-                    setFormData({ code: '', discount_percent: '', max_uses: '', expires_at: '' })
+                    setFormData({ code: '', name: '', discount_type: 'percentage', discount_value: '', usage_limit: '', expires_at: '' })
                   }}
                   className="flex-1 px-4 py-2 bg-muted dark:bg-slate-700 rounded-lg hover:bg-muted/80 dark:hover:bg-slate-600 transition-colors"
                 >

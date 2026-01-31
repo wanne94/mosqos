@@ -109,7 +109,7 @@ export function NewDonationModal({
 
     try {
       const { data: member, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('household_id, first_name, last_name')
         .eq('id', memberId)
         .eq('organization_id', currentOrganization.id)
@@ -137,7 +137,7 @@ export function NewDonationModal({
 
     try {
       const { data, error } = await supabase
-        .from('organization_members')
+        .from('members')
         .select('id, first_name, last_name, household_id')
         .eq('organization_id', currentOrganization.id)
         .order('first_name', { ascending: true })
@@ -170,7 +170,7 @@ export function NewDonationModal({
 
       if (memberId && !householdId) {
         const { data: member, error: memberError } = await supabase
-          .from('organization_members')
+          .from('members')
           .select('household_id')
           .eq('id', memberId)
           .eq('organization_id', currentOrganization.id)
@@ -185,21 +185,20 @@ export function NewDonationModal({
       }
 
       if (householdId && !memberId) {
-        const { data: headMember } = await supabase
-          .from('organization_members')
-          .select('id')
-          .eq('household_id', householdId)
-          .eq('organization_id', currentOrganization.id)
-          .eq('role', 'Head')
+        // Try to find head of household first
+        const { data: household } = await supabase
+          .from('households')
+          .select('head_of_household_id')
+          .eq('id', householdId)
           .maybeSingle()
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        if (headMember && (headMember as any).id) {
+        if (household && (household as any).head_of_household_id) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          memberId = (headMember as any).id
+          memberId = (household as any).head_of_household_id
         } else {
           const { data: firstMember } = await supabase
-            .from('organization_members')
+            .from('members')
             .select('id')
             .eq('household_id', householdId)
             .eq('organization_id', currentOrganization.id)
@@ -290,7 +289,7 @@ export function NewDonationModal({
     if (name === 'member_id' && value && currentOrganization) {
       try {
         const { data: member, error } = await supabase
-          .from('organization_members')
+          .from('members')
           .select('household_id')
           .eq('id', value)
           .eq('organization_id', currentOrganization.id)
