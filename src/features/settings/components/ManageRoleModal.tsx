@@ -33,7 +33,7 @@ interface Permissions {
 }
 
 export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
 
   // Determine initial role and permissions
   const isAdminRole = ['admin', 'super_admin', 'finance_admin', 'education_admin', 'services_admin', 'umrah_admin', 'people_admin'].includes(member.system_role)
@@ -154,7 +154,7 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 flex-shrink-0">
           <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-            {t('settings.manageRole')} - {member.first_name} {member.last_name}
+            {t('manageRole')} - {member.first_name} {member.last_name}
           </h2>
           <button
             onClick={onClose}
@@ -168,7 +168,7 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
           {/* Step 1: Select Member or Admin */}
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-              {t('common.selectRoleType')}
+              {t('common:selectRoleType')}
             </label>
             <div className="space-y-2">
               <label className={`flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -197,7 +197,7 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
                   className="mt-1"
                 />
                 <div className="flex-1">
-                  <div className="font-medium text-slate-900 dark:text-slate-100">{t('settings.member')} (Default - Limited Access)</div>
+                  <div className="font-medium text-slate-900 dark:text-slate-100">{t('member')} (Default - Limited Access)</div>
                   <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">Access to personal dashboard and profile only</div>
                 </div>
               </label>
@@ -216,7 +216,7 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
                   className="mt-1"
                 />
                 <div className="flex-1">
-                  <div className="font-medium text-slate-900 dark:text-slate-100">{t('settings.admin')} (Full Access)</div>
+                  <div className="font-medium text-slate-900 dark:text-slate-100">{t('admin')} (Full Access)</div>
                   <div className="text-sm text-slate-500 dark:text-slate-400 mt-1">Access to admin portal with customizable module permissions</div>
                 </div>
               </label>
@@ -227,20 +227,20 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
           {selectedRole === 'admin' && (
             <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                {t('settings.selectPermissions')}
+                {t('selectPermissions')}
               </label>
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
                 Choose which modules this admin can access. Select all for full access.
               </p>
               <div className="space-y-3">
                 {[
-                  { key: 'dashboard', label: t('settings.dashboard'), desc: 'View admin dashboard and overview' },
-                  { key: 'finance', label: t('settings.finance'), desc: 'Donations, Expenses, and Financial Reports' },
-                  { key: 'education', label: t('settings.education'), desc: 'Classes, enrollments, and evaluations' },
-                  { key: 'services', label: t('settings.caseManagement'), desc: 'Service cases and assistance tracking' },
-                  { key: 'umrah', label: t('settings.hajjUmrah'), desc: 'Trip management and pilgrim registration' },
-                  { key: 'people', label: t('settings.people'), desc: 'Member and household management' },
-                  { key: 'settings', label: t('settings.settings'), desc: 'Access management and system settings' },
+                  { key: 'dashboard', label: t('dashboard'), desc: 'View admin dashboard and overview' },
+                  { key: 'finance', label: t('finance'), desc: 'Donations, Expenses, and Financial Reports' },
+                  { key: 'education', label: t('education'), desc: 'Classes, enrollments, and evaluations' },
+                  { key: 'services', label: t('caseManagement'), desc: 'Service cases and assistance tracking' },
+                  { key: 'umrah', label: t('hajjUmrah'), desc: 'Trip management and pilgrim registration' },
+                  { key: 'people', label: t('people'), desc: 'Member and household management' },
+                  { key: 'settings', label: t('settings'), desc: 'Access management and system settings' },
                 ].map((perm) => (
                   <label key={perm.key} className="flex items-center gap-3 p-3 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer">
                     <input
@@ -274,7 +274,7 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
             disabled={saveRoleMutation.isPending}
             className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {saveRoleMutation.isPending ? t('people.saving') : t('common.saveRole')}
+            {saveRoleMutation.isPending ? t('people:saving') : t('common:saveRole')}
           </button>
         </div>
       </div>

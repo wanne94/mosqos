@@ -1,0 +1,15 @@
+{
+  "classrooms": "Sınıflar",
+  "classroom": "Sınıf",
+  "createClassroom": "Sınıf Oluştur",
+  "editClassroom": "Sınıfı Düzenle",
+  "classroomRemoved": "Sınıf başarıyla kaldırıldı",
+  "classroomsRemoved": "Sınıflar başarıyla kaldırıldı",
+  "failedToRemove": "Sınıf kaldırma başarısız",
+  "noClassrooms": "Henüz sınıf yok",
+  "noClassroomsDescription": "Eğitim programınızı organize etmek için sınıflar oluşturun",
+  "name": "Sınıf Adı",
+  "capacity": "Kapasite",
+  "location": "Konum",
+  "description": "Açıklama"
+}

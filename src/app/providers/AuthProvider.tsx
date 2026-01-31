@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 // Development test users
 const DEV_USERS = [
-  { email: 'admin@mosqos.com', password: 'admin123', role: 'admin', name: 'Admin User' },
+  { email: 'admin@mosqos.com', password: 'password123', role: 'admin', name: 'Admin User' },
   { email: 'imam@mosqos.com', password: 'imam123', role: 'imam', name: 'Imam User' },
   { email: 'member@mosqos.com', password: 'member123', role: 'member', name: 'Member User' },
 ]

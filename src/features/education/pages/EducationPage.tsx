@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { Plus, Users, BookOpen, GraduationCap, Building2 } from 'lucide-react'
+import { Plus, Users, BookOpen, GraduationCap, Building2, ClipboardCheck } from 'lucide-react'
 import { useOrganization } from '../../../hooks/useOrganization'
 import { toast } from 'sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -20,6 +20,9 @@ import {
   EditTeacherModal,
   CreateClassroomModal,
   EditClassroomModal,
+  AttendanceMarkingModal,
+  AttendanceHistoryModal,
+  AttendanceStatusBadge,
 } from '../components'
 import type {
   Course,
@@ -36,7 +39,7 @@ interface EnrollmentWithPayment extends Enrollment {
   }
 }
 
-type TabType = 'enrollments' | 'classrooms' | 'teachers' | 'courses'
+type TabType = 'enrollments' | 'classrooms' | 'teachers' | 'courses' | 'attendance'
 
 export default function EducationPage() {
   const { t, i18n } = useTranslation()
@@ -72,6 +75,16 @@ export default function EducationPage() {
   const [isCreateClassroomModalOpen, setIsCreateClassroomModalOpen] = useState(false)
   const [isEditClassroomModalOpen, setIsEditClassroomModalOpen] = useState(false)
   const [selectedClassroomId, setSelectedClassroomId] = useState<string | null>(null)
+
+  // Attendance modal states
+  const [isAttendanceMarkingModalOpen, setIsAttendanceMarkingModalOpen] = useState(false)
+  const [isAttendanceHistoryModalOpen, setIsAttendanceHistoryModalOpen] = useState(false)
+  const [selectedAttendanceMember, setSelectedAttendanceMember] = useState<{
+    memberId: string
+    memberName: string
+    classId?: string
+    className?: string
+  } | null>(null)
 
   // Fetch courses
   const { data: courses = [], isLoading: coursesLoading } = useQuery({
@@ -173,6 +186,31 @@ export default function EducationPage() {
     enabled: !!currentOrganizationId && activeTab === 'classrooms',
   })
 
+  // Fetch attendance records
+  const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery({
+    queryKey: ['attendance', currentOrganizationId],
+    queryFn: async () => {
+      if (!currentOrganizationId) return []
+      const { data, error } = await (supabase as any)
+        .from('attendance')
+        .select(`
+          *,
+          member:member_id (
+            id,
+            first_name,
+            last_name
+          )
+        `)
+        .eq('organization_id', currentOrganizationId)
+        .order('attendance_date', { ascending: false })
+        .limit(100)
+
+      if (error) throw error
+      return data || []
+    },
+    enabled: !!currentOrganizationId && activeTab === 'attendance',
+  })
+
   // Delete mutations
   const deleteTeachersMutation = useMutation({
     mutationFn: async (memberIds: string[]) => {
@@ -219,13 +257,14 @@ export default function EducationPage() {
     },
   })
 
-  const loading = coursesLoading || enrollmentsLoading || teachersLoading || classroomsLoading
+  const loading = coursesLoading || enrollmentsLoading || teachersLoading || classroomsLoading || attendanceLoading
 
   const refetchData = () => {
     queryClient.invalidateQueries({ queryKey: ['courses'] })
     queryClient.invalidateQueries({ queryKey: ['enrollments'] })
     queryClient.invalidateQueries({ queryKey: ['teachers'] })
     queryClient.invalidateQueries({ queryKey: ['classrooms'] })
+    queryClient.invalidateQueries({ queryKey: ['attendance'] })
   }
 
   return (
@@ -270,6 +309,15 @@ export default function EducationPage() {
             >
               <Plus size={18} />
               {t('education.addCourse') || 'Add Course'}
+            </button>
+          )}
+          {activeTab === 'attendance' && (
+            <button
+              onClick={() => setIsAttendanceMarkingModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 transition-colors"
+            >
+              <ClipboardCheck size={18} />
+              {t('attendance.markAttendance') || 'Mark Attendance'}
             </button>
           )}
         </div>
@@ -329,6 +377,19 @@ export default function EducationPage() {
                 {t('education.courses') || 'Courses'}
               </div>
             </button>
+            <button
+              onClick={() => setActiveTab('attendance')}
+              className={`flex-1 px-6 py-4 text-sm font-medium transition-colors ${
+                activeTab === 'attendance'
+                  ? 'text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+              }`}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <ClipboardCheck size={18} />
+                {t('attendance.attendance') || 'Attendance'}
+              </div>
+            </button>
           </div>
         </div>
 
@@ -336,6 +397,64 @@ export default function EducationPage() {
         {loading ? (
           <div className="bg-white dark:bg-slate-800 rounded-lg p-12 text-center shadow-sm">
             <div className="text-slate-600 dark:text-slate-400">{t('common.loading')}</div>
+          </div>
+        ) : activeTab === 'attendance' ? (
+          <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm">
+            {attendanceRecords.length === 0 ? (
+              <div className="p-12 text-center">
+                <ClipboardCheck size={48} className="mx-auto mb-4 text-slate-300 dark:text-slate-600" />
+                <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
+                  {t('attendance.noRecords') || 'No Attendance Records'}
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-4">
+                  {t('attendance.noRecordsDescription') || 'Start tracking attendance by clicking "Mark Attendance" above.'}
+                </p>
+                <button
+                  onClick={() => setIsAttendanceMarkingModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                >
+                  <ClipboardCheck size={18} />
+                  {t('attendance.markAttendance') || 'Mark Attendance'}
+                </button>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-200 dark:divide-slate-700">
+                <div className="p-4">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                    {t('attendance.recentRecords') || 'Recent attendance records'}: {attendanceRecords.length}
+                  </p>
+                </div>
+                {attendanceRecords.slice(0, 20).map((record: any) => (
+                  <div key={record.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                    <div className="flex items-center gap-3">
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-white">
+                          {record.member?.first_name} {record.member?.last_name}
+                        </p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                          {new Date(record.attendance_date).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <AttendanceStatusBadge status={record.status} size="sm" />
+                      <button
+                        onClick={() => {
+                          setSelectedAttendanceMember({
+                            memberId: record.member_id,
+                            memberName: `${record.member?.first_name || ''} ${record.member?.last_name || ''}`,
+                          })
+                          setIsAttendanceHistoryModalOpen(true)
+                        }}
+                        className="text-sm text-emerald-600 dark:text-emerald-400 hover:underline"
+                      >
+                        {t('attendance.viewHistory') || 'View History'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm">
@@ -456,6 +575,24 @@ export default function EducationPage() {
         }}
         onSave={refetchData}
         classroomId={selectedClassroomId || ''}
+      />
+
+      {/* Attendance Modals */}
+      <AttendanceMarkingModal
+        isOpen={isAttendanceMarkingModalOpen}
+        onClose={() => setIsAttendanceMarkingModalOpen(false)}
+        onSave={refetchData}
+      />
+      <AttendanceHistoryModal
+        isOpen={isAttendanceHistoryModalOpen}
+        onClose={() => {
+          setIsAttendanceHistoryModalOpen(false)
+          setSelectedAttendanceMember(null)
+        }}
+        memberId={selectedAttendanceMember?.memberId || ''}
+        memberName={selectedAttendanceMember?.memberName || ''}
+        classId={selectedAttendanceMember?.classId}
+        className={selectedAttendanceMember?.className}
       />
     </div>
   )

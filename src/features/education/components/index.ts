@@ -33,3 +33,8 @@ export { default as CreateClassInClassroomModal } from './CreateClassInClassroom
 export { default as EditableScheduleCell } from './EditableScheduleCell'
 export { default as OutstandingPaymentsModal } from './OutstandingPaymentsModal'
 export { default as StudentPaymentHistoryModal } from './StudentPaymentHistoryModal'
+
+// Attendance Components - Phase 4e
+export { default as AttendanceStatusBadge } from './AttendanceStatusBadge'
+export { default as AttendanceMarkingModal } from './AttendanceMarkingModal'
+export { default as AttendanceHistoryModal } from './AttendanceHistoryModal'

@@ -48,7 +48,7 @@ interface OrganizationMember {
 type TabType = 'general' | 'access'
 
 export default function SettingsPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation('settings')
   const { currentOrganization } = useOrganization()
   const queryClient = useQueryClient()
   const [activeTab, setActiveTab] = useState<TabType>('general')
@@ -204,14 +204,14 @@ export default function SettingsPage() {
 
   const getRoleBadge = (role: string) => {
     const roleLabels: Record<string, string> = {
-      'member': t('settings.member'),
-      'finance_admin': t('settings.financeAdmin'),
-      'education_admin': t('settings.educationAdmin'),
-      'services_admin': t('settings.servicesAdmin'),
-      'umrah_admin': t('settings.umrahAdmin'),
-      'people_admin': t('settings.peopleAdmin'),
-      'admin': t('settings.fullAdmin'),
-      'super_admin': t('settings.fullAdmin'),
+      'member': t('member'),
+      'finance_admin': t('financeAdmin'),
+      'education_admin': t('educationAdmin'),
+      'services_admin': t('servicesAdmin'),
+      'umrah_admin': t('umrahAdmin'),
+      'people_admin': t('peopleAdmin'),
+      'admin': t('fullAdmin'),
+      'super_admin': t('fullAdmin'),
     }
 
     const roleColors: Record<string, string> = {
@@ -227,7 +227,7 @@ export default function SettingsPage() {
 
     return (
       <span className={`px-2 py-1 text-xs font-medium rounded-full ${roleColors[role] || roleColors['member']}`}>
-        {roleLabels[role] || t('settings.member')}
+        {roleLabels[role] || t('member')}
       </span>
     )
   }
@@ -237,9 +237,9 @@ export default function SettingsPage() {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 flex items-center gap-3">
           <SettingsIcon className="text-emerald-600 dark:text-emerald-400" size={32} />
-          {t('settings.title')}
+          {t('title')}
         </h1>
-        <p className="text-slate-600 dark:text-slate-400 mt-2">{t('settings.subtitle')}</p>
+        <p className="text-slate-600 dark:text-slate-400 mt-2">{t('subtitle')}</p>
       </div>
 
       {/* Tabs */}
@@ -253,7 +253,7 @@ export default function SettingsPage() {
                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300'
             }`}
           >
-            {t('settings.general')}
+            {t('general')}
           </button>
           <button
             onClick={() => setActiveTab('access')}
@@ -263,7 +263,7 @@ export default function SettingsPage() {
                 : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 hover:border-slate-300'
             }`}
           >
-            {t('settings.accessManagement')}
+            {t('accessManagement')}
           </button>
         </nav>
       </div>
@@ -275,7 +275,7 @@ export default function SettingsPage() {
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-2">
                 <Building2 className="text-emerald-600 dark:text-emerald-400" size={20} />
-                {t('settings.organizationInformation')}
+                {t('organizationInformation')}
               </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 This information is managed by the platform administrator. Contact support to make changes.
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                 {/* Organization Name */}
                 <div>
                   <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                    {t('settings.organizationName')}
+                    {t('organizationName')}
                   </label>
                   <input
                     type="text"
@@ -304,7 +304,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                      {t('settings.contactEmail')}
+                      {t('contactEmail')}
                     </label>
                     <input
                       type="email"
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                      {t('settings.contactPhone')}
+                      {t('contactPhone')}
                     </label>
                     <input
                       type="tel"
@@ -331,7 +331,7 @@ export default function SettingsPage() {
                 {/* Address */}
                 <div>
                   <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                    {t('settings.address')}
+                    {t('address')}
                   </label>
                   <input
                     type="text"
@@ -345,7 +345,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                      {t('settings.city')}
+                      {t('city')}
                     </label>
                     <input
                       type="text"
@@ -357,7 +357,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                      {t('settings.state')}
+                      {t('state')}
                     </label>
                     <input
                       type="text"
@@ -369,7 +369,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                      {t('settings.zipCode')}
+                      {t('zipCode')}
                     </label>
                     <input
                       type="text"
@@ -384,7 +384,7 @@ export default function SettingsPage() {
                 {/* Website */}
                 <div>
                   <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-                    {t('settings.website')}
+                    {t('website')}
                   </label>
                   <input
                     type="url"
@@ -459,10 +459,10 @@ export default function SettingsPage() {
           <div className="p-6 border-b border-slate-200 dark:border-slate-700">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <Users className="text-emerald-600 dark:text-emerald-400" size={20} />
-              {t('settings.accessManagement')}
+              {t('accessManagement')}
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
-              {t('settings.accessManagementDescription')}
+              {t('accessManagementDescription')}
             </p>
           </div>
 
@@ -472,7 +472,7 @@ export default function SettingsPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
               <input
                 type="text"
-                placeholder={t('settings.searchUsers')}
+                placeholder={t('searchUsers')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -481,23 +481,23 @@ export default function SettingsPage() {
           </div>
 
           {loadingUsers ? (
-            <div className="p-8 text-center text-slate-600 dark:text-slate-400">{t('settings.loadingUsers')}</div>
+            <div className="p-8 text-center text-slate-600 dark:text-slate-400">{t('loadingUsers')}</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      {t('common.user')}
+                      {t('common:user')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      {t('common.email')}
+                      {t('common:email')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      {t('people.role')}
+                      {t('people:role')}
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                      {t('common.actions')}
+                      {t('common:actions')}
                     </th>
                   </tr>
                 </thead>
@@ -537,7 +537,7 @@ export default function SettingsPage() {
                             onClick={() => handleManageRole(user)}
                             className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-300"
                           >
-                            {t('common.changeRole')}
+                            {t('common:changeRole')}
                           </button>
                         </td>
                       </tr>

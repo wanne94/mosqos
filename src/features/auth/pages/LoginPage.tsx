@@ -3,9 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { toast } from 'sonner'
 import { getPostLoginRedirectUrl } from '@/features/auth/services/postLoginRedirect'
+import { Eye, EyeOff } from 'lucide-react'
 
 const DEV_CREDENTIALS = [
-  { email: 'admin@mosqos.com', password: 'admin123', role: 'Admin' },
+  { email: 'admin@mosqos.com', password: 'password123', role: 'Admin' },
   { email: 'imam@mosqos.com', password: 'imam123', role: 'Imam' },
   { email: 'member@mosqos.com', password: 'member123', role: 'Member' },
 ]
@@ -16,6 +17,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const fillCredentials = (devEmail: string, devPassword: string) => {
     setEmail(devEmail)
@@ -92,15 +94,29 @@ export default function LoginPage() {
           <label htmlFor="password" className="block text-sm font-medium mb-1">
             Password
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-3 py-2 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-            placeholder="Enter your password"
-          />
+          <div className="relative">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              className="w-full px-3 py-2 pr-10 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+              tabIndex={-1}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between">

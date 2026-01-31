@@ -1,0 +1,15 @@
+{
+  "classrooms": "Classrooms",
+  "classroom": "Classroom",
+  "createClassroom": "Create Classroom",
+  "editClassroom": "Edit Classroom",
+  "classroomRemoved": "Classroom removed successfully",
+  "classroomsRemoved": "Classrooms removed successfully",
+  "failedToRemove": "Failed to remove classroom",
+  "noClassrooms": "No classrooms yet",
+  "noClassroomsDescription": "Create classrooms to organize your education program",
+  "name": "Classroom Name",
+  "capacity": "Capacity",
+  "location": "Location",
+  "description": "Description"
+}

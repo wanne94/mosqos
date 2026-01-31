@@ -31,6 +31,9 @@ const EducationPage = lazy(() => import('@/features/education/pages/EducationPag
 const ClassEditPage = lazy(() => import('@/features/education/pages/ClassEditPage'))
 const AdminCasesPage = lazy(() => import('@/features/cases/pages/CasesPage'))
 const UmrahPage = lazy(() => import('@/features/umrah/pages/UmrahPage'))
+const QurbaniPage = lazy(() => import('@/features/qurbani/pages/QurbaniPage'))
+const AnnouncementsPage = lazy(() => import('@/features/announcements/pages/AnnouncementsPage'))
+const IslamicServicesPage = lazy(() => import('@/features/islamic-services/pages/IslamicServicesPage'))
 const BillingPage = lazy(() => import('@/features/billing/pages/BillingPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
@@ -150,9 +153,9 @@ export function AppRoutes() {
         <Route path="settings" element={<SettingsPage />} />
 
         {/* Placeholder routes for future pages */}
-        <Route path="qurbani" element={<div className="p-6">Qurbani - Coming Soon</div>} />
-        <Route path="services" element={<div className="p-6">Islamic Services - Coming Soon</div>} />
-        <Route path="announcements" element={<div className="p-6">Announcements - Coming Soon</div>} />
+        <Route path="qurbani" element={<QurbaniPage />} />
+        <Route path="services" element={<IslamicServicesPage />} />
+        <Route path="announcements" element={<AnnouncementsPage />} />
       </Route>
 
       {/* Member Portal Routes */}

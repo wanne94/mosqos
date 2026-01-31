@@ -1,0 +1,15 @@
+{
+  "classrooms": "الفصول الدراسية",
+  "classroom": "فصل دراسي",
+  "createClassroom": "إنشاء فصل دراسي",
+  "editClassroom": "تعديل الفصل الدراسي",
+  "classroomRemoved": "تمت إزالة الفصل الدراسي بنجاح",
+  "classroomsRemoved": "تمت إزالة الفصول الدراسية بنجاح",
+  "failedToRemove": "فشل في إزالة الفصل الدراسي",
+  "noClassrooms": "لا توجد فصول دراسية بعد",
+  "noClassroomsDescription": "أنشئ فصولاً دراسية لتنظيم برنامجك التعليمي",
+  "name": "اسم الفصل الدراسي",
+  "capacity": "السعة",
+  "location": "الموقع",
+  "description": "الوصف"
+}

@@ -630,6 +630,85 @@ Based on `Startplan.md`:
 
 ---
 
+## 🤖 Available Custom Agents
+
+Custom agents are defined in `~/.claude/agents/` (global) and provide specialized assistance for specific tasks.
+
+### Agent List
+
+| Agent | Model | Purpose | When to Use |
+|-------|-------|---------|-------------|
+| `supabase-expert` | Sonnet | RLS policies, Supabase queries, types, database patterns | Database questions, RLS audits, type issues |
+| `react-query-specialist` | Sonnet | TanStack Query hooks, caching, mutations, optimistic updates | Data fetching, caching issues, mutation setup |
+| `i18n-translator` | Haiku | Translations (en/ar/tr), RTL support, translation keys | New features needing translations, RTL fixes |
+| `test-runner` | Haiku | Running tests, analyzing failures, coverage reports | After writing code, CI failures |
+| `code-reviewer` | Sonnet | Code review, TypeScript quality, best practices | Before merging, code audits |
+| `security-audit` | Sonnet | OWASP vulnerabilities, RLS audit, input validation | Security reviews, new features |
+| `migration-writer` | Sonnet | SQL migrations, schema changes, RLS policies | New tables, schema changes |
+| `component-builder` | Sonnet | React components, shadcn/ui patterns, Tailwind CSS | Building new UI components |
+| `feature-scaffolder` | Sonnet | Scaffolding complete feature modules | Starting new features |
+
+### How to Use Agents
+
+**Using Task tool with subagent_type:**
+```
+Use the code-reviewer agent to review src/features/members/
+Use the security-audit agent to check the donations module
+Use the i18n-translator agent to add Arabic translations for education module
+```
+
+**Proactive Usage:**
+- `code-reviewer` and `security-audit` should be used proactively after significant changes
+- `test-runner` should run after writing code
+- `migration-writer` before creating database changes
+- `feature-scaffolder` when starting a new feature module
+
+### Agent Capabilities
+
+**supabase-expert**:
+- Reviews RLS policies for multi-tenant security
+- Optimizes Supabase queries
+- Generates TypeScript types from schema
+- Uses MCP Supabase tools for direct database access
+
+**react-query-specialist**:
+- Creates service + hook patterns
+- Sets up proper cache invalidation
+- Implements optimistic updates
+- Configures offline support
+
+**i18n-translator**:
+- Creates translation files for en, ar, tr
+- Ensures RTL support for Arabic
+- Maintains consistent Islamic terminology
+- Organizes translation keys by feature
+
+**security-audit**:
+- Checks OWASP Top 10 vulnerabilities
+- Audits RLS policies for all tables
+- Reviews authentication flows
+- Scans for XSS, SQL injection risks
+
+**migration-writer**:
+- Creates safe PostgreSQL migrations
+- Adds RLS policies to new tables
+- Sets up proper indexes
+- Includes rollback strategies
+
+**component-builder**:
+- Builds components following shadcn/ui patterns
+- Uses CVA for variants
+- Ensures RTL compatibility
+- Adds proper TypeScript interfaces
+
+**feature-scaffolder**:
+- Generates complete feature module structure
+- Creates types, services, hooks, components, pages
+- Sets up index.ts exports
+- Includes translation file templates
+
+---
+
 ## 📚 Additional Resources
 
 - **Startplan.md** - Detailed implementation plan with phases

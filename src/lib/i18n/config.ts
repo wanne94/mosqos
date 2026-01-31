@@ -11,7 +11,7 @@ i18n
     fallbackLng: 'en',
     supportedLngs: ['en', 'ar', 'tr'],
 
-    ns: ['common', 'roles'],
+    ns: ['common', 'roles', 'qurbani', 'settings', 'people', 'education', 'classroom', 'attendance', 'announcements', 'islamic-services'],
     defaultNS: 'common',
 
     backend: {
