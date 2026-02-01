@@ -13,7 +13,7 @@ const DEV_CREDENTIALS = [
 
 export default function LoginPage() {
   const navigate = useNavigate()
-  const { signIn, isDevMode } = useAuth()
+  const { signIn } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

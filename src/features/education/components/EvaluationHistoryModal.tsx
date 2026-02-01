@@ -8,15 +8,14 @@ interface EvaluationHistoryModalProps {
   isOpen: boolean
   onClose: () => void
   memberId: string
-  classId: string
   studentName: string
   className: string
 }
 
 interface Evaluation {
   id: string
-  score: number
-  behavior_notes: string | null
+  score: number | null
+  feedback: string | null
   evaluation_date: string
 }
 
@@ -25,7 +24,7 @@ export default function EvaluationHistoryModal({
   onClose,
   memberId,
   studentName,
-  className,
+  className: classNameProp,
 }: EvaluationHistoryModalProps) {
   const { currentOrganizationId } = useOrganization()
   const [evaluations, setEvaluations] = useState<Evaluation[]>([])
@@ -44,13 +43,13 @@ export default function EvaluationHistoryModal({
       setLoading(true)
       const { data, error } = await supabase
         .from('evaluations')
-        .select('*')
+        .select('id, score, feedback, evaluation_date')
         .eq('member_id', memberId)
         .eq('organization_id', currentOrganizationId)
         .order('evaluation_date', { ascending: false })
 
       if (error) throw error
-      setEvaluations(data || [])
+      setEvaluations((data || []) as Evaluation[])
     } catch (error) {
       console.error('Error fetching evaluations:', error)
       setEvaluations([])
@@ -86,7 +85,7 @@ export default function EvaluationHistoryModal({
 
   const averageScore =
     evaluations.length > 0
-      ? Math.round(evaluations.reduce((sum, e) => sum + e.score, 0) / evaluations.length)
+      ? Math.round(evaluations.reduce((sum, e) => sum + (e.score || 0), 0) / evaluations.length)
       : 0
 
   if (!isOpen) return null
@@ -98,7 +97,7 @@ export default function EvaluationHistoryModal({
           <div>
             <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Evaluation History</h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-              {studentName} - {className}
+              {studentName} - {classNameProp}
             </p>
           </div>
           <button
@@ -149,18 +148,18 @@ export default function EvaluationHistoryModal({
                     <p className="text-sm text-slate-600 dark:text-slate-400">Latest Score</p>
                     <p
                       className={`text-2xl font-bold ${
-                        evaluations[0].score >= 90
+                        (evaluations[0].score || 0) >= 90
                           ? 'text-emerald-600 dark:text-emerald-400'
-                          : evaluations[0].score >= 80
+                          : (evaluations[0].score || 0) >= 80
                           ? 'text-blue-600 dark:text-blue-400'
-                          : evaluations[0].score >= 70
+                          : (evaluations[0].score || 0) >= 70
                           ? 'text-yellow-600 dark:text-yellow-400'
-                          : evaluations[0].score >= 60
+                          : (evaluations[0].score || 0) >= 60
                           ? 'text-orange-600 dark:text-orange-400'
                           : 'text-red-600 dark:text-red-400'
                       }`}
                     >
-                      {evaluations[0].score}
+                      {evaluations[0].score || 0}
                     </p>
                   </div>
                 </div>
@@ -183,24 +182,24 @@ export default function EvaluationHistoryModal({
                             {formatDate(evaluation.evaluation_date)}
                           </p>
                           <p className="text-sm text-slate-500 dark:text-slate-400">
-                            {getScoreLabel(evaluation.score)}
+                            {getScoreLabel(evaluation.score || 0)}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <span
                           className={`px-3 py-1 rounded-full text-lg font-bold ${getScoreColor(
-                            evaluation.score
+                            evaluation.score || 0
                           )}`}
                         >
-                          {evaluation.score}
+                          {evaluation.score || 0}
                         </span>
                       </div>
                     </div>
-                    {evaluation.behavior_notes && (
+                    {evaluation.feedback && (
                       <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
                         <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">
-                          {evaluation.behavior_notes}
+                          {evaluation.feedback}
                         </p>
                       </div>
                     )}

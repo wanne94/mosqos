@@ -13,13 +13,13 @@ interface LogTuitionPaymentModalProps {
   enrollment: {
     id: string
     member_id: string
-    class_id: string
-    amount_paid?: number
-    classes?: {
+    scheduled_class_id: string
+    tuition_paid?: number
+    scheduled_class?: {
       name: string
       tuition_fee?: number
     }
-    organization_members?: {
+    member?: {
       first_name: string
       last_name: string
     }
@@ -92,7 +92,7 @@ export default function LogTuitionPaymentModal({
       const lastDayOfMonth = new Date(year, month, 0).toISOString().split('T')[0]
 
       // Reset form when modal opens with tuition fee as default amount
-      const tuitionFee = parseFloat(enrollment.classes?.tuition_fee?.toString() || '0') || 0
+      const tuitionFee = parseFloat(enrollment.scheduled_class?.tuition_fee?.toString() || '0') || 0
       setFormData({
         amount: tuitionFee > 0 ? tuitionFee.toString() : '',
         payment_date: lastDayOfMonth,
@@ -125,9 +125,9 @@ export default function LogTuitionPaymentModal({
 
       if (!fund) {
         // Create Education fund if it doesn't exist
-        const { data: newFund, error: createError } = await (supabase
-          .from('organization_funds') as any)
-          .insert([{ name: 'Education', organization_id: currentOrganizationId }])
+        const { data: newFund, error: createError } = await supabase
+          .from('organization_funds')
+          .insert([{ name: 'Education', organization_id: currentOrganizationId }] as never)
           .select()
           .single()
 
@@ -143,14 +143,14 @@ export default function LogTuitionPaymentModal({
             .single()
 
           if (retryData) {
-            fund = retryData
+            fund = retryData as Fund
           } else {
             // Last resort: use first available fund or show error
             console.warn('Could not find or create Education fund. Using first available fund or null.')
             fund = availableFunds[0] || null
           }
         } else {
-          fund = newFund
+          fund = newFund as Fund
         }
       }
 
@@ -179,7 +179,7 @@ export default function LogTuitionPaymentModal({
     setLoading(true)
 
     try {
-      if (!enrollment?.member_id || !enrollment?.classes) {
+      if (!enrollment?.member_id || !enrollment?.scheduled_class) {
         alert(t('common.missingEnrollmentInfo'))
         return
       }
@@ -192,7 +192,8 @@ export default function LogTuitionPaymentModal({
         .eq('organization_id', currentOrganizationId)
         .single()
 
-      if (memberError || !(memberData as any)?.household_id) {
+      const memberHouseholdId = (memberData as { household_id: string | null } | null)?.household_id
+      if (memberError || !memberHouseholdId) {
         alert(t('common.couldNotFindHousehold'))
         return
       }
@@ -212,7 +213,7 @@ export default function LogTuitionPaymentModal({
       const paymentDueDate = lastDayOfMonth.toISOString().split('T')[0]
 
       // Get or create monthly payment record for the payment month
-      const tuitionFee = parseFloat(enrollment.classes?.tuition_fee?.toString() || '0') || 0
+      const tuitionFee = parseFloat(enrollment.scheduled_class?.tuition_fee?.toString() || '0') || 0
 
       const { data: existingMonthlyPayment, error: fetchError } = await supabase
         .from('tuition_monthly_payments')
@@ -224,10 +225,10 @@ export default function LogTuitionPaymentModal({
 
       if (fetchError && fetchError.code === 'PGRST116') {
         // Record doesn't exist, create it
-        const { error: createError } = await (supabase.from('tuition_monthly_payments') as any).insert([
+        const { error: createError } = await supabase.from('tuition_monthly_payments').insert([
           {
             enrollment_id: enrollment.id,
-            class_id: enrollment.class_id,
+            scheduled_class_id: enrollment.scheduled_class_id,
             member_id: enrollment.member_id,
             month: paymentMonth,
             year: paymentYear,
@@ -236,20 +237,21 @@ export default function LogTuitionPaymentModal({
             payment_status: paymentAmount >= tuitionFee ? 'Paid' : 'Unpaid',
             payment_date: paymentDueDate, // Set to last day of month
           },
-        ])
+        ] as never)
 
         if (createError) throw createError
       } else if (fetchError) {
         // Some other error occurred
         throw fetchError
-      } else {
+      } else if (existingMonthlyPayment) {
         // Record exists, update it
-        const newMonthlyAmountPaid = (parseFloat((existingMonthlyPayment as any).amount_paid?.toString() || '0') || 0) + paymentAmount
-        const monthlyAmountDue = parseFloat((existingMonthlyPayment as any).amount_due?.toString() || '0') || tuitionFee
+        const existingPayment = existingMonthlyPayment as { id: string; amount_paid: number | null; amount_due: number | null }
+        const newMonthlyAmountPaid = (parseFloat(existingPayment.amount_paid?.toString() || '0') || 0) + paymentAmount
+        const monthlyAmountDue = parseFloat(existingPayment.amount_due?.toString() || '0') || tuitionFee
         const newMonthlyStatus = newMonthlyAmountPaid >= monthlyAmountDue ? 'Paid' : 'Unpaid'
 
-        const { error: updateMonthlyError } = await (supabase
-          .from('tuition_monthly_payments') as any)
+        const { error: updateMonthlyError } = await supabase
+          .from('tuition_monthly_payments')
           .update({
             amount_paid: newMonthlyAmountPaid,
             payment_status: newMonthlyStatus,
@@ -257,14 +259,14 @@ export default function LogTuitionPaymentModal({
               newMonthlyStatus === 'Paid'
                 ? paymentDueDate
                 : formData.payment_date || new Date().toISOString().split('T')[0],
-          })
-          .eq('id', (existingMonthlyPayment as any).id)
+          } as never)
+          .eq('id', existingPayment.id)
 
         if (updateMonthlyError) throw updateMonthlyError
       }
 
       // Update total enrollment payment
-      const currentAmountPaid = parseFloat(enrollment.amount_paid?.toString() || '0') || 0
+      const currentAmountPaid = parseFloat(enrollment.tuition_paid?.toString() || '0') || 0
       const newAmountPaid = currentAmountPaid + paymentAmount
 
       // Ensure Education fund exists before inserting donation
@@ -281,9 +283,9 @@ export default function LogTuitionPaymentModal({
 
         if (fundError || !fundData) {
           // Create Education fund if it still doesn't exist
-          const { data: newFund, error: createError } = await (supabase
-            .from('organization_funds') as any)
-            .insert([{ name: 'Education', organization_id: currentOrganizationId }])
+          const { data: newFund, error: createError } = await supabase
+            .from('organization_funds')
+            .insert([{ name: 'Education', organization_id: currentOrganizationId }] as never)
             .select()
             .single()
 
@@ -292,27 +294,27 @@ export default function LogTuitionPaymentModal({
               'Could not find or create Education fund. Please create an Education fund in Settings first.'
             )
           }
-          currentEducationFund = newFund
-          setEducationFund(newFund)
+          currentEducationFund = newFund as Fund
+          setEducationFund(newFund as Fund)
         } else {
-          currentEducationFund = fundData
-          setEducationFund(fundData)
+          currentEducationFund = fundData as Fund
+          setEducationFund(fundData as Fund)
         }
       }
 
       // Insert into donations table
-      const studentName = enrollment.organization_members
-        ? `${enrollment.organization_members.first_name} ${enrollment.organization_members.last_name}`
+      const studentName = enrollment.member
+        ? `${enrollment.member.first_name} ${enrollment.member.last_name}`
         : 'Student'
 
       const donationData = {
-        household_id: (memberData as any).household_id,
+        household_id: memberHouseholdId,
         member_id: enrollment.member_id,
         fund_id: currentEducationFund?.id || null,
         amount: paymentAmount,
         payment_method: formData.payment_method,
         donation_date: formData.payment_date || new Date().toISOString().split('T')[0],
-        notes: `Tuition for ${studentName} - ${enrollment.classes?.name || 'Class'} (${paymentMonth}/${paymentYear})`,
+        notes: `Tuition for ${studentName} - ${enrollment.scheduled_class?.name || 'Class'} (${paymentMonth}/${paymentYear})`,
         organization_id: currentOrganizationId,
       }
 
@@ -321,26 +323,16 @@ export default function LogTuitionPaymentModal({
         throw new Error('Education fund not found. Please create an Education fund in Settings first.')
       }
 
-      const { error: donationError } = await (supabase.from('donations') as any).insert([donationData])
+      const { error: donationError } = await supabase.from('donations').insert([donationData] as never)
 
       if (donationError) throw donationError
 
-      // Update payment status in enrollments
-      let newPaymentStatus = 'Partial'
-      if (newAmountPaid >= tuitionFee && tuitionFee > 0) {
-        newPaymentStatus = 'Paid'
-      } else if (newAmountPaid > 0) {
-        newPaymentStatus = 'Partial'
-      } else {
-        newPaymentStatus = 'Unpaid'
-      }
-
-      const { error: updateError } = await (supabase
-        .from('enrollments') as any)
+      // Update tuition paid in enrollments
+      const { error: updateError } = await supabase
+        .from('enrollments')
         .update({
-          amount_paid: newAmountPaid,
-          payment_status: newPaymentStatus,
-        })
+          tuition_paid: newAmountPaid,
+        } as never)
         .eq('id', enrollment.id)
 
       if (updateError) throw updateError
@@ -362,8 +354,8 @@ export default function LogTuitionPaymentModal({
 
   if (!isOpen) return null
 
-  const tuitionFee = parseFloat(enrollment?.classes?.tuition_fee?.toString() || '0') || 0
-  const amountPaid = parseFloat(enrollment?.amount_paid?.toString() || '0') || 0
+  const tuitionFee = parseFloat(enrollment?.scheduled_class?.tuition_fee?.toString() || '0') || 0
+  const amountPaid = parseFloat(enrollment?.tuition_paid?.toString() || '0') || 0
   const remaining = tuitionFee - amountPaid
 
   return (
@@ -386,15 +378,15 @@ export default function LogTuitionPaymentModal({
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">Student:</span>
                   <span className="font-medium text-slate-900 dark:text-white">
-                    {enrollment.organization_members
-                      ? `${enrollment.organization_members.first_name} ${enrollment.organization_members.last_name}`
+                    {enrollment.member
+                      ? `${enrollment.member.first_name} ${enrollment.member.last_name}`
                       : t('common.notAvailable')}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">{t('education.class')}:</span>
                   <span className="font-medium text-slate-900 dark:text-white">
-                    {enrollment.classes?.name || t('common.notAvailable')}
+                    {enrollment.scheduled_class?.name || t('common.notAvailable')}
                   </span>
                 </div>
                 <div className="flex justify-between">

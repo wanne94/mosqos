@@ -62,25 +62,34 @@ export default function ClassEditPage() {
         .select(`
           id,
           teacher_color,
-          organization_members:member_id (
+          member:member_id (
             id,
             first_name,
-            last_name,
-            role
+            last_name
           )
         `)
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      return (data || [])
-        .map((teacher: any) => ({
-          id: teacher.organization_members?.id,
-          first_name: teacher.organization_members?.first_name || '',
-          last_name: teacher.organization_members?.last_name || '',
+      type TeacherQueryResult = {
+        id: string
+        teacher_color: string | null
+        member: {
+          id: string
+          first_name: string
+          last_name: string
+        } | null
+      }
+
+      return ((data || []) as TeacherQueryResult[])
+        .map((teacher) => ({
+          id: teacher.member?.id || '',
+          first_name: teacher.member?.first_name || '',
+          last_name: teacher.member?.last_name || '',
           teacher_color: teacher.teacher_color,
         }))
-        .filter((t: TeacherDisplay) => t.id && t.first_name && t.last_name)
+        .filter((t) => t.id && t.first_name && t.last_name)
     },
   })
 

@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { Navigate } from 'react-router-dom';
 import { usePermissions } from '@/features/permissions/hooks/usePermissions';
 import { type UserRole } from '@/shared/utils/roleDisplay';
 
@@ -20,7 +19,7 @@ export function RoleGuard({ children, allowedRoles, redirectTo = '/' }: RoleGuar
     );
   }
 
-  if (!role || !allowedRoles.includes(role)) {
+  if (!role || !allowedRoles.includes(role as UserRole)) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">

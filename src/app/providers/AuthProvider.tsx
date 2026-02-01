@@ -44,11 +44,14 @@ const createMockSession = (user: User): Session => ({
 
 const DEV_MODE_KEY = 'mosqos_dev_user'
 
+// Force dev mode via environment variable (useful for testing with real Supabase but mock auth)
+const FORCE_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const isDevMode = !isSupabaseConfigured()
+  const isDevMode = FORCE_DEV_MODE || !isSupabaseConfigured()
 
   useEffect(() => {
     if (isDevMode) {

@@ -1,5 +1,13 @@
-import { Building2, Users, DollarSign, TrendingUp, Loader2 } from 'lucide-react'
+import { Building2, Users, DollarSign, TrendingUp, Loader2, LucideIcon } from 'lucide-react'
 import { usePlatformStats, useRecentOrganizations } from '../hooks/usePlatformStats'
+
+interface StatItem {
+  label: string
+  value: string
+  icon: LucideIcon
+  change: string
+  changeType: 'positive' | 'negative' | 'neutral'
+}
 
 export default function DashboardPage() {
   const { data: stats, isLoading: statsLoading, error: statsError } = usePlatformStats()
@@ -23,7 +31,7 @@ export default function DashboardPage() {
     return 'neutral'
   }
 
-  const statsData = [
+  const statsData: StatItem[] = [
     {
       label: 'Total Organizations',
       value: stats?.totalOrganizations.toString() || '0',

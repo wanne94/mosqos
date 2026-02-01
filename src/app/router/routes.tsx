@@ -39,6 +39,7 @@ const IslamicServicesPage = lazy(() => import('@/features/islamic-services/pages
 const BillingPage = lazy(() => import('@/features/billing/pages/BillingPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
+const PermissionsPage = lazy(() => import('@/features/permissions/pages/PermissionsPage'))
 
 // Portal Pages
 const PortalDashboardPage = lazy(() => import('@/features/portal/pages/DashboardPage'))
@@ -160,6 +161,7 @@ export function AppRoutes() {
         <Route path="qurbani" element={<QurbaniPage />} />
         <Route path="services" element={<IslamicServicesPage />} />
         <Route path="announcements" element={<AnnouncementsPage />} />
+        <Route path="permissions" element={<PermissionsPage />} />
       </Route>
 
       {/* Member Portal Routes */}

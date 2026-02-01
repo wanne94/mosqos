@@ -18,7 +18,7 @@ interface StudentPaymentHistoryModalProps {
 }
 
 interface PaymentRecord {
-  id: string | number
+  id: string
   enrollment_id: string
   month: number
   year: number
@@ -54,7 +54,7 @@ export default function StudentPaymentHistoryModal({
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null)
 
-  useEscapeKey(onClose, { enabled: isOpen })
+  useEscapeKey(onClose, false, '', isOpen)
 
   useEffect(() => {
     if (isOpen && enrollmentId) {
@@ -67,13 +67,23 @@ export default function StudentPaymentHistoryModal({
     try {
       const { data, error } = await supabase
         .from('enrollments')
-        .select('monthly_fee, start_date, end_date')
+        .select(`
+          scheduled_class:scheduled_class_id (
+            tuition_fee
+          )
+        `)
         .eq('id', enrollmentId)
         .eq('organization_id', currentOrganizationId)
         .single()
 
       if (error) throw error
-      setEnrollmentInfo(data)
+      // Map the data to the expected structure
+      const classData = (data as { scheduled_class: { tuition_fee: number | null } | null })?.scheduled_class
+      setEnrollmentInfo({
+        monthly_fee: classData?.tuition_fee || 0,
+        start_date: new Date().toISOString().split('T')[0],
+        end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      })
     } catch (error) {
       console.error('Error fetching enrollment info:', error)
     }

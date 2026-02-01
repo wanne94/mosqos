@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import { Eye, DollarSign, Trash2, ChevronRight } from 'lucide-react'
-import type { QurbaniShare, ProcessingStatus, PaymentStatus, AnimalType } from '../../types/qurbani.types'
+import { Eye, DollarSign, Trash2 } from 'lucide-react'
+import type { QurbaniShare } from '../../types/qurbani.types'
+import { ProcessingStatus, PaymentStatus, AnimalType } from '../../types/qurbani.types'
 
 interface SharesTableProps {
   shares: QurbaniShare[]
@@ -11,26 +12,26 @@ interface SharesTableProps {
 }
 
 const animalTypeLabels: Record<AnimalType, string> = {
-  sheep: 'Sheep',
-  cow: 'Cow',
-  camel: 'Camel',
+  [AnimalType.SHEEP]: 'Sheep',
+  [AnimalType.COW]: 'Cow',
+  [AnimalType.CAMEL]: 'Camel',
 }
 
 const paymentStatusColors: Record<PaymentStatus, { bg: string; text: string }> = {
-  pending: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-700 dark:text-slate-300' },
-  deposit_paid: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400' },
-  partial: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
-  paid: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
-  refunded: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400' },
+  [PaymentStatus.PENDING]: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-700 dark:text-slate-300' },
+  [PaymentStatus.DEPOSIT_PAID]: { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-700 dark:text-amber-400' },
+  [PaymentStatus.PARTIAL]: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
+  [PaymentStatus.PAID]: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
+  [PaymentStatus.REFUNDED]: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-400' },
 }
 
 const processingStatusColors: Record<ProcessingStatus, { bg: string; text: string }> = {
-  registered: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-700 dark:text-slate-300' },
-  slaughtered: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
-  processed: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
-  ready_for_pickup: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' },
-  distributed: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400' },
-  completed: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
+  [ProcessingStatus.REGISTERED]: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-700 dark:text-slate-300' },
+  [ProcessingStatus.SLAUGHTERED]: { bg: 'bg-orange-100 dark:bg-orange-900/30', text: 'text-orange-700 dark:text-orange-400' },
+  [ProcessingStatus.PROCESSED]: { bg: 'bg-yellow-100 dark:bg-yellow-900/30', text: 'text-yellow-700 dark:text-yellow-400' },
+  [ProcessingStatus.READY_FOR_PICKUP]: { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-700 dark:text-blue-400' },
+  [ProcessingStatus.DISTRIBUTED]: { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-700 dark:text-purple-400' },
+  [ProcessingStatus.COMPLETED]: { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-700 dark:text-emerald-400' },
 }
 
 export default function SharesTable({
@@ -50,12 +51,12 @@ export default function SharesTable({
   }
 
   const processingStatusOptions: ProcessingStatus[] = [
-    'registered',
-    'slaughtered',
-    'processed',
-    'ready_for_pickup',
-    'distributed',
-    'completed',
+    ProcessingStatus.REGISTERED,
+    ProcessingStatus.SLAUGHTERED,
+    ProcessingStatus.PROCESSED,
+    ProcessingStatus.READY_FOR_PICKUP,
+    ProcessingStatus.DISTRIBUTED,
+    ProcessingStatus.COMPLETED,
   ]
 
   return (
@@ -89,8 +90,8 @@ export default function SharesTable({
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
             {shares.map((share) => {
-              const paymentStyle = paymentStatusColors[share.payment_status] || paymentStatusColors.pending
-              const processingStyle = processingStatusColors[share.processing_status] || processingStatusColors.registered
+              const paymentStyle = paymentStatusColors[share.payment_status] || paymentStatusColors[PaymentStatus.PENDING]
+              const processingStyle = processingStatusColors[share.processing_status] || processingStatusColors[ProcessingStatus.REGISTERED]
 
               return (
                 <tr

@@ -1,2 +1,14 @@
-// Expense types will be added here as needed
-export {}
+export type {
+  Expense,
+  ExpenseWithRelations,
+  ExpenseCategory,
+  ExpenseFilters,
+  ExpenseStatus,
+  ExpensePaymentMethod,
+  CreateExpenseInput,
+  UpdateExpenseInput,
+  CreateExpenseCategoryInput,
+  UpdateExpenseCategoryInput,
+  ExpenseSummary,
+  ApproveExpenseInput,
+} from './expenses.types'

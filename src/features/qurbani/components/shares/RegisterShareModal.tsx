@@ -7,6 +7,8 @@ import { useShares } from '../../hooks/useShares'
 import type {
   QurbaniCampaign,
   CreateShareInput,
+} from '../../types/qurbani.types'
+import {
   AnimalType,
   DistributionType,
   IntentionType,
@@ -33,10 +35,10 @@ export default function RegisterShareModal({
 
   const [formData, setFormData] = useState<Partial<CreateShareInput>>({
     campaign_id: campaignId,
-    animal_type: 'sheep',
+    animal_type: AnimalType.SHEEP,
     quantity: 1,
-    distribution_type: 'local_pickup',
-    intention_type: 'self',
+    distribution_type: DistributionType.LOCAL_PICKUP,
+    intention_type: IntentionType.SELF,
     intention_names: [],
     amount_paid: 0,
   })
@@ -47,10 +49,10 @@ export default function RegisterShareModal({
     if (isOpen) {
       setFormData({
         campaign_id: campaignId,
-        animal_type: 'sheep',
+        animal_type: AnimalType.SHEEP,
         quantity: 1,
-        distribution_type: 'local_pickup',
-        intention_type: 'self',
+        distribution_type: DistributionType.LOCAL_PICKUP,
+        intention_type: IntentionType.SELF,
         intention_names: [],
         amount_paid: 0,
       })
@@ -61,9 +63,9 @@ export default function RegisterShareModal({
   const getUnitPrice = () => {
     if (!campaign) return 0
     switch (formData.animal_type) {
-      case 'sheep': return campaign.sheep_price || 0
-      case 'cow': return campaign.cow_price || 0
-      case 'camel': return campaign.camel_price || 0
+      case AnimalType.SHEEP: return campaign.sheep_price || 0
+      case AnimalType.COW: return campaign.cow_price || 0
+      case AnimalType.CAMEL: return campaign.camel_price || 0
       default: return 0
     }
   }
@@ -92,13 +94,13 @@ export default function RegisterShareModal({
     try {
       const input: CreateShareInput = {
         campaign_id: campaignId,
-        animal_type: formData.animal_type as AnimalType,
+        animal_type: formData.animal_type || AnimalType.SHEEP,
         quantity: formData.quantity || 1,
         guest_name: formData.guest_name || null,
         guest_email: formData.guest_email || null,
         guest_phone: formData.guest_phone || null,
-        distribution_type: formData.distribution_type as DistributionType,
-        intention_type: formData.intention_type as IntentionType,
+        distribution_type: formData.distribution_type || DistributionType.LOCAL_PICKUP,
+        intention_type: formData.intention_type,
         intention_names: intentionNamesInput.split(',').map(n => n.trim()).filter(Boolean),
         unit_price: unitPrice,
         total_amount: totalAmount,
@@ -186,9 +188,9 @@ export default function RegisterShareModal({
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
               >
-                <option value="sheep">{t('sheep') || 'Sheep'} (${campaign?.sheep_price || 0})</option>
-                <option value="cow">{t('cowShare') || 'Cow (1/7 share)'} (${campaign?.cow_price || 0})</option>
-                <option value="camel">{t('camelShare') || 'Camel (1/7 share)'} (${campaign?.camel_price || 0})</option>
+                <option value={AnimalType.SHEEP}>{t('sheep') || 'Sheep'} (${campaign?.sheep_price || 0})</option>
+                <option value={AnimalType.COW}>{t('cowShare') || 'Cow (1/7 share)'} (${campaign?.cow_price || 0})</option>
+                <option value={AnimalType.CAMEL}>{t('camelShare') || 'Camel (1/7 share)'} (${campaign?.camel_price || 0})</option>
               </select>
             </div>
             <div>
@@ -201,7 +203,7 @@ export default function RegisterShareModal({
                 value={formData.quantity}
                 onChange={handleChange}
                 min="1"
-                max={formData.animal_type === 'sheep' ? 10 : 7}
+                max={formData.animal_type === AnimalType.SHEEP ? 10 : 7}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
               />
             </div>
@@ -219,9 +221,9 @@ export default function RegisterShareModal({
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
               >
-                <option value="local_pickup">{t('localPickup') || 'Local Pickup'}</option>
-                <option value="full_charity">{t('fullCharity') || 'Full Charity'}</option>
-                <option value="hybrid">{t('hybrid') || 'Hybrid'}</option>
+                <option value={DistributionType.LOCAL_PICKUP}>{t('localPickup') || 'Local Pickup'}</option>
+                <option value={DistributionType.FULL_CHARITY}>{t('fullCharity') || 'Full Charity'}</option>
+                <option value={DistributionType.HYBRID}>{t('hybrid') || 'Hybrid'}</option>
               </select>
             </div>
             <div>
@@ -234,15 +236,15 @@ export default function RegisterShareModal({
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
               >
-                <option value="self">{t('self') || 'Self'}</option>
-                <option value="family">{t('family') || 'Family'}</option>
-                <option value="deceased">{t('deceased') || 'Deceased'}</option>
-                <option value="other">{t('other') || 'Other'}</option>
+                <option value={IntentionType.SELF}>{t('self') || 'Self'}</option>
+                <option value={IntentionType.FAMILY}>{t('family') || 'Family'}</option>
+                <option value={IntentionType.DECEASED}>{t('deceased') || 'Deceased'}</option>
+                <option value={IntentionType.OTHER}>{t('other') || 'Other'}</option>
               </select>
             </div>
           </div>
 
-          {formData.intention_type !== 'self' && (
+          {formData.intention_type !== IntentionType.SELF && (
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                 {t('intentionNames') || 'Names (comma-separated)'}

@@ -5,7 +5,10 @@ import { X } from 'lucide-react'
 import { useFormDirty } from '@/hooks/useFormDirty'
 import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useOrganization } from '@/hooks/useOrganization'
-import type { UpdateTripInput, TripStatus } from '../types/umrah.types'
+import { TripStatus } from '../types/umrah.types'
+import type { Database } from '@/shared/types/database.types'
+
+type TripUpdate = Database['public']['Tables']['trips']['Update']
 
 interface EditTripModalProps {
   isOpen: boolean
@@ -33,7 +36,7 @@ export default function EditTripModal({ isOpen, onClose, onSave, tripId }: EditT
     start_date: '',
     end_date: '',
     cost_per_person: '',
-    status: 'open' as TripStatus,
+    status: TripStatus.OPEN,
   })
   const isDirty = useFormDirty(formData, initialFormData)
 
@@ -78,7 +81,7 @@ export default function EditTripModal({ isOpen, onClose, onSave, tripId }: EditT
           start_date: data.start_date ? data.start_date.split('T')[0] : '',
           end_date: data.end_date ? data.end_date.split('T')[0] : '',
           cost_per_person: data.price?.toString() || '',
-          status: (data.status as TripStatus) || 'open',
+          status: (data.status as TripStatus) || TripStatus.OPEN,
         }
         setInitialFormData(initial)
         setFormData(initial)
@@ -105,7 +108,7 @@ export default function EditTripModal({ isOpen, onClose, onSave, tripId }: EditT
     setLoading(true)
 
     try {
-      const tripData: UpdateTripInput = {
+      const tripData: TripUpdate = {
         name: formData.name,
         start_date: formData.start_date,
         end_date: formData.end_date,
@@ -224,8 +227,8 @@ export default function EditTripModal({ isOpen, onClose, onSave, tripId }: EditT
                 required
                 className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
               >
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
+                <option value={TripStatus.OPEN}>Open</option>
+                <option value={TripStatus.CLOSED}>Closed</option>
               </select>
             </div>
 

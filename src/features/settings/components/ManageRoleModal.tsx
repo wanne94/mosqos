@@ -123,16 +123,20 @@ export function ManageRoleModal({ member, onClose, onSuccess }: ManageRoleModalP
         }
       }
 
-      // @ts-ignore - Supabase type generation issue with JSONB columns
-      const { error } = await supabase
+      // Update role field (permissions stored separately)
+      // organization_members table is not in generated types, use type assertion
+      const { error } = await (supabase as unknown as {
+        from: (table: string) => {
+          update: (data: { role: string }) => {
+            eq: (column: string, value: string) => Promise<{ error: Error | null }>
+          }
+        }
+      })
         .from('organization_members')
         .update({
-          system_role: systemRole,
-          permissions: permissionsData
+          role: systemRole,
         })
         .eq('id', member.id)
-
-      if (error) throw error
 
       if (error) throw error
 

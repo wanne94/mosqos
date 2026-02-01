@@ -19,11 +19,11 @@ interface EditTeacherModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: () => void
-  teacherId: number
+  teacherId: string
   teacher: {
-    id?: number
-    teacher_id?: number
-    member_id?: number
+    id?: string
+    teacher_id?: string
+    member_id?: string
     first_name: string
     last_name: string
     teacher_color?: string
@@ -109,7 +109,7 @@ export default function EditTeacherModal({ isOpen, onClose, onSave, teacherId, t
       onClose()
     } catch (error) {
       console.error('Error updating teacher:', error)
-      alert(t('common.failedToUpdate') || `Failed to update teacher: ${(error as any).message}`)
+      alert(t('common.failedToUpdate') || `Failed to update teacher: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

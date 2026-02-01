@@ -6,31 +6,25 @@ import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
 import { useOrganization } from '../../../hooks/useOrganization'
 
 interface ClassScheduleGridProps {
-  classroomId: string | number
+  classroomId: string
   weekStartDate?: Date
 }
 
 interface ScheduledClassData {
-  id: number
+  id: string
   name: string
-  class_time: string | null
-  class_date: string | null
-  teacher_id: number | null
-  teacher_ids: number[] | null
-  teachers?: {
-    id: number
+  start_time: string | null
+  start_date: string | null
+  teacher_id: string | null
+  teacher?: {
+    id: string
     first_name: string
     last_name: string
   } | null
-  multipleTeachers?: Array<{
-    id: number
-    first_name: string
-    last_name: string
-  }>
 }
 
 interface Member {
-  id: number
+  id: string
   first_name: string
   last_name: string
 }
@@ -75,40 +69,23 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
       const { data, error } = await supabase
         .from('scheduled_classes')
         .select(`
-          *,
-          teachers:teacher_id (
+          id,
+          name,
+          start_time,
+          start_date,
+          teacher_id,
+          teacher:teacher_id (
             id,
             first_name,
             last_name
           )
         `)
         .eq('classroom_id', classroomId)
-        .order('class_time', { ascending: true })
+        .order('start_time', { ascending: true })
 
       if (error) throw error
 
-      // Fetch teacher details for classes with multiple teachers
-      const classesWithTeachers = await Promise.all(
-        (data || []).map(async (classItem) => {
-          if (classItem.teacher_ids && Array.isArray(classItem.teacher_ids) && classItem.teacher_ids.length > 0) {
-            const { data: teachersData, error: teachersError } = await supabase
-              .from('teachers')
-              .select('id, first_name, last_name')
-              .eq('organization_id', currentOrganizationId)
-              .in('id', classItem.teacher_ids)
-
-            if (!teachersError && teachersData) {
-              return {
-                ...classItem,
-                multipleTeachers: teachersData
-              }
-            }
-          }
-          return classItem
-        })
-      )
-
-      setClasses(classesWithTeachers)
+      setClasses((data || []) as ScheduledClassData[])
     } catch (error) {
       console.error('Error fetching classes:', error)
       setClasses([])
@@ -126,7 +103,7 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
         .order('first_name', { ascending: true })
 
       if (error) throw error
-      setMembers(data || [])
+      setMembers((data || []) as Member[])
     } catch (error) {
       console.error('Error fetching members:', error)
       setMembers([])
@@ -168,15 +145,15 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
     const dayKey = day.toISOString().split('T')[0]
 
     return classes.filter(classItem => {
-      if (classItem.class_time) {
-        const classTime = classItem.class_time.substring(0, 5)
+      if (classItem.start_time) {
+        const classTime = classItem.start_time.substring(0, 5)
         if (classTime !== timeSlot.time.substring(0, 5)) {
           return false
         }
       }
 
-      if (classItem.class_date) {
-        const classDate = new Date(classItem.class_date).toISOString().split('T')[0]
+      if (classItem.start_date) {
+        const classDate = new Date(classItem.start_date).toISOString().split('T')[0]
         return classDate === dayKey
       }
 
@@ -319,9 +296,9 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
                         {classesAtSlot.length > 0 ? (
                           <div className="space-y-1">
                             {classesAtSlot.map((classItem, idx) => {
-                              const allTeachers = classItem.multipleTeachers || (classItem.teachers ? [classItem.teachers] : [])
-                              const teacherNames = allTeachers.length > 0
-                                ? allTeachers.map(t => `${t.first_name.charAt(0)}.${t.last_name}`).join(', ')
+                              const teacher = classItem.teacher
+                              const teacherName = teacher
+                                ? `${teacher.first_name.charAt(0)}.${teacher.last_name}`
                                 : 'No teacher'
 
                               return (
@@ -329,14 +306,14 @@ export default function ClassScheduleGrid({ classroomId, weekStartDate }: ClassS
                                   key={classItem.id}
                                   onClick={() => handleCellClick(classItem)}
                                   className={`p-2 rounded border-2 cursor-pointer hover:shadow-md transition-all ${getClassColor(classItem, idx)}`}
-                                  title={`${classItem.name} - ${allTeachers.map(t => `${t.first_name} ${t.last_name}`).join(', ')} (Click to edit)`}
+                                  title={`${classItem.name} - ${teacher ? `${teacher.first_name} ${teacher.last_name}` : 'No teacher'} (Click to edit)`}
                                 >
                                   <div className="font-semibold text-xs mb-1 truncate">
                                     {classItem.name}
                                   </div>
-                                  {teacherNames !== 'No teacher' && (
+                                  {teacherName !== 'No teacher' && (
                                     <div className="text-xs opacity-90 truncate">
-                                      {teacherNames}
+                                      {teacherName}
                                     </div>
                                   )}
                                 </div>

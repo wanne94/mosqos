@@ -10,9 +10,9 @@ interface StudentNotesModalProps {
   onClose: () => void
   enrollment: {
     id: string
-  }
+  } | null
   memberId: string
-  classId: string
+  classId: string | null
   studentName: string
   className: string
 }
@@ -20,12 +20,12 @@ interface StudentNotesModalProps {
 interface StudentNote {
   id: string
   note_date: string
-  notes: string
+  content: string
 }
 
 interface NewNoteData {
   note_date: string
-  notes: string
+  content: string
 }
 
 export default function StudentNotesModal({
@@ -45,7 +45,7 @@ export default function StudentNotesModal({
   const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false)
   const [newNote, setNewNote] = useState<NewNoteData>({
     note_date: new Date().toISOString().split('T')[0],
-    notes: '',
+    content: '',
   })
   const [saving, setSaving] = useState(false)
 
@@ -59,17 +59,18 @@ export default function StudentNotesModal({
   }, [isOpen, enrollment])
 
   const fetchNotes = async () => {
+    if (!enrollment) return
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('student_notes')
-        .select('*')
-        .eq('enrollment_id', enrollment.id)
+        .select('id, note_date, content')
+        .eq('member_id', memberId)
         .eq('organization_id', currentOrganizationId)
         .order('note_date', { ascending: false })
 
       if (error) throw error
-      setNotes(data || [])
+      setNotes((data || []) as StudentNote[])
     } catch (error) {
       console.error('Error fetching notes:', error)
       setNotes([])
@@ -79,29 +80,28 @@ export default function StudentNotesModal({
   }
 
   const handleAddNote = async () => {
-    if (!newNote.notes.trim()) {
+    if (!newNote.content.trim()) {
       alert(t('common.pleaseEnterNote'))
       return
     }
 
     setSaving(true)
     try {
-      const { error } = await (supabase.from('student_notes') as any).insert([
+      const { error } = await supabase.from('student_notes').insert([
         {
           organization_id: currentOrganizationId,
-          enrollment_id: enrollment.id,
           member_id: memberId,
-          class_id: classId,
+          scheduled_class_id: classId,
           note_date: newNote.note_date,
-          notes: newNote.notes,
+          content: newNote.content,
         },
-      ])
+      ] as never)
 
       if (error) throw error
 
       setNewNote({
         note_date: new Date().toISOString().split('T')[0],
-        notes: '',
+        content: '',
       })
       setIsAddNoteModalOpen(false)
       fetchNotes()
@@ -185,7 +185,7 @@ export default function StudentNotesModal({
                         </div>
                       </div>
                       <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                        <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{note.notes}</p>
+                        <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap">{note.content}</p>
                       </div>
                     </div>
                   ))}
@@ -228,8 +228,8 @@ export default function StudentNotesModal({
                     {t('common.description')} *
                   </label>
                   <textarea
-                    value={newNote.notes}
-                    onChange={(e) => setNewNote({ ...newNote, notes: e.target.value })}
+                    value={newNote.content}
+                    onChange={(e) => setNewNote({ ...newNote, content: e.target.value })}
                     rows={5}
                     required
                     className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"

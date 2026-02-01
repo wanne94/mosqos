@@ -4,9 +4,48 @@
  *
  * @module excelExport
  * @description Export utilities for generating Excel files from data
+ * @requires xlsx - Install with: npm install xlsx
  */
 
-import * as XLSX from 'xlsx'
+// Type declarations for optional xlsx module (dynamically imported)
+// These types are defined here to avoid requiring the package to be installed
+// until it's actually used at runtime
+
+interface XLSXWorkbook {
+  SheetNames: string[]
+  Sheets: Record<string, XLSXWorksheet>
+}
+
+interface XLSXWorksheet {
+  '!cols'?: Array<{ wch: number }>
+  '!rows'?: Array<{ hpt?: number }>
+  [cell: string]: unknown
+}
+
+interface XLSXUtils {
+  book_new: () => XLSXWorkbook
+  aoa_to_sheet: (data: (string | number)[][]) => XLSXWorksheet
+  book_append_sheet: (wb: XLSXWorkbook, ws: XLSXWorksheet, name: string) => void
+}
+
+interface XLSXModule {
+  utils: XLSXUtils
+  writeFile: (wb: XLSXWorkbook, filename: string) => void
+}
+
+/**
+ * Dynamically imports xlsx module
+ * @returns Promise resolving to XLSXModule
+ * @throws Error if xlsx is not installed
+ */
+async function importXLSX(): Promise<XLSXModule> {
+  // @ts-expect-error - xlsx is an optional dependency, dynamically imported at runtime
+  const xlsxModule = await import('xlsx')
+  return {
+    utils: xlsxModule.utils as XLSXUtils,
+    writeFile: xlsxModule.writeFile as (wb: XLSXWorkbook, filename: string) => void,
+  }
+}
 
 /**
  * Column definition for Excel export
@@ -102,11 +141,11 @@ function formatCellValue(value: unknown): string | number {
  * exportToExcel(data, columns, { filename: 'users' })
  * ```
  */
-export function exportToExcel(
+export async function exportToExcel(
   data: Record<string, unknown>[],
   columns: ExcelColumn[],
   options: ExcelExportOptions = {}
-): void {
+): Promise<void> {
   const {
     filename = 'export',
     sheetName = 'Sheet1',
@@ -140,41 +179,49 @@ export function exportToExcel(
     worksheetData.push(rowData)
   })
 
-  // Create workbook and worksheet
-  const wb = XLSX.utils.book_new()
-  const ws = XLSX.utils.aoa_to_sheet(worksheetData)
+  try {
+    // Dynamic import to avoid bundling if not needed
+    const XLSX = await importXLSX()
 
-  // Set column widths based on content
-  const colWidths = columns.map((col, index) => {
-    const maxLength = Math.max(
-      col.label.length,
-      ...data.map((row) => {
-        const value = row[col.key]
-        if (value == null) return 0
-        const str = String(value)
-        return str.length
-      })
-    )
-    return { wch: Math.min(Math.max(maxLength, minColumnWidth), maxColumnWidth) }
-  })
-  ws['!cols'] = colWidths
+    // Create workbook and worksheet
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet(worksheetData)
 
-  // Add worksheet to workbook
-  XLSX.utils.book_append_sheet(wb, ws, sheetName)
+    // Set column widths based on content
+    const colWidths = columns.map((col) => {
+      const maxLength = Math.max(
+        col.label.length,
+        ...data.map((row) => {
+          const value = row[col.key]
+          if (value == null) return 0
+          const str = String(value)
+          return str.length
+        })
+      )
+      return { wch: Math.min(Math.max(maxLength, minColumnWidth), maxColumnWidth) }
+    })
+    ws['!cols'] = colWidths
 
-  // Generate filename with optional timestamp
-  let finalFilename = filename
-  if (includeTimestamp) {
-    const timestamp =
-      dateFormat === 'ISO'
-        ? new Date().toISOString().split('T')[0]
-        : new Date().toLocaleDateString().replace(/\//g, '-')
-    finalFilename = `${filename}_${timestamp}`
+    // Add worksheet to workbook
+    XLSX.utils.book_append_sheet(wb, ws, sheetName)
+
+    // Generate filename with optional timestamp
+    let finalFilename = filename
+    if (includeTimestamp) {
+      const timestamp =
+        dateFormat === 'ISO'
+          ? new Date().toISOString().split('T')[0]
+          : new Date().toLocaleDateString().replace(/\//g, '-')
+      finalFilename = `${filename}_${timestamp}`
+    }
+    finalFilename = `${finalFilename}.xlsx`
+
+    // Write file
+    XLSX.writeFile(wb, finalFilename)
+  } catch (error) {
+    console.error('Error exporting to Excel:', error)
+    throw new Error('Failed to export to Excel. Make sure xlsx is installed.')
   }
-  finalFilename = `${finalFilename}.xlsx`
-
-  // Write file
-  XLSX.writeFile(wb, finalFilename)
 }
 
 /**
@@ -271,56 +318,63 @@ export function exportToCSV(
  * ], 'report')
  * ```
  */
-export function exportMultipleSheets(
+export async function exportMultipleSheets(
   sheets: Array<{
     name: string
     data: Record<string, unknown>[]
     columns: ExcelColumn[]
   }>,
   filename = 'export'
-): void {
+): Promise<void> {
   if (!sheets || sheets.length === 0) {
     alert('No data to export')
     return
   }
 
-  const wb = XLSX.utils.book_new()
+  try {
+    const XLSX = await importXLSX()
 
-  sheets.forEach(({ name, data, columns }) => {
-    if (data.length === 0) return
+    const wb = XLSX.utils.book_new()
 
-    // Create worksheet data
-    const worksheetData: (string | number)[][] = [columns.map((col) => col.label)]
+    sheets.forEach(({ name, data, columns }) => {
+      if (data.length === 0) return
 
-    data.forEach((row) => {
-      const rowData = columns.map((col) => {
-        const value = row[col.key]
-        return col.formatter ? col.formatter(value) : formatCellValue(value)
+      // Create worksheet data
+      const worksheetData: (string | number)[][] = [columns.map((col) => col.label)]
+
+      data.forEach((row) => {
+        const rowData = columns.map((col) => {
+          const value = row[col.key]
+          return col.formatter ? col.formatter(value) : formatCellValue(value)
+        })
+        worksheetData.push(rowData)
       })
-      worksheetData.push(rowData)
+
+      // Create worksheet
+      const ws = XLSX.utils.aoa_to_sheet(worksheetData)
+
+      // Set column widths
+      const colWidths = columns.map((col) => {
+        const maxLength = Math.max(
+          col.label.length,
+          ...data.map((row) => String(row[col.key] || '').length)
+        )
+        return { wch: Math.min(Math.max(maxLength, 10), 50) }
+      })
+      ws['!cols'] = colWidths
+
+      // Add to workbook
+      XLSX.utils.book_append_sheet(wb, ws, name)
     })
 
-    // Create worksheet
-    const ws = XLSX.utils.aoa_to_sheet(worksheetData)
+    // Generate filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0]
+    const finalFilename = `${filename}_${timestamp}.xlsx`
 
-    // Set column widths
-    const colWidths = columns.map((col) => {
-      const maxLength = Math.max(
-        col.label.length,
-        ...data.map((row) => String(row[col.key] || '').length)
-      )
-      return { wch: Math.min(Math.max(maxLength, 10), 50) }
-    })
-    ws['!cols'] = colWidths
-
-    // Add to workbook
-    XLSX.utils.book_append_sheet(wb, ws, name)
-  })
-
-  // Generate filename with timestamp
-  const timestamp = new Date().toISOString().split('T')[0]
-  const finalFilename = `${filename}_${timestamp}.xlsx`
-
-  // Write file
-  XLSX.writeFile(wb, finalFilename)
+    // Write file
+    XLSX.writeFile(wb, finalFilename)
+  } catch (error) {
+    console.error('Error exporting multiple sheets:', error)
+    throw new Error('Failed to export to Excel. Make sure xlsx is installed.')
+  }
 }

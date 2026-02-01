@@ -13,6 +13,16 @@ interface PilgrimDetailModalProps {
   trip: Trip
 }
 
+interface HouseholdDetails {
+  id: string
+  name: string
+  address: string | null
+  city: string | null
+  state: string | null
+  zip_code: string | null
+  phone: string | null
+}
+
 interface MemberDetails {
   id: string
   first_name: string
@@ -20,15 +30,7 @@ interface MemberDetails {
   email: string | null
   phone: string | null
   date_of_birth: string | null
-  households?: {
-    id: string
-    family_name: string
-    address: string | null
-    city: string | null
-    state: string | null
-    zip_code: string | null
-    phone: string | null
-  }
+  households: HouseholdDetails | null
 }
 
 export default function PilgrimDetailModal({ isOpen, onClose, pilgrim, trip }: PilgrimDetailModalProps) {
@@ -70,7 +72,17 @@ export default function PilgrimDetailModal({ isOpen, onClose, pilgrim, trip }: P
         .single()
 
       if (error) throw error
-      setMemberDetails(data)
+      if (data) {
+        setMemberDetails({
+          id: data.id,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          email: data.email,
+          phone: data.phone,
+          date_of_birth: data.date_of_birth,
+          households: data.households as HouseholdDetails | null,
+        })
+      }
     } catch (error) {
       console.error('Error fetching member details:', error)
     } finally {
@@ -88,36 +100,35 @@ export default function PilgrimDetailModal({ isOpen, onClose, pilgrim, trip }: P
       const memberId = pilgrim.member_id
       const tripName = trip.name
 
-      let { data: umrahFund, error: fundsError } = await supabase
-        .from('organization_funds')
+      const { data: umrahFund, error: fundsError } = await supabase
+        .from('funds')
         .select('id')
-        .eq('organization_id', currentOrganizationId)
-        .ilike('name', 'Hajj & Umrah')
+        .eq('organization_id', currentOrganizationId as string)
+        .ilike('name', '%Hajj%')
         .limit(1)
         .maybeSingle()
 
-      if (!umrahFund && !fundsError) {
+      let fundId = umrahFund?.id
+      if (!fundId && !fundsError) {
         const { data: fallbackFund } = await supabase
-          .from('organization_funds')
+          .from('funds')
           .select('id')
-          .eq('organization_id', currentOrganizationId)
-          .ilike('name', 'Umrah')
+          .eq('organization_id', currentOrganizationId as string)
+          .ilike('name', '%Umrah%')
           .limit(1)
           .maybeSingle()
-        umrahFund = fallbackFund
+        fundId = fallbackFund?.id
       }
 
-      let donationsQuery = supabase
+      const donationsQuery = supabase
         .from('donations')
         .select('amount, fund_id, notes, member_id, donation_date')
-        .eq('organization_id', currentOrganizationId)
+        .eq('organization_id', currentOrganizationId as string)
         .eq('member_id', memberId)
 
-      if (umrahFund && !fundsError) {
-        donationsQuery = donationsQuery.eq('fund_id', umrahFund.id)
-      }
-
-      const { data: donations, error: donationsError } = await donationsQuery
+      const { data: donations, error: donationsError } = fundId
+        ? await donationsQuery.eq('fund_id', fundId)
+        : await donationsQuery
 
       if (donationsError) {
         console.warn('Error fetching by member_id:', donationsError)
@@ -134,7 +145,7 @@ export default function PilgrimDetailModal({ isOpen, onClose, pilgrim, trip }: P
           return donation.notes.toLowerCase().includes(tripName.toLowerCase())
         }
 
-        if (umrahFund && donation.fund_id === umrahFund.id) {
+        if (fundId && donation.fund_id === fundId) {
           return true
         }
 
@@ -266,7 +277,7 @@ export default function PilgrimDetailModal({ isOpen, onClose, pilgrim, trip }: P
                     <div className="pt-3 border-t border-slate-200 dark:border-slate-600">
                       <p className="text-sm text-slate-600 dark:text-slate-400 mb-2">{t('common.familyName')}</p>
                       <p className="font-medium text-slate-900 dark:text-white">
-                        {memberDetails.households.family_name || t('common.notAvailable')}
+                        {memberDetails.households.name || t('common.notAvailable')}
                       </p>
                       {memberDetails.households.address && (
                         <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">

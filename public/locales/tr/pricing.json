@@ -1,0 +1,88 @@
+{
+  "title": "Planınızı Seçin",
+  "subtitle": "Her büyüklükteki topluluk için şeffaf fiyatlandırma",
+  "billingCycle": {
+    "monthly": "Aylık",
+    "yearly": "Yıllık",
+    "save": "%20 Tasarruf"
+  },
+  "country": {
+    "label": "Ülke",
+    "us": "Amerika Birleşik Devletleri",
+    "tr": "Türkiye",
+    "de": "Almanya"
+  },
+  "plans": {
+    "free": {
+      "name": "Ücretsiz",
+      "description": "Yeni başlayan küçük topluluklar için mükemmel"
+    },
+    "basic": {
+      "name": "Temel",
+      "description": "Büyüyen topluluklar için temel özellikler"
+    },
+    "pro": {
+      "name": "Profesyonel",
+      "description": "Yerleşik topluluklar için gelişmiş araçlar"
+    },
+    "enterprise": {
+      "name": "Kurumsal",
+      "description": "Büyük organizasyonlar için eksiksiz çözüm"
+    }
+  },
+  "features": {
+    "members": "Üye Yönetimi",
+    "donations": "Bağış Yönetimi",
+    "education": "Eğitim ve Dersler",
+    "islamic_services": "İslami Hizmetler (Nikah, Cenaze)",
+    "cases": "Hizmet Vakaları",
+    "umrah": "Umre Seyahat Yönetimi",
+    "qurbani": "Kurban Kampanyaları",
+    "advanced_reports": "Gelişmiş Raporlar ve Analitik",
+    "bank_reconciliation": "Banka Mutabakatı",
+    "api_access": "API Erişimi",
+    "custom_domain": "Özel Alan Adı",
+    "white_label": "Beyaz Etiket Markalaşma",
+    "priority_support": "Öncelikli Destek"
+  },
+  "limits": {
+    "members": "{{count}} üyeye kadar",
+    "members_unlimited": "Sınırsız üye",
+    "storage": "{{amount}} GB depolama"
+  },
+  "cta": {
+    "getStarted": "Başlayın",
+    "contactSales": "Satışla İletişime Geçin",
+    "mostPopular": "En Popüler",
+    "currentPlan": "Mevcut Plan"
+  },
+  "faq": {
+    "title": "Sık Sorulan Sorular",
+    "questions": [
+      {
+        "question": "Planı daha sonra değiştirebilir miyim?",
+        "answer": "Evet! İstediğiniz zaman planınızı yükseltebilir veya düşürebilirsiniz. Yükseltme yaparken yeni özelliklere anında erişim kazanırsınız. Düşürme yaparken değişiklikler mevcut fatura döneminin sonunda geçerli olur."
+      },
+      {
+        "question": "Üye sınırımı aşarsam ne olur?",
+        "answer": "Sınıra yaklaştığınızda sizi bilgilendiririz. Daha yüksek bir plana yükseltebilir veya etkin olmayan üyeleri arşivleyebilirsiniz. Verilerinize erişiminizi asla engellemeyiz."
+      },
+      {
+        "question": "Ücretsiz deneme var mı?",
+        "answer": "Evet! Tüm ücretli planlar ücretsiz deneme süresi içerir (plana bağlı olarak 14-30 gün). Denemeyi başlatmak için kredi kartı gerekmez."
+      },
+      {
+        "question": "Hangi ödeme yöntemlerini kabul ediyorsunuz?",
+        "answer": "Stripe aracılığıyla tüm büyük kredi kartlarını (Visa, Mastercard, American Express) ve banka kartlarını kabul ediyoruz. Kurumsal müşteriler fatura ile ödeme düzenleyebilir."
+      },
+      {
+        "question": "Para iadesi alabilir miyim?",
+        "answer": "Evet, yıllık planlar için 30 günlük para iade garantisi sunuyoruz. Aylık abonelikler herhangi bir zamanda iptal edilebilir, mevcut ay için iade yapılmaz."
+      }
+    ]
+  },
+  "comparisonTable": {
+    "title": "Tüm Özellikleri Karşılaştır",
+    "allFeatures": "Tüm Özellikler"
+  }
+}

@@ -4,15 +4,23 @@ import { supabase } from '@/lib/supabase/client'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { CaseStatus } from '@/features/cases/types/cases.types'
+import type { Database } from '@/shared/types/database.types'
+
+type ServiceCaseRow = Database['public']['Tables']['service_cases']['Row']
+
+interface OrganizationMemberData {
+  id: string
+  member_id: string | null
+}
 
 interface Case {
   id: string
-  category: string
+  category: string | null
   case_type: string | null
   requested_amount: number | null
-  status: string
+  status: string | null
   notes: string | null
-  notes_thread: NotesThreadItem[]
+  notes_thread: NotesThreadItem[] | null
   created_at: string
   assistance_date: string | null
 }
@@ -69,14 +77,17 @@ export default function CasesPage() {
       if (!user || !currentOrganizationId) return
 
       // Get current member via organization_members -> member_id join
-      const { data: orgMember, error: memberError } = await supabase
-        .from('organization_members')
+      // Note: organization_members table exists in DB but not in generated types
+      const { data: orgMemberData, error: memberError } = await supabase
+        .from('organization_members' as 'members')
         .select('id, member_id')
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganizationId)
         .single()
 
       if (memberError) throw memberError
+
+      const orgMember = orgMemberData as unknown as OrganizationMemberData | null
       if (!orgMember || !orgMember.member_id) return
 
       setMemberId(orgMember.member_id)
@@ -85,12 +96,25 @@ export default function CasesPage() {
       const { data, error } = await supabase
         .from('service_cases')
         .select('*')
-        .eq('member_id', member.id)
+        .eq('member_id', orgMember.member_id)
         .order('created_at', { ascending: false })
 
       if (error) throw error
 
-      setCases((data || []) as Case[])
+      // Map database rows to Case interface
+      const mappedCases: Case[] = (data || []).map((row: ServiceCaseRow) => ({
+        id: row.id,
+        category: row.category,
+        case_type: row.case_type,
+        requested_amount: row.requested_amount,
+        status: row.status,
+        notes: row.description,
+        notes_thread: row.notes_thread as NotesThreadItem[] | null,
+        created_at: row.created_at,
+        assistance_date: row.assistance_date,
+      }))
+
+      setCases(mappedCases)
     } catch (error) {
       console.error('Error fetching cases:', error)
       setCases([])
@@ -147,14 +171,14 @@ export default function CasesPage() {
       const caseData = {
         member_id: memberId,
         organization_id: currentOrganizationId,
+        title: `${formData.category} Request`,
         category: formData.category,
         case_type: null,
         requested_amount: null,
         status: CaseStatus.OPEN,
-        notes: formData.notes || null,
-        notes_thread: initialNotesThread,
+        description: formData.notes || null,
+        notes_thread: initialNotesThread as unknown as Database['public']['Tables']['service_cases']['Insert']['notes_thread'],
         assistance_date: formData.assistance_date || new Date().toISOString().split('T')[0],
-        household_id: member.household_id,
       }
 
       const { error } = await supabase.from('service_cases').insert([caseData])
@@ -277,13 +301,13 @@ export default function CasesPage() {
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-3">
                     <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
-                      {caseItem.category}
+                      {caseItem.category || 'Uncategorized'}
                     </h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(caseItem.category)}`}>
-                      {caseItem.category}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(caseItem.category || '')}`}>
+                      {caseItem.category || 'Uncategorized'}
                     </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(caseItem.status)}`}>
-                      {getStatusLabel(caseItem.status)}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(caseItem.status || '')}`}>
+                      {getStatusLabel(caseItem.status || '')}
                     </span>
                   </div>
 

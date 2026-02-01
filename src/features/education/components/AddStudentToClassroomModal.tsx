@@ -10,23 +10,23 @@ interface AddStudentToClassroomModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: () => void
-  classroomId: number
+  classroomId: string
 }
 
 interface ScheduledClass {
-  id: number
+  id: string
   name: string
-  classroom_id: number | null
+  classroom_id: string | null
 }
 
 interface Member {
-  id: number
+  id: string
   first_name: string
   last_name: string
-  role: string | null
+  membership_type: string | null
 }
 
-const initialFormData = { selectedStudentIds: [] }
+const initialFormData = { selectedStudentIds: [] as string[] }
 
 export default function AddStudentToClassroomModal({
   isOpen,
@@ -40,7 +40,7 @@ export default function AddStudentToClassroomModal({
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(false)
-  const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([])
+  const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([])
   const isDirty = useFormDirty({ selectedStudentIds }, initialFormData)
 
   const handleClose = () => {
@@ -98,18 +98,18 @@ export default function AddStudentToClassroomModal({
 
       if (classesError) throw classesError
 
-      const classToClassroomMap = new Map<number, number>()
+      const classToClassroomMap = new Map<string, string>()
       if (allClasses) {
-        allClasses.forEach(c => {
+        allClasses.forEach((c: { id: string; classroom_id: string | null }) => {
           if (c.classroom_id) {
             classToClassroomMap.set(c.id, c.classroom_id)
           }
         })
       }
 
-      const enrolledStudentIds = new Set<number>()
+      const enrolledStudentIds = new Set<string>()
       if (allEnrollments) {
-        allEnrollments.forEach(enrollment => {
+        allEnrollments.forEach((enrollment: { member_id: string }) => {
           enrolledStudentIds.add(enrollment.member_id)
         })
       }
@@ -128,10 +128,10 @@ export default function AddStudentToClassroomModal({
 
       if (membersError) throw membersError
 
-      const studentsInThisClassroom = new Set<number>()
-      const studentsInOtherClassrooms = new Set<number>()
+      const studentsInThisClassroom = new Set<string>()
+      const studentsInOtherClassrooms = new Set<string>()
 
-      const availableMembers = (enrolledMembers || []).filter(member => {
+      const availableMembers = (enrolledMembers || []).filter((member: { id: string; first_name: string; last_name: string; membership_type: string | null }) => {
         if (studentsInThisClassroom.has(member.id)) {
           return true
         }
@@ -141,14 +141,14 @@ export default function AddStudentToClassroomModal({
         return true
       })
 
-      setMembers(availableMembers)
+      setMembers(availableMembers as Member[])
     } catch (error) {
       console.error('Error fetching available students:', error)
       setMembers([])
     }
   }
 
-  const handleStudentToggle = (studentId: number) => {
+  const handleStudentToggle = (studentId: string) => {
     setSelectedStudentIds((prev) => {
       if (prev.includes(studentId)) {
         return prev.filter(id => id !== studentId)
@@ -177,7 +177,7 @@ export default function AddStudentToClassroomModal({
     setLoading(true)
 
     try {
-      let classIdToUse: number | null = null
+      let classIdToUse: string | null = null
 
       if (classes.length > 0) {
         classIdToUse = classes[0].id
@@ -189,14 +189,17 @@ export default function AddStudentToClassroomModal({
             {
               name: defaultClassName,
               classroom_id: classroomId,
-              teacher_ids: [],
+              organization_id: currentOrganizationId,
+              course_id: '', // Required field - should be provided
+              start_date: new Date().toISOString().split('T')[0],
+              end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
             },
           ])
           .select()
           .single()
 
         if (createClassError) throw createClassError
-        classIdToUse = newClass.id
+        classIdToUse = (newClass as { id: string }).id
       }
 
       console.log('Enrolling students:', {
@@ -220,19 +223,19 @@ export default function AddStudentToClassroomModal({
 
       if (classesError) throw classesError
 
-      const classToClassroomMap = new Map<number, number>()
+      const classToClassroomMap2 = new Map<string, string>()
       if (allClasses) {
-        allClasses.forEach(c => {
+        (allClasses as { id: string; classroom_id: string | null }[]).forEach(c => {
           if (c.classroom_id) {
-            classToClassroomMap.set(c.id, c.classroom_id)
+            classToClassroomMap2.set(c.id, c.classroom_id)
           }
         })
       }
 
       const studentsInOtherClassrooms: Member[] = []
       if (existingEnrollments) {
-        existingEnrollments.forEach(enrollment => {
-          const studentClassroomId = classToClassroomMap.get((enrollment as any).class_id)
+        (existingEnrollments as { member_id: string; scheduled_class_id?: string }[]).forEach(enrollment => {
+          const studentClassroomId = enrollment.scheduled_class_id ? classToClassroomMap2.get(enrollment.scheduled_class_id) : undefined
           if (studentClassroomId && studentClassroomId !== classroomId) {
             const student = members.find(m => m.id === enrollment.member_id)
             if (student && !studentsInOtherClassrooms.find(s => s.id === student.id)) {
@@ -250,9 +253,9 @@ export default function AddStudentToClassroomModal({
 
       const studentsToEnroll = selectedStudentIds.filter(studentId => {
         if (!existingEnrollments) return true
-        return !existingEnrollments.some(e => {
-          if (!(e as any).class_id) return false
-          const studentClassroomId = classToClassroomMap.get((e as any).class_id)
+        return !(existingEnrollments as { member_id: string; scheduled_class_id?: string }[]).some(e => {
+          if (!e.scheduled_class_id) return false
+          const studentClassroomId = classToClassroomMap2.get(e.scheduled_class_id)
           return e.member_id === studentId && studentClassroomId === classroomId
         })
       })
@@ -263,7 +266,7 @@ export default function AddStudentToClassroomModal({
       }
 
       const enrollmentsToInsert = studentsToEnroll.map(studentId => ({
-        class_id: classIdToUse,
+        scheduled_class_id: classIdToUse,
         member_id: studentId,
         organization_id: currentOrganizationId,
       }))

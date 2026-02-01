@@ -10,24 +10,24 @@ interface AddTeacherToClassroomModalProps {
   isOpen: boolean
   onClose: () => void
   onSave: () => void
-  classroomId: number
+  classroomId: string
 }
 
 interface ScheduledClass {
-  id: number
+  id: string
   name: string
-  teacher_ids: number[] | null
+  teacher_id: string | null
 }
 
-interface Member {
-  id: number
+interface TeacherMember {
+  id: string
   first_name: string
   last_name: string
-  role: string | null
+  specialization: string | null
   teacher_color: string | null
 }
 
-const initialFormData = { selectedTeacherIds: [] }
+const initialFormData = { selectedTeacherIds: [] as string[] }
 
 export default function AddTeacherToClassroomModal({
   isOpen,
@@ -38,10 +38,10 @@ export default function AddTeacherToClassroomModal({
   const { t } = useTranslation(['classroom', 'common'])
   const { currentOrganizationId } = useOrganization()
   const [classes, setClasses] = useState<ScheduledClass[]>([])
-  const [members, setMembers] = useState<Member[]>([])
+  const [members, setMembers] = useState<TeacherMember[]>([])
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(false)
-  const [selectedTeacherIds, setSelectedTeacherIds] = useState<number[]>([])
+  const [selectedTeacherIds, setSelectedTeacherIds] = useState<string[]>([])
   const isDirty = useFormDirty({ selectedTeacherIds }, initialFormData)
 
   const handleClose = () => {
@@ -70,12 +70,12 @@ export default function AddTeacherToClassroomModal({
       setFetching(true)
       const { data, error } = await supabase
         .from('scheduled_classes')
-        .select('id, name, teacher_ids')
+        .select('id, name, teacher_id')
         .eq('classroom_id', classroomId)
         .order('name', { ascending: true })
 
       if (error) throw error
-      setClasses(data || [])
+      setClasses((data || []) as ScheduledClass[])
     } catch (error) {
       console.error('Error fetching classes:', error)
     } finally {
@@ -87,20 +87,20 @@ export default function AddTeacherToClassroomModal({
     try {
       const { data, error } = await supabase
         .from('teachers')
-        .select('id, first_name, last_name, specialization')
+        .select('id, first_name, last_name, specialization, teacher_color')
         .eq('organization_id', currentOrganizationId)
         .eq('is_active', true)
         .order('first_name', { ascending: true })
 
       if (error) throw error
-      setMembers(data || [])
+      setMembers((data || []) as TeacherMember[])
     } catch (error) {
       console.error('Error fetching teachers:', error)
       setMembers([])
     }
   }
 
-  const handleTeacherToggle = (teacherId: number) => {
+  const handleTeacherToggle = (teacherId: string) => {
     setSelectedTeacherIds((prev) => {
       if (prev.includes(teacherId)) {
         return prev.filter(id => id !== teacherId)
@@ -142,30 +142,19 @@ export default function AddTeacherToClassroomModal({
             (async () => {
               const { data: classData, error: fetchError } = await supabase
                 .from('scheduled_classes')
-                .select('teacher_ids, teacher_id')
+                .select('teacher_id')
                 .eq('id', classItem.id)
                 .single()
 
               if (fetchError) throw fetchError
 
-              const currentTeacherIds = Array.isArray(classData.teacher_ids)
-                ? classData.teacher_ids
-                : []
+              const currentTeacherId = (classData as { teacher_id: string | null }).teacher_id
 
-              if (!currentTeacherIds.includes(teacherId)) {
-                const updatedTeacherIds = [...currentTeacherIds, teacherId]
-
-                const updateData: any = {
-                  teacher_ids: updatedTeacherIds,
-                }
-
-                if (!classData.teacher_id) {
-                  updateData.teacher_id = teacherId
-                }
-
+              // Only update if no teacher is assigned
+              if (!currentTeacherId) {
                 const { error: updateError } = await supabase
                   .from('scheduled_classes')
-                  .update(updateData)
+                  .update({ teacher_id: teacherId })
                   .eq('id', classItem.id)
 
                 if (updateError) throw updateError
@@ -266,8 +255,8 @@ export default function AddTeacherToClassroomModal({
                               <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
                                 {member.first_name} {member.last_name}
                               </span>
-                              {member.role && (
-                                <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">({member.role})</span>
+                              {member.specialization && (
+                                <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">({member.specialization})</span>
                               )}
                             </div>
                           </label>

@@ -69,10 +69,11 @@ export default function EditClassroomModal({ isOpen, onClose, onSave, classroomI
       if (error) throw error
 
       if (data) {
+        const classroomData = data as { name: string; capacity: number | null; description: string | null }
         const initial: ClassroomFormData = {
-          name: data.name || '',
-          capacity: data.capacity || '',
-          description: data.description || '',
+          name: classroomData.name || '',
+          capacity: classroomData.capacity?.toString() || '',
+          description: classroomData.description || '',
         }
         setInitialFormData(initial)
         setFormData(initial)
@@ -117,7 +118,7 @@ export default function EditClassroomModal({ isOpen, onClose, onSave, classroomI
       onClose()
     } catch (error) {
       console.error('Error updating classroom:', error)
-      alert(t('failedToUpdate', { ns: 'common' }) || `Failed to update classroom: ${(error as any).message}`)
+      alert(t('failedToUpdate', { ns: 'common' }) || `Failed to update classroom: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

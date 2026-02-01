@@ -2,10 +2,43 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
 import { supabase } from '@/lib/supabase/client'
-import { SubscriptionPlan, PlanPricing } from '../types'
+import { SubscriptionPlan, PlanPricing, PlanFeatures } from '../types'
+
+// Extended organization interface with country relation
+interface OrganizationWithCountry {
+  id: string
+  name: string
+  slug: string
+  logo_url: string | null
+  settings: Record<string, unknown> | null
+  country_id: string | null
+  country?: {
+    id: string
+    code: string
+    name: string
+    currency_code: string
+    currency_symbol: string
+  } | null
+}
+
+// Subscription with plan from query
+interface SubscriptionWithPlan {
+  id: string
+  organization_id: string
+  plan_id: string
+  status: string
+  billing_cycle: string
+  trial_ends_at: string | null
+  current_period_end: string | null
+  external_customer_id?: string | null
+  plan: SubscriptionPlan | null
+}
 
 export default function BillingPage() {
-  const { currentOrganizationId, currentOrganization } = useOrganization()
+  const { currentOrganization } = useOrganization()
+  // Type assertion for organization with country relation
+  const orgWithCountry = currentOrganization as OrganizationWithCountry | null
+  const currentOrganizationId = currentOrganization?.id
   const [showChangePlanModal, setShowChangePlanModal] = useState(false)
   const [selectedNewPlan, setSelectedNewPlan] = useState<SubscriptionPlan | null>(null)
   const [loading, setLoading] = useState(false)
@@ -20,7 +53,7 @@ export default function BillingPage() {
   }
 
   // Fetch subscription
-  const { data: subscription } = useQuery({
+  const { data: subscription } = useQuery<SubscriptionWithPlan | null>({
     queryKey: ['subscription', currentOrganizationId],
     queryFn: async () => {
       if (!currentOrganizationId) return null
@@ -32,13 +65,13 @@ export default function BillingPage() {
         .maybeSingle()
 
       if (error) throw error
-      return data
+      return data as SubscriptionWithPlan | null
     },
     enabled: !!currentOrganizationId,
   })
 
   // Fetch available plans
-  const { data: plans = [] } = useQuery({
+  const { data: plans = [] } = useQuery<SubscriptionPlan[]>({
     queryKey: ['plans'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -48,25 +81,26 @@ export default function BillingPage() {
         .order('sort_order')
 
       if (error) throw error
-      return data as SubscriptionPlan[]
+      return (data || []) as SubscriptionPlan[]
     },
   })
 
   // Fetch pricing for current country
-  const { data: pricing = [] } = useQuery({
-    queryKey: ['pricing', currentOrganization?.country_id],
+  const { data: pricing = [] } = useQuery<PlanPricing[]>({
+    queryKey: ['pricing', orgWithCountry?.country_id],
     queryFn: async () => {
-      if (!currentOrganization?.country_id) return []
+      if (!orgWithCountry?.country_id) return []
 
       const { data, error } = await supabase
         .from('plan_pricing')
         .select('*, plan:subscription_plans(*), country:countries(*)')
-        .eq('country_id', currentOrganization.country_id)
+        .eq('country_id', orgWithCountry.country_id)
 
       if (error) throw error
-      return data as PlanPricing[]
+      // Cast through unknown to handle type mismatch between Json and PlanFeatures
+      return (data || []) as unknown as PlanPricing[]
     },
-    enabled: !!currentOrganization?.country_id,
+    enabled: !!orgWithCountry?.country_id,
   })
 
   const plan = subscription?.plan
@@ -105,8 +139,11 @@ export default function BillingPage() {
   }
 
   const currencySymbol =
-    currencySymbols[currentOrganization?.country?.currency_code || 'USD'] || '$'
-  const currentPrice = getPriceForPlan(plan?.id || '', subscription?.billing_cycle || 'monthly')
+    currencySymbols[orgWithCountry?.country?.currency_code || 'USD'] || '$'
+  const billingCycle = (subscription?.billing_cycle === 'monthly' || subscription?.billing_cycle === 'yearly')
+    ? subscription.billing_cycle
+    : 'monthly'
+  const currentPrice = getPriceForPlan(plan?.id || '', billingCycle)
 
   return (
     <div className="max-w-6xl mx-auto p-6">
@@ -151,7 +188,7 @@ export default function BillingPage() {
                   trialDaysLeft <= 3 ? 'text-orange-700 dark:text-orange-400' : 'text-blue-700 dark:text-blue-400'
                 }`}
               >
-                Your trial ends on {new Date(subscription.trial_ends_at).toLocaleDateString()}.
+                Your trial ends on {subscription.trial_ends_at ? new Date(subscription.trial_ends_at).toLocaleDateString() : 'N/A'}.
                 {subscription.external_customer_id
                   ? ' You will be charged automatically.'
                   : ' Please add a payment method to continue.'}
@@ -289,7 +326,7 @@ export default function BillingPage() {
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
               <p className="text-sm font-medium text-gray-900 dark:text-white mb-2">Features</p>
               <div className="space-y-2">
-                {plan?.features?.donations && (
+                {(plan?.features as PlanFeatures | undefined)?.donations && (
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-4 h-4 text-green-600 dark:text-green-400 mr-2"
@@ -305,7 +342,7 @@ export default function BillingPage() {
                     Donations & Finance
                   </div>
                 )}
-                {plan?.features?.education && (
+                {(plan?.features as PlanFeatures | undefined)?.education && (
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-4 h-4 text-green-600 dark:text-green-400 mr-2"
@@ -321,7 +358,7 @@ export default function BillingPage() {
                     Education & Classes
                   </div>
                 )}
-                {plan?.features?.umrah && (
+                {(plan?.features as PlanFeatures | undefined)?.umrah && (
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-4 h-4 text-green-600 dark:text-green-400 mr-2"
@@ -337,7 +374,7 @@ export default function BillingPage() {
                     Umrah/Hajj
                   </div>
                 )}
-                {plan?.features?.cases && (
+                {(plan?.features as PlanFeatures | undefined)?.cases && (
                   <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                     <svg
                       className="w-4 h-4 text-green-600 dark:text-green-400 mr-2"
@@ -403,7 +440,7 @@ export default function BillingPage() {
             <div className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {plans.map((planOption) => {
-                  const price = getPriceForPlan(planOption.id, subscription?.billing_cycle || 'monthly')
+                  const price = getPriceForPlan(planOption.id, billingCycle)
                   const isCurrent = planOption.id === plan?.id
 
                   return (

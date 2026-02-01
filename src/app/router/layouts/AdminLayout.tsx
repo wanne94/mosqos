@@ -20,6 +20,7 @@ import { useAuth } from '@/app/providers/AuthProvider'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
 import { usePermissions } from '@/features/permissions/hooks/usePermissions'
 import { RoleDisplay, RoleDisplaySkeleton } from '@/shared/components/RoleDisplay'
+import { type UserRole } from '@/shared/utils/roleDisplay'
 
 const navItems = [
   { path: 'people', label: 'People', icon: Users },
@@ -137,7 +138,7 @@ export default function AdminLayout() {
                   <div className="px-4 py-3 border-b">
                     <p className="text-sm font-medium truncate">{user?.email}</p>
                     <p className="text-xs text-muted-foreground">
-                      {roleLoading ? <RoleDisplaySkeleton /> : <RoleDisplay role={role} />}
+                      {roleLoading ? <RoleDisplaySkeleton /> : <RoleDisplay role={role as UserRole | null} />}
                     </p>
                   </div>
                   <div className="p-1">

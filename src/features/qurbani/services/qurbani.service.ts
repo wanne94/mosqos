@@ -1,4 +1,9 @@
 import { supabase } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import {
+  PaymentStatus,
+  ProcessingStatus,
+} from '../types/qurbani.types'
 import type {
   QurbaniCampaign,
   QurbaniShare,
@@ -12,9 +17,23 @@ import type {
   CampaignStats,
   AnimalType,
   DistributionType,
-  PaymentStatus,
-  ProcessingStatus,
 } from '../types/qurbani.types'
+
+// Type assertion helper for tables not in generated types
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const db = supabase as SupabaseClient<any>
+
+// Helper type for share stats query
+interface ShareStatsRow {
+  animal_type: string
+  quantity: number
+  total_amount: number
+  amount_paid: number
+  distribution_type: string
+  payment_status: string
+  processing_status: string
+  status: string
+}
 
 /**
  * Qurbani service for campaign and share management
@@ -31,8 +50,7 @@ export const qurbaniService = {
     organizationId: string,
     filters?: CampaignFilters
   ): Promise<QurbaniCampaign[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (supabase as any)
+    let query = db
       .from('qurbani_campaigns')
       .select('*')
       .eq('organization_id', organizationId)
@@ -56,15 +74,14 @@ export const qurbaniService = {
     const { data, error } = await query.order('year', { ascending: false })
 
     if (error) throw error
-    return (data || []) as QurbaniCampaign[]
+    return (data || []) as unknown as QurbaniCampaign[]
   },
 
   /**
    * Get a single campaign by ID
    */
   async getCampaign(campaignId: string): Promise<QurbaniCampaign | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from('qurbani_campaigns')
       .select('*')
       .eq('id', campaignId)
@@ -74,7 +91,7 @@ export const qurbaniService = {
       if (error.code === 'PGRST116') return null
       throw error
     }
-    return data as QurbaniCampaign
+    return data as unknown as QurbaniCampaign
   },
 
   /**
@@ -84,18 +101,17 @@ export const qurbaniService = {
     organizationId: string,
     input: CreateCampaignInput
   ): Promise<QurbaniCampaign> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from('qurbani_campaigns')
       .insert({
         organization_id: organizationId,
         ...input,
-      })
+      } as never)
       .select()
       .single()
 
     if (error) throw error
-    return data as QurbaniCampaign
+    return data as unknown as QurbaniCampaign
   },
 
   /**
@@ -105,24 +121,22 @@ export const qurbaniService = {
     campaignId: string,
     input: UpdateCampaignInput
   ): Promise<QurbaniCampaign> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from('qurbani_campaigns')
-      .update(input)
+      .update(input as never)
       .eq('id', campaignId)
       .select()
       .single()
 
     if (error) throw error
-    return data as QurbaniCampaign
+    return data as unknown as QurbaniCampaign
   },
 
   /**
    * Delete a campaign
    */
   async deleteCampaign(campaignId: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from('qurbani_campaigns')
       .delete()
       .eq('id', campaignId)
@@ -141,8 +155,7 @@ export const qurbaniService = {
     organizationId: string,
     filters?: ShareFilters
   ): Promise<QurbaniShare[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let query = (supabase as any)
+    let query = db
       .from('qurbani_shares')
       .select(`
         *,
@@ -219,15 +232,14 @@ export const qurbaniService = {
     const { data, error } = await query.order('created_at', { ascending: false })
 
     if (error) throw error
-    return (data || []) as QurbaniShare[]
+    return (data || []) as unknown as QurbaniShare[]
   },
 
   /**
    * Get a single share by ID
    */
   async getShare(shareId: string): Promise<QurbaniShare | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from('qurbani_shares')
       .select(`
         *,
@@ -247,7 +259,7 @@ export const qurbaniService = {
       if (error.code === 'PGRST116') return null
       throw error
     }
-    return data as QurbaniShare
+    return data as unknown as QurbaniShare
   },
 
   /**
@@ -257,18 +269,19 @@ export const qurbaniService = {
     organizationId: string,
     input: CreateShareInput
   ): Promise<QurbaniShare> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const paymentStatus: PaymentStatus = input.amount_paid && input.amount_paid >= input.total_amount
+      ? PaymentStatus.PAID
+      : input.amount_paid && input.amount_paid > 0
+      ? PaymentStatus.PARTIAL
+      : PaymentStatus.PENDING
+
+    const { data, error } = await db
       .from('qurbani_shares')
       .insert({
         organization_id: organizationId,
         ...input,
-        payment_status: input.amount_paid && input.amount_paid >= input.total_amount
-          ? 'paid'
-          : input.amount_paid && input.amount_paid > 0
-          ? 'partial'
-          : 'pending',
-      })
+        payment_status: paymentStatus,
+      } as never)
       .select(`
         *,
         member:member_id (
@@ -282,7 +295,7 @@ export const qurbaniService = {
       .single()
 
     if (error) throw error
-    return data as QurbaniShare
+    return data as unknown as QurbaniShare
   },
 
   /**
@@ -292,10 +305,9 @@ export const qurbaniService = {
     shareId: string,
     input: UpdateShareInput
   ): Promise<QurbaniShare> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from('qurbani_shares')
-      .update(input)
+      .update(input as never)
       .eq('id', shareId)
       .select(`
         *,
@@ -310,15 +322,14 @@ export const qurbaniService = {
       .single()
 
     if (error) throw error
-    return data as QurbaniShare
+    return data as unknown as QurbaniShare
   },
 
   /**
    * Delete a share
    */
   async deleteShare(shareId: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from('qurbani_shares')
       .delete()
       .eq('id', shareId)
@@ -330,7 +341,7 @@ export const qurbaniService = {
    * Record a payment for a share
    */
   async recordPayment(
-    organizationId: string,
+    _organizationId: string,
     input: RecordPaymentInput
   ): Promise<QurbaniShare> {
     // First get the current share
@@ -339,7 +350,7 @@ export const qurbaniService = {
 
     const newAmountPaid = share.amount_paid + input.amount
     const newPaymentStatus: PaymentStatus =
-      newAmountPaid >= share.total_amount ? 'paid' : 'partial'
+      newAmountPaid >= share.total_amount ? PaymentStatus.PAID : PaymentStatus.PARTIAL
 
     return this.updateShare(input.share_id, {
       amount_paid: newAmountPaid,
@@ -357,15 +368,16 @@ export const qurbaniService = {
     shareId: string,
     processingStatus: ProcessingStatus
   ): Promise<QurbaniShare> {
-    const updates: UpdateShareInput = { processing_status: processingStatus }
+    // Use Record type to allow additional fields not in UpdateShareInput
+    const updates: Record<string, unknown> = { processing_status: processingStatus }
 
-    if (processingStatus === 'slaughtered') {
+    if (processingStatus === ProcessingStatus.SLAUGHTERED) {
       updates.slaughtered_at = new Date().toISOString()
-    } else if (processingStatus === 'distributed' || processingStatus === 'completed') {
+    } else if (processingStatus === ProcessingStatus.DISTRIBUTED || processingStatus === ProcessingStatus.COMPLETED) {
       updates.distributed_at = new Date().toISOString()
     }
 
-    return this.updateShare(shareId, updates)
+    return this.updateShare(shareId, updates as UpdateShareInput)
   },
 
   /**
@@ -381,7 +393,7 @@ export const qurbaniService = {
       cancelled_at: new Date().toISOString(),
       cancellation_reason: reason,
       refund_amount: refundAmount,
-    } as any)
+    } as UpdateShareInput)
   },
 
   // =========================================================================
@@ -395,8 +407,7 @@ export const qurbaniService = {
     organizationId: string,
     campaignId: string
   ): Promise<CampaignStats> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: shares, error } = await (supabase as any)
+    const { data: shares, error } = await db
       .from('qurbani_shares')
       .select('animal_type, quantity, total_amount, amount_paid, distribution_type, payment_status, processing_status, status')
       .eq('organization_id', organizationId)
@@ -439,7 +450,8 @@ export const qurbaniService = {
       },
     }
 
-    for (const share of shares || []) {
+    const typedShares = (shares || []) as ShareStatsRow[]
+    for (const share of typedShares) {
       stats.total_shares += share.quantity
       stats.total_revenue += share.total_amount
       stats.total_collected += share.amount_paid

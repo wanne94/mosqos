@@ -13,9 +13,7 @@
 const IS_PRODUCTION = (() => {
   // Browser environment (Vite)
   try {
-    // @ts-expect-error - import.meta.env is available in Vite but TypeScript may not recognize it
     if (typeof window !== 'undefined' && import.meta?.env?.MODE) {
-      // @ts-expect-error - import.meta.env is available in Vite
       return import.meta.env.MODE === 'production'
     }
   } catch {
@@ -33,7 +31,7 @@ const IS_PRODUCTION = (() => {
 /**
  * Logger configuration type
  */
-type LogLevel = 'log' | 'error' | 'warn' | 'info' | 'debug'
+export type LogLevel = 'log' | 'error' | 'warn' | 'info' | 'debug'
 
 /**
  * Logger utility with production-safe methods
@@ -106,7 +104,6 @@ export const logger = {
 if (IS_PRODUCTION && typeof console !== 'undefined') {
   // Preserve error logging in production
   const originalError = console.error
-  const originalWarn = console.warn
 
   // Disable non-critical console methods
   console.log = (): void => {}

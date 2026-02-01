@@ -6,6 +6,18 @@ import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { DonateModal } from '@/features/donations/components/DonateModal'
 
+interface MemberJoinData {
+  id: string
+  first_name: string
+  last_name: string
+}
+
+interface OrganizationMemberWithMember {
+  id: string
+  member_id: string | null
+  members: MemberJoinData | null
+}
+
 interface DashboardStats {
   memberName: string
   totalContributions: number
@@ -62,8 +74,9 @@ export default function DashboardPage() {
       if (!user || !currentOrganizationId) return
 
       // Get current member based on user - join through organization_members to get member profile
-      const { data: orgMember, error: memberError } = await supabase
-        .from('organization_members')
+      // Note: organization_members table exists in DB but not in generated types
+      const { data: orgMemberData, error: memberError } = await supabase
+        .from('organization_members' as 'members')
         .select(`
           id,
           member_id,
@@ -78,11 +91,14 @@ export default function DashboardPage() {
         .single()
 
       if (memberError) throw memberError
-      if (!orgMember) return
+      if (!orgMemberData) return
 
       // Extract member data from the join
-      const memberData = orgMember.members as any
+      const orgMember = orgMemberData as unknown as OrganizationMemberWithMember
+      const memberData = orgMember.members as MemberJoinData | null
       const memberIdValue = memberData?.id || orgMember.member_id
+
+      if (!memberIdValue) return
 
       setMemberId(memberIdValue)
       setStats((prev) => ({
@@ -94,7 +110,7 @@ export default function DashboardPage() {
       const { data: donations, error: donationsError } = await supabase
         .from('donations')
         .select('amount')
-        .eq('member_id', member.id)
+        .eq('member_id', memberIdValue)
 
       if (!donationsError && donations) {
         const total = donations.reduce((sum, d) => sum + (parseFloat(String(d.amount)) || 0), 0)

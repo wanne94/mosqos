@@ -5,7 +5,9 @@ import { useTranslation } from 'react-i18next'
 import { useFormDirty } from '@/hooks/useFormDirty'
 import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useOrganization } from '@/hooks/useOrganization'
-import type { CreateRegistrationInput } from '../types/umrah.types'
+import type { Database } from '@/shared/types/database.types'
+
+type TripRegistrationInsert = Database['public']['Tables']['trip_registrations']['Insert']
 
 interface RegisterPilgrimModalProps {
   isOpen: boolean
@@ -120,19 +122,13 @@ export default function RegisterPilgrimModal({ isOpen, onClose, onSave }: Regist
         return
       }
 
-      const memberId = typeof formData.member_id === 'string' ? parseInt(formData.member_id, 10) : formData.member_id
-      const tripId = typeof formData.trip_id === 'string' ? parseInt(formData.trip_id, 10) : formData.trip_id
-
-      if (isNaN(memberId) || isNaN(tripId)) {
-        alert(t('common.invalidMemberOrTrip'))
-        setLoading(false)
-        return
-      }
+      const memberId = formData.member_id
+      const tripId = formData.trip_id
 
       const { data: existingRegistration, error: checkError } = await supabase
         .from('trip_registrations')
         .select('*')
-        .eq('organization_id', currentOrganizationId)
+        .eq('organization_id', currentOrganizationId as string)
         .eq('member_id', memberId)
         .eq('trip_id', tripId)
         .maybeSingle()
@@ -145,7 +141,7 @@ export default function RegisterPilgrimModal({ isOpen, onClose, onSave }: Regist
       }
 
       if (existingRegistration) {
-        const selectedMember = members.find((m) => m.id === memberId.toString())
+        const selectedMember = members.find((m) => m.id === memberId)
         const memberName = selectedMember ? `${selectedMember.first_name} ${selectedMember.last_name}` : t('common.thisPerson')
         alert(t('common.alreadyRegisteredForTrip', { name: memberName }))
         setLoading(false)
@@ -154,9 +150,10 @@ export default function RegisterPilgrimModal({ isOpen, onClose, onSave }: Regist
 
       console.log('Inserting registration:', { memberId, tripId })
 
-      const registrationData: CreateRegistrationInput = {
-        member_id: memberId.toString(),
-        trip_id: tripId.toString(),
+      const registrationData: TripRegistrationInsert = {
+        organization_id: currentOrganizationId as string,
+        member_id: memberId,
+        trip_id: tripId,
       }
 
       console.log('Registration data:', registrationData)

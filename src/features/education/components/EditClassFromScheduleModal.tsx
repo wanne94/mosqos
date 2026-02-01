@@ -4,8 +4,9 @@ import { supabase } from '../../../lib/supabase/client'
 import { X } from 'lucide-react'
 import { useFormDirty } from '../../../hooks/useFormDirty'
 import { useEscapeKey } from '../../../hooks/useEscapeKey'
+import { useOrganization } from '../../../hooks/useOrganization'
 
-interface Member {
+interface TeacherMember {
   id: string
   first_name: string
   last_name: string
@@ -22,17 +23,12 @@ interface TimeSlot {
   time: string
 }
 
-interface Teacher {
-  id: string
-}
-
 interface ClassItem {
   id: string
   name: string
-  class_time: string
+  start_time: string
   description?: string | null
-  multipleTeachers?: Teacher[]
-  teachers?: Teacher
+  teacher_id?: string | null
 }
 
 interface EditClassFromScheduleModalProps {
@@ -62,7 +58,8 @@ export default function EditClassFromScheduleModal({
   period
 }: EditClassFromScheduleModalProps) {
   const { t } = useTranslation(['classroom', 'common'])
-  const [members, setMembers] = useState<Member[]>([])
+  const { currentOrganizationId } = useOrganization()
+  const [members, setMembers] = useState<TeacherMember[]>([])
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(false)
   const [teacherDropdownOpen, setTeacherDropdownOpen] = useState(false)
@@ -83,64 +80,48 @@ export default function EditClassFromScheduleModal({
     try {
       const { data, error } = await supabase
         .from('teachers')
-        .select(`
-          id,
-          teacher_color,
-          organization_members:member_id (
-            id,
-            first_name,
-            last_name,
-            role
-          )
-        `)
-        .order('members(first_name)', { ascending: true })
+        .select('id, first_name, last_name, teacher_color')
+        .eq('organization_id', currentOrganizationId)
+        .eq('is_active', true)
+        .order('first_name', { ascending: true })
 
       if (error) throw error
 
-      // Transform data to flat structure
-      const teachers = (data || []).map((teacher: any) => ({
-        id: teacher.organization_members?.id,
-        first_name: teacher.organization_members?.first_name || '',
-        last_name: teacher.organization_members?.last_name || '',
-        teacher_color: teacher.teacher_color
-      })).filter((t: Member) => t.id && t.first_name && t.last_name)
-
-      setMembers(teachers)
+      setMembers((data || []) as TeacherMember[])
     } catch (error) {
       console.error('Error fetching teachers:', error)
       setMembers([])
     }
-  }, [])
+  }, [currentOrganizationId])
 
   const fetchCourses = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('courses')
-        .select('name, description')
+        .select('id, name, description')
+        .eq('organization_id', currentOrganizationId)
         .order('name', { ascending: true })
 
       if (error) throw error
 
-      setCourses(data || [])
+      setCourses((data || []) as Course[])
     } catch (error) {
       console.error('Error fetching courses:', error)
       setCourses([])
     }
-  }, [])
+  }, [currentOrganizationId])
 
   useEffect(() => {
     if (isOpen && classItem) {
       fetchMembers()
       fetchCourses()
       // Load existing class data
-      const teacherIds = classItem.multipleTeachers
-        ? classItem.multipleTeachers.map(t => t.id)
-        : (classItem.teachers ? [classItem.teachers.id] : [])
+      const teacherIds = classItem.teacher_id ? [classItem.teacher_id] : []
 
       setFormData({
         name: classItem.name || '',
         teacher_ids: teacherIds,
-        class_time: classItem.class_time || timeSlot?.time || '',
+        class_time: classItem.start_time || timeSlot?.time || '',
         description: classItem.description || '',
       })
     }
@@ -236,36 +217,32 @@ export default function EditClassFromScheduleModal({
       // Get the specific date for this class (one-time class, not recurring)
       const classDate = day ? day.toISOString().split('T')[0] : null
 
-      // Store all teacher IDs in a JSONB array
-      const teacherIds = formData.teacher_ids.length > 0 ? formData.teacher_ids : []
-
       // Find course_id for the selected course name
       const selectedCourse = courses.find(c => c.name === formData.name)
-      const courseId = (selectedCourse as any)?.id || null
+      const courseId = selectedCourse?.id || null
 
-      // Update class with multiple teachers stored in teacher_ids array
-      const classData = {
+      // Update class
+      const classData: Record<string, unknown> = {
         course_id: courseId,
         name: formData.name,
-        teacher_id: teacherIds.length > 0 ? teacherIds[0] : null, // Keep first teacher for backward compatibility
-        teacher_ids: teacherIds, // Store all teachers in array
-        class_time: formData.class_time,
-        class_date: classDate, // One-time class for this specific date
+        teacher_id: formData.teacher_ids.length > 0 ? formData.teacher_ids[0] : null,
+        start_time: formData.class_time,
+        start_date: classDate,
         description: formData.description || null,
       }
 
       const { error } = await supabase
         .from('scheduled_classes')
-        .update(classData as any)
+        .update(classData)
         .eq('id', classItem!.id)
 
       if (error) throw error
 
       onSave()
       onClose()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error updating class:', error)
-      alert(`Failed to update class: ${error.message}`)
+      alert(`Failed to update class: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -287,9 +264,9 @@ export default function EditClassFromScheduleModal({
 
       onSave()
       onClose()
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error deleting class:', error)
-      alert(`Failed to delete class: ${error.message}`)
+      alert(`Failed to delete class: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -364,7 +341,7 @@ export default function EditClassFromScheduleModal({
               className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100"
             >
               <option value="">{t('selectCourse') || 'Select a course...'}</option>
-              {courses.map((course: any) => (
+              {courses.map((course) => (
                 <option key={course.id} value={course.name}>
                   {course.name}
                 </option>

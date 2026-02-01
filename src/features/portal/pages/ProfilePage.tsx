@@ -6,6 +6,16 @@ import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { DonationsTab } from '@/features/donations/components/DonationsTab'
 import CaseHistoryTab from '@/features/cases/components/CaseHistoryTab'
+import type { Database } from '@/shared/types/database.types'
+
+type MemberRow = Database['public']['Tables']['members']['Row']
+
+interface OrganizationMemberWithMember {
+  id: string
+  role: string | null
+  member_id: string | null
+  members: MemberRow | null
+}
 
 interface Member {
   id: string
@@ -14,16 +24,12 @@ interface Member {
   email: string | null
   phone: string | null
   date_of_birth: string | null
-  job: string | null
-  status: string
+  membership_status: string | null
   address: string | null
   city: string | null
   state: string | null
   zip_code: string | null
   country: string | null
-  emergency_contact_name: string | null
-  emergency_contact_phone: string | null
-  emergency_contact_relationship: string | null
   notes: string | null
   role: string | null
   household_id: string | null
@@ -38,6 +44,12 @@ interface Household {
   zip_code: string | null
 }
 
+interface FamilyMember {
+  id: string
+  first_name: string
+  last_name: string
+}
+
 type TabType = 'profile' | 'donations' | 'case-history' | 'education' | 'family'
 
 export default function ProfilePage() {
@@ -47,7 +59,7 @@ export default function ProfilePage() {
   const { user } = useAuth()
   const [member, setMember] = useState<Member | null>(null)
   const [household, setHousehold] = useState<Household | null>(null)
-  const [familyMembers, setFamilyMembers] = useState<Member[]>([])
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabType>('profile')
 
@@ -72,8 +84,9 @@ export default function ProfilePage() {
       if (!user || !currentOrganizationId) return
 
       // Fetch current member via organization_members -> members join
-      const { data: orgMemberData, error: memberError } = await supabase
-        .from('organization_members')
+      // Note: organization_members table exists in DB but not in generated types
+      const { data: orgMemberRawData, error: memberError } = await supabase
+        .from('organization_members' as 'members')
         .select(`
           id,
           role,
@@ -85,15 +98,31 @@ export default function ProfilePage() {
         .single()
 
       if (memberError) throw memberError
-      if (!orgMemberData) return
+      if (!orgMemberRawData) return
+
+      // Cast to expected type
+      const orgMemberData = orgMemberRawData as unknown as OrganizationMemberWithMember
 
       // Extract member profile from the join
-      const memberProfile = orgMemberData.members as any
+      const memberProfile = orgMemberData.members as MemberRow | null
       if (memberProfile) {
         setMember({
-          ...memberProfile,
+          id: memberProfile.id,
+          first_name: memberProfile.first_name,
+          last_name: memberProfile.last_name,
+          email: memberProfile.email,
+          phone: memberProfile.phone,
+          date_of_birth: memberProfile.date_of_birth,
+          membership_status: memberProfile.membership_status,
+          address: memberProfile.address,
+          city: memberProfile.city,
+          state: memberProfile.state,
+          zip_code: memberProfile.zip_code,
+          country: memberProfile.country,
+          notes: memberProfile.notes,
           role: orgMemberData.role,
-        } as Member)
+          household_id: memberProfile.household_id,
+        })
 
         // Fetch household if member has one
         if (memberProfile.household_id) {
@@ -104,7 +133,14 @@ export default function ProfilePage() {
             .single()
 
           if (!householdError && householdData) {
-            setHousehold(householdData as Household)
+            setHousehold({
+              id: householdData.id,
+              name: householdData.name,
+              address: householdData.address,
+              city: householdData.city,
+              state: householdData.state,
+              zip_code: householdData.zip_code,
+            })
 
             // Fetch family members from the members table
             const { data: familyData, error: familyError } = await supabase
@@ -113,8 +149,8 @@ export default function ProfilePage() {
               .eq('household_id', memberProfile.household_id)
               .neq('id', memberProfile.id)
 
-            if (!familyError) {
-              setFamilyMembers((familyData || []) as Member[])
+            if (!familyError && familyData) {
+              setFamilyMembers(familyData)
             }
           }
         }
@@ -272,21 +308,17 @@ export default function ProfilePage() {
                       </div>
                     )}
                     <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
-                      <span className="text-slate-400 dark:text-slate-500 font-medium">Job:</span>
-                      <span>{member.job || '—'}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300">
                       <span className="text-slate-400 dark:text-slate-500 font-medium">Status:</span>
                       <span
                         className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          (member.status || 'Active') === 'Active'
+                          (member.membership_status || 'Active') === 'Active'
                             ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-400'
-                            : (member.status || 'Active') === 'Inactive'
+                            : (member.membership_status || 'Active') === 'Inactive'
                             ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
                             : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                         }`}
                       >
-                        {member.status || 'Active'}
+                        {member.membership_status || 'Active'}
                       </span>
                     </div>
                   </div>
@@ -325,39 +357,7 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* Emergency Contact Section */}
-              {(member.emergency_contact_name || member.emergency_contact_phone) && (
-                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700">
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Emergency Contact</h2>
-                  <div className="space-y-3 text-slate-700 dark:text-slate-300">
-                    {member.emergency_contact_name && (
-                      <div>
-                        <span className="text-slate-500 dark:text-slate-400 text-sm">Name:</span>
-                        <div className="font-medium">{member.emergency_contact_name}</div>
-                      </div>
-                    )}
-                    {member.emergency_contact_phone && (
-                      <div>
-                        <span className="text-slate-500 dark:text-slate-400 text-sm">Phone:</span>
-                        <div className="font-medium">
-                          <a
-                            href={`tel:${member.emergency_contact_phone}`}
-                            className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
-                          >
-                            {member.emergency_contact_phone}
-                          </a>
-                        </div>
-                      </div>
-                    )}
-                    {member.emergency_contact_relationship && (
-                      <div>
-                        <span className="text-slate-500 dark:text-slate-400 text-sm">Relationship:</span>
-                        <div className="font-medium">{member.emergency_contact_relationship}</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Note: Emergency contact fields are stored in custom_fields if available */}
             </div>
           </>
         )}
@@ -396,7 +396,7 @@ export default function ProfilePage() {
                           {familyMember.first_name} {familyMember.last_name}
                         </div>
                         <div className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                          {familyMember.role || 'Member'}
+                          Family Member
                         </div>
                       </div>
                     </div>

@@ -5,7 +5,10 @@ import { useTranslation } from 'react-i18next'
 import { useFormDirty } from '@/hooks/useFormDirty'
 import { useEscapeKey } from '@/hooks/useEscapeKey'
 import { useOrganization } from '@/hooks/useOrganization'
-import type { CreateTripInput, TripStatus } from '../types/umrah.types'
+import { TripStatus } from '../types/umrah.types'
+import type { Database } from '@/shared/types/database.types'
+
+type TripInsert = Database['public']['Tables']['trips']['Insert']
 
 interface CreateTripModalProps {
   isOpen: boolean
@@ -26,11 +29,12 @@ const initialFormData: FormData = {
   start_date: '',
   end_date: '',
   cost_per_person: '',
-  status: 'open' as TripStatus,
+  status: TripStatus.OPEN,
 }
 
 export default function CreateTripModal({ isOpen, onClose, onSave }: CreateTripModalProps) {
   const { t } = useTranslation()
+  const { currentOrganizationId } = useOrganization()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<FormData>(initialFormData)
   const isDirty = useFormDirty(formData, initialFormData)
@@ -71,7 +75,12 @@ export default function CreateTripModal({ isOpen, onClose, onSave }: CreateTripM
     setLoading(true)
 
     try {
-      const tripData: CreateTripInput = {
+      if (!currentOrganizationId) {
+        throw new Error('Organization ID required')
+      }
+
+      const tripData: TripInsert = {
+        organization_id: currentOrganizationId,
         name: formData.name,
         start_date: formData.start_date,
         end_date: formData.end_date,
@@ -181,8 +190,8 @@ export default function CreateTripModal({ isOpen, onClose, onSave }: CreateTripM
               required
               className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:focus:ring-emerald-400 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
             >
-              <option value="open">{t('umrah.open')}</option>
-              <option value="closed">{t('umrah.closed')}</option>
+              <option value={TripStatus.OPEN}>{t('umrah.open')}</option>
+              <option value={TripStatus.CLOSED}>{t('umrah.closed')}</option>
             </select>
           </div>
 

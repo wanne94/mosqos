@@ -22,10 +22,10 @@ interface AddTeacherModalProps {
 }
 
 interface Member {
-  id: number
+  id: string
   first_name: string
   last_name: string
-  role: string | null
+  membership_type: string | null
 }
 
 export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherModalProps) {
@@ -76,7 +76,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
         console.warn('Error fetching enrollments:', enrollmentsError)
       }
 
-      const enrolledMemberIds = (enrollments || []).map(e => e.member_id)
+      const enrolledMemberIds = (enrollments || []).map((e: { member_id: string }) => e.member_id)
 
       const { data: existingTeachers, error: teachersError } = await supabase
         .from('teachers')
@@ -87,7 +87,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
         console.warn('Error fetching teachers:', teachersError)
       }
 
-      const teacherMemberIds = (existingTeachers || []).map(t => t.member_id)
+      const teacherMemberIds = (existingTeachers || []).map((t: { member_id: string | null }) => t.member_id)
 
       const { data, error } = await supabase
         .from('members')
@@ -97,11 +97,11 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
 
       if (error) throw error
 
-      const availableMembers = (data || []).filter(member =>
+      const availableMembers = (data || []).filter((member: { id: string; first_name: string; last_name: string; membership_type: string | null }) =>
         !enrolledMemberIds.includes(member.id) && !teacherMemberIds.includes(member.id)
       )
 
-      setMembers(availableMembers)
+      setMembers(availableMembers as Member[])
     } catch (error) {
       console.error('Error fetching members:', error)
       setMembers([])
@@ -124,7 +124,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       const { data: enrollment, error: checkError } = await supabase
         .from('enrollments')
         .select('id')
-        .eq('member_id', parseInt(selectedMemberId))
+        .eq('member_id', selectedMemberId)
         .eq('organization_id', currentOrganizationId)
         .maybeSingle()
 
@@ -133,7 +133,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       }
 
       if (enrollment) {
-        const selectedMember = members.find(m => m.id === parseInt(selectedMemberId))
+        const selectedMember = members.find(m => m.id === selectedMemberId)
         const memberName = selectedMember ? `${selectedMember.first_name} ${selectedMember.last_name}` : t('education.defaultStudent')
         alert(t('education.cannotAddEnrolledStudent') || `${memberName} is enrolled as a student and cannot be added as a teacher. Please remove their enrollment first.`)
         setLoading(false)
@@ -143,7 +143,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       const { data: existingTeacher, error: checkTeacherError } = await supabase
         .from('teachers')
         .select('id')
-        .eq('member_id', parseInt(selectedMemberId))
+        .eq('member_id', selectedMemberId)
         .eq('organization_id', currentOrganizationId)
         .maybeSingle()
 
@@ -155,16 +155,20 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
         const { error } = await supabase
           .from('teachers')
           .update({ teacher_color: selectedColor })
-          .eq('id', existingTeacher.id)
+          .eq('id', (existingTeacher as { id: string }).id)
 
         if (error) throw error
       } else {
+        // Get member info for teacher record
+        const selectedMember = members.find(m => m.id === selectedMemberId)
         const { error } = await supabase
           .from('teachers')
           .insert({
-            member_id: parseInt(selectedMemberId),
+            member_id: selectedMemberId,
             teacher_color: selectedColor,
             organization_id: currentOrganizationId,
+            first_name: selectedMember?.first_name || '',
+            last_name: selectedMember?.last_name || '',
           })
 
         if (error) throw error
@@ -174,7 +178,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       onClose()
     } catch (error) {
       console.error('Error adding teacher:', error)
-      alert(t('common.failedToAdd') || `Failed to add teacher: ${(error as any).message}`)
+      alert(t('common.failedToAdd') || `Failed to add teacher: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }

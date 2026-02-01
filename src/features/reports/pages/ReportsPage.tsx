@@ -139,7 +139,8 @@ export default function ReportsPage() {
       const combinedTransactions: Transaction[] = []
 
       // Process donations as Income
-      ;(donations || []).forEach((donation: Donation) => {
+      const donationsArray = (donations || []) as unknown as Donation[]
+      donationsArray.forEach((donation) => {
         combinedTransactions.push({
           id: donation.id,
           type: 'Income',
@@ -154,7 +155,8 @@ export default function ReportsPage() {
       })
 
       // Process expenses as Expense
-      ;(expenses || []).forEach((expense: Expense) => {
+      const expensesArray = (expenses || []) as unknown as Expense[]
+      expensesArray.forEach((expense) => {
         combinedTransactions.push({
           id: expense.id,
           type: 'Expense',
@@ -350,8 +352,12 @@ export default function ReportsPage() {
                 value={filters.month}
                 onChange={(e) => {
                   const val = e.target.value
-                  // @ts-ignore - Type inference issue with useUrlParam
-                  setMonth(val)
+                  // Pass null to clear the param from URL
+                  if (val === '') {
+                    setMonth(null)
+                  } else {
+                    setMonth(val as '' | null)
+                  }
                 }}
                 className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >
@@ -369,8 +375,12 @@ export default function ReportsPage() {
                 value={filters.fund_id}
                 onChange={(e) => {
                   const val = e.target.value
-                  // @ts-ignore - Type inference issue with useUrlParam
-                  setFundId(val)
+                  // Pass null to clear the param from URL
+                  if (val === '') {
+                    setFundId(null)
+                  } else {
+                    setFundId(val as '' | null)
+                  }
                 }}
                 className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               >

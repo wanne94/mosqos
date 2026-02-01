@@ -121,8 +121,32 @@ export default function SettingsPage() {
     queryFn: async () => {
       if (!currentOrganization?.id) return []
 
+      // organization_members table is not in generated types
+      // Use type assertion to avoid deep type instantiation
+      type OrgMemberQueryResult = {
+        id: string
+        role: string
+        user_id: string | null
+        members: {
+          id: string
+          first_name: string
+          last_name: string
+          email: string | null
+          households: {
+            id: string
+            name: string
+          } | null
+        } | null
+      }
+
       // Fetch members with their organization_members link
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as unknown as {
+        from: (table: string) => {
+          select: (query: string) => {
+            eq: (column: string, value: string) => Promise<{ data: OrgMemberQueryResult[] | null; error: Error | null }>
+          }
+        }
+      })
         .from('organization_members')
         .select(`
           id,
@@ -144,7 +168,7 @@ export default function SettingsPage() {
       if (error) throw error
 
       // Transform data to expected format
-      return (data || []).map((om: any) => ({
+      return (data || []).map((om) => ({
         id: om.members?.id || om.id,
         first_name: om.members?.first_name || '',
         last_name: om.members?.last_name || '',

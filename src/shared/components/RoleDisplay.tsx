@@ -9,6 +9,7 @@ interface RoleDisplayProps {
 export function RoleDisplay({ role, variant = 'text' }: RoleDisplayProps) {
   const { t } = useTranslation('roles');
   const config = getRoleDisplay(role);
+  const roleKey = role || 'member';
 
   if (variant === 'badge') {
     return (
@@ -16,12 +17,12 @@ export function RoleDisplay({ role, variant = 'text' }: RoleDisplayProps) {
         className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.color} ${config.bgColor}`}
       >
         {config.icon && <span>{config.icon}</span>}
-        {t(role || 'member')}
+        {t(roleKey as unknown as TemplateStringsArray)}
       </span>
     );
   }
 
-  return <span className={config.color}>{t(role || 'member')}</span>;
+  return <span className={config.color}>{t(roleKey as unknown as TemplateStringsArray)}</span>;
 }
 
 export function RoleDisplaySkeleton() {

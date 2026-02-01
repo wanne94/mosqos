@@ -48,7 +48,7 @@ export default function CreateClassInClassroomModal({
     }
   }
 
-  useEscapeKey(handleClose, { enabled: isOpen })
+  useEscapeKey(handleClose, false, '', isOpen)
 
   useEffect(() => {
     if (isOpen) {
@@ -75,21 +75,21 @@ export default function CreateClassInClassroomModal({
     setLoading(true)
 
     try {
-      // Use classroom_classes table (separate from schedule grid classes)
-      const { error } = await supabase.from('classroom_classes').insert([
+      // Use scheduled_classes table
+      const { error } = await supabase.from('scheduled_classes').insert([
         {
           name: formData.name.trim(),
           description: formData.description || null,
-          classroom_id: parseInt(classroomId),
+          classroom_id: classroomId,
           organization_id: currentOrganizationId,
+          course_id: '', // Required - should be selected from courses
+          start_date: new Date().toISOString().split('T')[0],
+          end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
         },
       ])
 
       if (error) {
-        console.error('Error creating classroom class:', error)
-        if (error.message && error.message.includes('does not exist')) {
-          alert('classroom_classes table does not exist. Please run the migration: create_classroom_classes_table.sql')
-        }
+        console.error('Error creating class:', error)
         throw error
       }
 
@@ -97,7 +97,7 @@ export default function CreateClassInClassroomModal({
       onClose()
 
       alert(t('classCreatedSuccess', { ns: 'common' }) || 'Class created successfully!')
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error creating class:', error)
       alert(t('failedToCreate', { ns: 'common' }) || 'Failed to create class. Please try again.')
     } finally {

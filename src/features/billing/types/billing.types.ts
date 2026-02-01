@@ -70,6 +70,17 @@ export interface SubscriptionPlan {
   updated_at: string
 }
 
+export interface Country {
+  id: string
+  code: string
+  name: string
+  currency_code: string
+  currency_symbol: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface PlanPricing {
   id: string
   plan_id: string
@@ -83,13 +94,7 @@ export interface PlanPricing {
   updated_at: string
   // Joined fields
   plan?: SubscriptionPlan
-  country?: {
-    id: string
-    code: string
-    name: string
-    currency_code: string
-    currency_symbol: string
-  }
+  country?: Country
 }
 
 export interface PlanWithPricing extends SubscriptionPlan {

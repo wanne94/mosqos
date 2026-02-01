@@ -4,27 +4,40 @@ import { supabase } from '@/lib/supabase/client'
 import { useOrganization } from '@/hooks/useOrganization'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useFunds } from '@/features/donations/hooks/useFunds'
+import type { Database } from '@/shared/types/database.types'
+
+type RecurringDonationRow = Database['public']['Tables']['recurring_donations']['Row']
+
+interface OrganizationMemberData {
+  id: string
+  member_id: string | null
+}
+
+interface FundJoin {
+  id: string
+  name: string
+}
 
 interface RecurringDonation {
   id: string
   fund_id: string | null
   amount: number
-  frequency: 'monthly' | 'yearly'
+  frequency: string
   start_date: string
   end_date: string | null
-  payment_method: string
+  payment_method: string | null
   notes: string | null
-  status: 'active' | 'paused' | 'cancelled' | 'completed'
+  status: string | null
   next_payment_date: string | null
-  total_payments: number
+  donation_count: number | null
   stripe_subscription_id: string | null
-  funds?: { id: string; name: string }
+  funds?: FundJoin | null
 }
 
 interface FormData {
   fund_id: string
   amount: string
-  frequency: 'monthly' | 'yearly'
+  frequency: string
   start_date: string
   end_date: string
   payment_method: string
@@ -65,14 +78,17 @@ export default function RecurringDonationsPage() {
       if (!user || !currentOrganizationId) return
 
       // Get current member via organization_members -> member_id join
-      const { data: orgMember, error: memberError } = await supabase
-        .from('organization_members')
+      // Note: organization_members table exists in DB but not in generated types
+      const { data: orgMemberData, error: memberError } = await supabase
+        .from('organization_members' as 'members')
         .select('id, member_id')
         .eq('user_id', user.id)
         .eq('organization_id', currentOrganizationId)
         .single()
 
       if (memberError) throw memberError
+
+      const orgMember = orgMemberData as unknown as OrganizationMemberData | null
       if (!orgMember || !orgMember.member_id) return
 
       setMemberId(orgMember.member_id)
@@ -84,7 +100,7 @@ export default function RecurringDonationsPage() {
           *,
           funds:fund_id (id, name)
         `)
-        .eq('member_id', member.id)
+        .eq('member_id', orgMember.member_id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -103,7 +119,24 @@ export default function RecurringDonationsPage() {
         throw error
       }
 
-      setRecurringDonations((data || []) as RecurringDonation[])
+      // Map the data to our interface
+      const mappedDonations: RecurringDonation[] = (data || []).map((row) => ({
+        id: row.id,
+        fund_id: row.fund_id,
+        amount: row.amount,
+        frequency: row.frequency,
+        start_date: row.start_date,
+        end_date: row.end_date,
+        payment_method: row.payment_method,
+        notes: row.notes,
+        status: row.status,
+        next_payment_date: row.next_payment_date,
+        donation_count: row.donation_count,
+        stripe_subscription_id: row.stripe_subscription_id,
+        funds: row.funds as FundJoin | null,
+      }))
+
+      setRecurringDonations(mappedDonations)
     } catch (error) {
       console.error('Error fetching recurring donations:', error)
       setRecurringDonations([])
@@ -139,7 +172,7 @@ export default function RecurringDonationsPage() {
     setIsEditModalOpen(true)
   }
 
-  const calculateNextPaymentDate = (startDate: string, frequency: 'monthly' | 'yearly', lastPaymentDate: string | null = null) => {
+  const calculateNextPaymentDate = (startDate: string, frequency: string, lastPaymentDate: string | null = null) => {
     const start = new Date(startDate)
     const last = lastPaymentDate ? new Date(lastPaymentDate) : start
     const next = new Date(last)
@@ -242,7 +275,7 @@ export default function RecurringDonationsPage() {
 
   const handleToggleStatus = async (donation: RecurringDonation) => {
     try {
-      const newStatus = donation.status === 'active' ? 'paused' : 'active'
+      const newStatus = (donation.status || 'active') === 'active' ? 'paused' : 'active'
 
       const { error } = await supabase
         .from('recurring_donations')
@@ -358,8 +391,8 @@ export default function RecurringDonationsPage() {
                     <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                       {formatCurrency(donation.amount)}
                     </h3>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(donation.status)}`}>
-                      {donation.status.charAt(0).toUpperCase() + donation.status.slice(1)}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(donation.status || 'active')}`}>
+                      {(donation.status || 'active').charAt(0).toUpperCase() + (donation.status || 'active').slice(1)}
                     </span>
                   </div>
 
@@ -385,7 +418,7 @@ export default function RecurringDonationsPage() {
                     <div>
                       <p className="text-slate-500 dark:text-slate-400">Total Payments</p>
                       <p className="font-medium text-slate-900 dark:text-white">
-                        {donation.total_payments || 0}
+                        {donation.donation_count || 0}
                       </p>
                     </div>
                   </div>
@@ -396,13 +429,13 @@ export default function RecurringDonationsPage() {
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-2">
-                  {(donation.status === 'active' || donation.status === 'paused') && (
+                  {((donation.status || 'active') === 'active' || donation.status === 'paused') && (
                     <button
                       onClick={() => handleToggleStatus(donation)}
                       className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                      title={donation.status === 'active' ? 'Pause' : 'Resume'}
+                      title={(donation.status || 'active') === 'active' ? 'Pause' : 'Resume'}
                     >
-                      {donation.status === 'active' ? (
+                      {(donation.status || 'active') === 'active' ? (
                         <>
                           <Pause size={18} />
                           <span className="hidden sm:inline">Pause</span>
@@ -415,7 +448,7 @@ export default function RecurringDonationsPage() {
                       )}
                     </button>
                   )}
-                  {donation.status !== 'cancelled' && donation.status !== 'completed' && (
+                  {(donation.status || 'active') !== 'cancelled' && (donation.status || 'active') !== 'completed' && (
                     <>
                       <button
                         onClick={() => handleEdit(donation)}
@@ -510,7 +543,7 @@ export default function RecurringDonationsPage() {
                 </label>
                 <select
                   value={formData.frequency}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, frequency: e.target.value as 'monthly' | 'yearly' }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, frequency: e.target.value }))}
                   className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   required
                   disabled={submitting}

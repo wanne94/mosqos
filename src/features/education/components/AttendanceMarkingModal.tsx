@@ -7,7 +7,8 @@ import { supabase } from '../../../lib/supabase/client'
 import { useOrganization } from '../../../hooks/useOrganization'
 import { attendanceService } from '../services/attendance.service'
 import AttendanceStatusBadge from './AttendanceStatusBadge'
-import type { AttendanceStatus, Enrollment } from '../types/education.types'
+import { AttendanceStatus } from '../types/education.types'
+import type { Enrollment } from '../types/education.types'
 
 interface AttendanceMarkingModalProps {
   isOpen: boolean
@@ -25,7 +26,13 @@ interface AttendanceRecord {
   notes: string
 }
 
-const statusOptions: AttendanceStatus[] = ['present', 'absent', 'late', 'excused', 'early_leave']
+const statusOptions: AttendanceStatus[] = [
+  AttendanceStatus.PRESENT,
+  AttendanceStatus.ABSENT,
+  AttendanceStatus.LATE,
+  AttendanceStatus.EXCUSED,
+  AttendanceStatus.EARLY_LEAVE,
+]
 
 export default function AttendanceMarkingModal({
   isOpen,
@@ -116,7 +123,7 @@ export default function AttendanceMarkingModal({
           memberId: enrollment.member_id,
           firstName: enrollment.organization_members?.first_name || '',
           lastName: enrollment.organization_members?.last_name || '',
-          status: existing?.status || ('present' as AttendanceStatus),
+          status: existing?.status || AttendanceStatus.PRESENT,
           notes: existing?.notes || '',
         }
       })
@@ -212,10 +219,10 @@ export default function AttendanceMarkingModal({
   // Calculate stats
   const stats = useMemo(() => {
     const total = records.length
-    const present = records.filter((r) => r.status === 'present').length
-    const absent = records.filter((r) => r.status === 'absent').length
-    const late = records.filter((r) => r.status === 'late').length
-    const excused = records.filter((r) => r.status === 'excused').length
+    const present = records.filter((r) => r.status === AttendanceStatus.PRESENT).length
+    const absent = records.filter((r) => r.status === AttendanceStatus.ABSENT).length
+    const late = records.filter((r) => r.status === AttendanceStatus.LATE).length
+    const excused = records.filter((r) => r.status === AttendanceStatus.EXCUSED).length
     return { total, present, absent, late, excused }
   }, [records])
 
@@ -292,7 +299,7 @@ export default function AttendanceMarkingModal({
                 </span>
                 <button
                   type="button"
-                  onClick={() => handleMarkAll('present')}
+                  onClick={() => handleMarkAll(AttendanceStatus.PRESENT)}
                   className="flex items-center gap-1 px-3 py-1.5 text-sm bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 rounded-lg hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition-colors"
                 >
                   <CheckCircle2 size={14} />
@@ -300,7 +307,7 @@ export default function AttendanceMarkingModal({
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleMarkAll('absent')}
+                  onClick={() => handleMarkAll(AttendanceStatus.ABSENT)}
                   className="flex items-center gap-1 px-3 py-1.5 text-sm bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
                 >
                   <XCircle size={14} />

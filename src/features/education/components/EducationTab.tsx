@@ -10,17 +10,17 @@ interface EducationTabProps {
   householdId?: string | null
 }
 
-interface ClassInfo {
+interface ScheduledClassInfo {
   id?: string
   name?: string
-  schedule?: string
+  day_of_week?: string | null
 }
 
 interface EnrollmentWithEvaluation {
   id: string
-  class_id: string
+  scheduled_class_id: string
   member_id: string
-  classes?: ClassInfo
+  scheduled_class?: ScheduledClassInfo
   studentName?: string
   latestEvaluation?: {
     score: number
@@ -63,13 +63,13 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
             // Filter for children/students (case-insensitive check)
             // Exclude the parent themselves and only include children/students
             const children = (householdMembers || []).filter(
-              (member: any) =>
+              (member: { id: string; first_name: string; last_name: string; membership_type: string | null }) =>
                 member.id !== memberId && // Exclude the parent
                 member.membership_type &&
                 (member.membership_type.toLowerCase() === 'student' ||
                   member.membership_type.toLowerCase() === 'individual')
             )
-            studentIds = children.map((child) => ({
+            studentIds = children.map((child: { id: string; first_name: string; last_name: string }) => ({
               id: child.id,
               name: `${child.first_name} ${child.last_name}`,
             }))
@@ -202,7 +202,7 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {educationData.map((item) => (
           <div
-            key={`${item.id}-${item.class_id}`}
+            key={`${item.id}-${item.scheduled_class_id}`}
             className="glass-card bg-white dark:bg-gray-800 border border-slate-200 dark:border-gray-700 rounded-lg p-6 hover:shadow-md transition-shadow"
           >
             <div className="flex items-start justify-between mb-4">
@@ -210,7 +210,7 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
                 <div className="flex items-center gap-2 mb-2">
                   <BookOpen className="text-emerald-600 dark:text-emerald-400" size={20} />
                   <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100">
-                    {item.classes?.name || 'Unknown Class'}
+                    {item.scheduled_class?.name || 'Unknown Class'}
                   </h3>
                 </div>
                 {item.studentName && (
@@ -219,9 +219,9 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
                     {item.studentName}
                   </p>
                 )}
-                {item.classes?.schedule && (
+                {item.scheduled_class?.day_of_week && (
                   <p className="text-xs text-slate-500 dark:text-gray-500">
-                    {translateSchedule(item.classes.schedule)}
+                    {translateSchedule(item.scheduled_class.day_of_week)}
                   </p>
                 )}
               </div>

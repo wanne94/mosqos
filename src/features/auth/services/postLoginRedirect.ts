@@ -1,6 +1,20 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 
 const DEV_ORG_SLUG = 'green-lane-masjid'
+const FORCE_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
+
+// Use type assertion for tables not in generated types
+const db = supabase as unknown as {
+  from: (table: string) => {
+    select: (query: string) => {
+      eq: (column: string, value: string) => {
+        limit: (count: number) => {
+          maybeSingle: () => Promise<{ data: { organization: { slug: string } } | null }>
+        }
+      }
+    }
+  }
+}
 
 /**
  * Determines the correct redirect URL after login based on user role.
@@ -13,7 +27,7 @@ const DEV_ORG_SLUG = 'green-lane-masjid'
  */
 export async function getPostLoginRedirectUrl(userEmail: string): Promise<string> {
   // Dev mode - use email-based routing
-  if (!isSupabaseConfigured()) {
+  if (FORCE_DEV_MODE || !isSupabaseConfigured()) {
     if (userEmail === 'admin@mosqos.com') {
       return '/platform'
     }
@@ -38,7 +52,7 @@ export async function getPostLoginRedirectUrl(userEmail: string): Promise<string
   }
 
   // 2. Check if organization owner
-  const { data: ownerOrg } = await supabase
+  const { data: ownerOrg } = await db
     .from('organization_owners')
     .select('organization:organizations(slug)')
     .eq('user_id', user.id)
@@ -50,7 +64,7 @@ export async function getPostLoginRedirectUrl(userEmail: string): Promise<string
   }
 
   // 3. Check if organization delegate
-  const { data: delegateOrg } = await supabase
+  const { data: delegateOrg } = await db
     .from('organization_delegates')
     .select('organization:organizations(slug)')
     .eq('user_id', user.id)
@@ -62,7 +76,7 @@ export async function getPostLoginRedirectUrl(userEmail: string): Promise<string
   }
 
   // 4. Check if organization member
-  const { data: memberOrg } = await supabase
+  const { data: memberOrg } = await db
     .from('organization_members')
     .select('organization:organizations(slug)')
     .eq('user_id', user.id)

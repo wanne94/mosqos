@@ -2,6 +2,9 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
 import type { PermissionCode } from '../types/permissions.types'
 
+// Use any-typed client for tables not yet in generated types
+const db = supabase as any
+
 // Module-level permission flags for backward compatibility
 interface ModulePermissions {
   dashboard: boolean
@@ -94,6 +97,9 @@ interface PermissionGroupMember {
   } | null
 }
 
+// Force dev mode via environment variable
+const FORCE_DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true'
+
 async function fetchUserPermissions(): Promise<{
   role: string | null
   memberId: string | null
@@ -107,7 +113,7 @@ async function fetchUserPermissions(): Promise<{
   const DEV_MODE_KEY = 'mosqos_dev_user'
   const savedDevUser = localStorage.getItem(DEV_MODE_KEY)
 
-  if (savedDevUser && !isSupabaseConfigured()) {
+  if (savedDevUser && (FORCE_DEV_MODE || !isSupabaseConfigured())) {
     // Development mode: Return role based on email
     const devUsers: Record<string, { role: string; mappedRole: string }> = {
       'admin@mosqos.com': { role: 'admin', mappedRole: 'platform_admin' },
@@ -184,7 +190,7 @@ async function fetchUserPermissions(): Promise<{
   let permissionCodes: string[] = []
 
   // Check if user is an organization owner
-  const { data: ownerRecord, error: ownerError } = await supabase
+  const { data: ownerRecord, error: ownerError } = await db
     .from('organization_owners')
     .select(
       `
@@ -210,7 +216,7 @@ async function fetchUserPermissions(): Promise<{
 
   // If not owner, check if delegate
   if (!memberData) {
-    const { data: delegateRecord, error: delegateError } = await supabase
+    const { data: delegateRecord, error: delegateError } = await db
       .from('organization_delegates')
       .select(
         `
@@ -237,7 +243,7 @@ async function fetchUserPermissions(): Promise<{
 
   // If not owner or delegate, check if member
   if (!memberData) {
-    const { data: memberRecord, error: memberError } = await supabase
+    const { data: memberRecord, error: memberError } = await db
       .from('organization_members')
       .select(
         `
@@ -264,7 +270,7 @@ async function fetchUserPermissions(): Promise<{
 
       // Fetch permission codes from permission groups for members
       if (orgId) {
-        const { data: groupPermissions } = await supabase
+        const { data: groupPermissions } = await db
           .from('permission_group_members')
           .select(
             `

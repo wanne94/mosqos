@@ -1,8 +1,17 @@
 import { useQuery } from '@tanstack/react-query'
-import { platformService } from '../services/platform.service'
+import { platformService, PlatformStats } from '../services/platform.service'
+
+// Type for recent organizations
+export interface RecentOrganization {
+  id: string
+  name: string
+  slug: string
+  created_at: string
+  is_active: boolean
+}
 
 export const usePlatformStats = () => {
-  return useQuery({
+  return useQuery<PlatformStats>({
     queryKey: ['platform', 'stats'],
     queryFn: () => platformService.getStats(),
     staleTime: 60 * 1000, // 1 minute
@@ -11,9 +20,12 @@ export const usePlatformStats = () => {
 }
 
 export const useRecentOrganizations = (limit = 5) => {
-  return useQuery({
+  return useQuery<RecentOrganization[]>({
     queryKey: ['platform', 'organizations', 'recent', limit],
-    queryFn: () => platformService.getRecentOrganizations(limit),
+    queryFn: async () => {
+      const data = await platformService.getRecentOrganizations(limit)
+      return (data || []) as RecentOrganization[]
+    },
     staleTime: 30 * 1000, // 30 seconds
   })
 }

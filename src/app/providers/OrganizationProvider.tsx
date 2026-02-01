@@ -1,14 +1,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
-import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import { supabase } from '@/lib/supabase/client'
 
 interface Organization {
   id: string
   name: string
   slug: string
   logo_url: string | null
-  settings: Record<string, unknown>
+  settings: Record<string, unknown> | null
   country_id: string | null
 }
 
@@ -106,8 +106,8 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
           .eq('is_active', true)
           .order('name')
 
-        const memberships: OrganizationMembership[] = (allOrgs || []).map((org: Organization) => ({
-          organization: org,
+        const memberships: OrganizationMembership[] = (allOrgs || []).map((org) => ({
+          organization: org as Organization,
           isOwner: true, // Platform admins have full access
           isDelegate: true,
           permissions: ['*'],
@@ -128,20 +128,29 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
       }
 
       // Non-platform admin: fetch user's organization memberships
+      // Use type assertion for tables not in generated types
+      const db = supabase as unknown as {
+        from: (table: string) => {
+          select: (query: string) => {
+            eq: (column: string, value: string) => Promise<{ data: Array<{ organization: Organization }> | null }>
+          }
+        }
+      }
+
       // Fetch organizations where user is owner
-      const { data: ownedOrgs } = await supabase
+      const { data: ownedOrgs } = await db
         .from('organization_owners')
         .select('organization:organizations(*)')
         .eq('user_id', user.id)
 
       // Fetch organizations where user is delegate
-      const { data: delegateOrgs } = await supabase
+      const { data: delegateOrgs } = await db
         .from('organization_delegates')
         .select('organization:organizations(*)')
         .eq('user_id', user.id)
 
       // Fetch organizations where user is member
-      const { data: memberOrgs } = await supabase
+      const { data: memberOrgs } = await db
         .from('organization_members')
         .select('organization:organizations(*)')
         .eq('user_id', user.id)

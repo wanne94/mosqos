@@ -47,3 +47,10 @@ coverage
 
 # MCP Configuration
 .mcp.json
+
+# Test outputs
+playwright-report/
+test-results/
+
+# Claude Code
+.claude/

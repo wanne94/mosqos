@@ -9,9 +9,77 @@
  * @requires jspdf-autotable - Install with: npm install jspdf-autotable
  */
 
-// Type definitions for jsPDF (install @types/jspdf for full types)
-type JsPDF = unknown
-type AutoTable = unknown
+// Type declarations for optional jspdf modules (dynamically imported)
+// These types are defined here to avoid requiring the packages to be installed
+// until they are actually used at runtime
+
+interface JsPDFOptions {
+  orientation?: 'portrait' | 'landscape'
+  unit?: 'pt' | 'mm' | 'cm' | 'in'
+  format?: string | [number, number]
+}
+
+interface JsPDFDocument {
+  internal: {
+    pageSize: {
+      getWidth: () => number
+      getHeight: () => number
+    }
+  }
+  lastAutoTable?: {
+    finalY: number
+  }
+  setFillColor: (r: number, g: number, b: number) => JsPDFDocument
+  setTextColor: (r: number, g: number, b: number) => JsPDFDocument
+  setFontSize: (size: number) => JsPDFDocument
+  setFont: (font: string, style: string) => JsPDFDocument
+  text: (text: string, x: number, y: number, options?: { align?: string }) => JsPDFDocument
+  rect: (x: number, y: number, w: number, h: number, style: string) => JsPDFDocument
+  setDrawColor: (r: number, g: number, b: number) => JsPDFDocument
+  line: (x1: number, y1: number, x2: number, y2: number) => JsPDFDocument
+  save: (filename: string) => void
+}
+
+interface AutoTableOptions {
+  startY?: number
+  head?: (string | number)[][]
+  body?: (string | number)[][]
+  theme?: 'striped' | 'grid' | 'plain'
+  headStyles?: {
+    fillColor?: [number, number, number]
+    textColor?: [number, number, number]
+    fontStyle?: string
+  }
+  styles?: {
+    fontSize?: number
+    cellPadding?: number
+  }
+}
+
+type AutoTableFunction = (doc: JsPDFDocument, options: AutoTableOptions) => void
+
+// Type for jsPDF constructor
+type JsPDFConstructor = new (options?: JsPDFOptions) => JsPDFDocument
+
+/**
+ * Dynamically imports jspdf and jspdf-autotable modules
+ * @returns Promise resolving to jsPDF constructor and autoTable function
+ * @throws Error if packages are not installed
+ */
+async function importJsPDF(): Promise<{
+  jsPDF: JsPDFConstructor
+  autoTable: AutoTableFunction
+}> {
+  // @ts-expect-error - jspdf is an optional dependency, dynamically imported at runtime
+  const jspdfModule = await import('jspdf')
+  // @ts-expect-error - jspdf-autotable is an optional dependency, dynamically imported at runtime
+  const autoTableModule = await import('jspdf-autotable')
+
+  return {
+    jsPDF: jspdfModule.default as JsPDFConstructor,
+    autoTable: autoTableModule.default as AutoTableFunction,
+  }
+}
 
 /**
  * Invoice data interface
@@ -143,8 +211,7 @@ export async function generateInvoice(
 ): Promise<void> {
   try {
     // Dynamic import to avoid bundling if not needed
-    const { default: jsPDF } = await import('jspdf')
-    const { default: autoTable } = await import('jspdf-autotable')
+    const { jsPDF, autoTable } = await importJsPDF()
 
     const {
       organization = { name: 'Mosque SaaS' },
@@ -156,18 +223,7 @@ export async function generateInvoice(
     // Create PDF document
     const doc = new jsPDF({
       orientation: options.orientation || 'portrait',
-    }) as unknown as {
-      internal: { pageSize: { getWidth: () => number; getHeight: () => number } }
-      setFillColor: (r: number, g: number, b: number) => void
-      setTextColor: (r: number, g: number, b: number) => void
-      setFontSize: (size: number) => void
-      setFont: (font: string, style: string) => void
-      text: (text: string, x: number, y: number, options?: { align: string }) => void
-      rect: (x: number, y: number, w: number, h: number, style: string) => void
-      setDrawColor: (r: number, g: number, b: number) => void
-      line: (x1: number, y1: number, x2: number, y2: number) => void
-      save: (filename: string) => void
-    }
+    }) as JsPDFDocument
 
     const pageWidth = doc.internal.pageSize.getWidth()
     const margin = 20
@@ -239,7 +295,7 @@ export async function generateInvoice(
 
     // Items table (if items are provided)
     if (invoice.items && invoice.items.length > 0) {
-      ;(autoTable as unknown as (doc: unknown, options: unknown) => void)(doc, {
+      autoTable(doc, {
         startY: yPosition,
         head: [['Description', 'Quantity', 'Unit Price', 'Total']],
         body: invoice.items.map((item) => [
@@ -260,7 +316,7 @@ export async function generateInvoice(
         },
       })
 
-      yPosition = (doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15
+      yPosition = (doc.lastAutoTable?.finalY ?? yPosition) + 15
     }
 
     // Total amount
@@ -341,8 +397,7 @@ export async function generateReport(
   options: PDFOptions = {}
 ): Promise<void> {
   try {
-    const { default: jsPDF } = await import('jspdf')
-    const { default: autoTable } = await import('jspdf-autotable')
+    const { jsPDF, autoTable } = await importJsPDF()
 
     const {
       organization = { name: 'Mosque SaaS' },
@@ -351,19 +406,9 @@ export async function generateReport(
 
     const doc = new jsPDF({
       orientation: options.orientation || 'portrait',
-    }) as unknown as {
-      internal: { pageSize: { getWidth: () => number } }
-      setFillColor: (r: number, g: number, b: number) => void
-      setTextColor: (r: number, g: number, b: number) => void
-      setFontSize: (size: number) => void
-      setFont: (font: string, style: string) => void
-      text: (text: string, x: number, y: number, options?: { align: string }) => void
-      rect: (x: number, y: number, w: number, h: number, style: string) => void
-      save: (filename: string) => void
-    }
+    }) as JsPDFDocument
 
     const pageWidth = doc.internal.pageSize.getWidth()
-    const margin = 20
 
     // Header
     doc.setFillColor(headerColor[0], headerColor[1], headerColor[2])
@@ -383,7 +428,7 @@ export async function generateReport(
       columns.map((col) => String(row[col.key] || ''))
     )
 
-    ;(autoTable as unknown as (doc: unknown, options: unknown) => void)(doc, {
+    autoTable(doc, {
       startY: 60,
       head: [columns.map((col) => col.label)],
       body: tableData,
@@ -418,8 +463,7 @@ export async function generateReport(
  */
 export async function isPDFAvailable(): Promise<boolean> {
   try {
-    await import('jspdf')
-    await import('jspdf-autotable')
+    await importJsPDF()
     return true
   } catch {
     return false

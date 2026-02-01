@@ -8,7 +8,6 @@ import {
   Trash2,
   Send,
   Archive,
-  Eye,
   Globe,
   Users,
   AlertTriangle,
