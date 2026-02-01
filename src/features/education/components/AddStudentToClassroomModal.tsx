@@ -74,7 +74,7 @@ export default function AddStudentToClassroomModal({
         .order('name', { ascending: true })
 
       if (error) throw error
-      setClasses(data || [])
+      setClasses((data || []).map(d => ({ ...d, classroom_id: classroomId })) as ScheduledClass[])
     } catch (error) {
       console.error('Error fetching classes:', error)
     } finally {
@@ -360,8 +360,8 @@ export default function AddStudentToClassroomModal({
                               <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
                                 {member.first_name} {member.last_name}
                               </span>
-                              {member.role && (
-                                <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">({member.role})</span>
+                              {member.membership_type && (
+                                <span className="text-xs text-slate-500 dark:text-slate-400 ml-2">({member.membership_type})</span>
                               )}
                             </div>
                           </label>

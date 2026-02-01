@@ -59,35 +59,17 @@ export default function ClassEditPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('teachers')
-        .select(`
-          id,
-          teacher_color,
-          member:member_id (
-            id,
-            first_name,
-            last_name
-          )
-        `)
+        .select('id, first_name, last_name')
         .order('created_at', { ascending: true })
 
       if (error) throw error
 
-      type TeacherQueryResult = {
-        id: string
-        teacher_color: string | null
-        member: {
-          id: string
-          first_name: string
-          last_name: string
-        } | null
-      }
-
-      return ((data || []) as TeacherQueryResult[])
+      return ((data || []) as Array<{ id: string; first_name: string; last_name: string }>)
         .map((teacher) => ({
-          id: teacher.member?.id || '',
-          first_name: teacher.member?.first_name || '',
-          last_name: teacher.member?.last_name || '',
-          teacher_color: teacher.teacher_color,
+          id: teacher.id,
+          first_name: teacher.first_name,
+          last_name: teacher.last_name,
+          teacher_color: null,
         }))
         .filter((t) => t.id && t.first_name && t.last_name)
     },
@@ -100,7 +82,7 @@ export default function ClassEditPage() {
       const { data, error } = await supabase.from('courses').select('*').order('name', { ascending: true })
 
       if (error) throw error
-      return data as Course[]
+      return data as unknown as Course[]
     },
   })
 
@@ -139,7 +121,7 @@ export default function ClassEditPage() {
         description: data.description || null,
       }
 
-      const { error } = await supabase.from('scheduled_classes').update(classData).eq('id', classId)
+      const { error } = await supabase.from('scheduled_classes').update(classData as Record<string, unknown>).eq('id', classId)
 
       if (error) throw error
     },

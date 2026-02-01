@@ -17,6 +17,19 @@ interface StudentPaymentHistoryModalProps {
   className?: string
 }
 
+// Interface matching actual database schema
+interface TuitionPaymentRecord {
+  id: string
+  enrollment_id: string
+  payment_month: string // Format: "2024-01"
+  amount: number
+  final_amount: number | null
+  payment_date: string | null
+  status: string | null
+  due_date: string
+}
+
+// UI-friendly interface for display
 interface PaymentRecord {
   id: string
   enrollment_id: string
@@ -25,7 +38,7 @@ interface PaymentRecord {
   amount_due: number
   amount_paid: number
   payment_status: string
-  payment_date?: string | null
+  payment_date: string | null
   isPastMonth?: boolean
   isFutureMonth?: boolean
 }
@@ -34,6 +47,30 @@ interface EnrollmentInfo {
   monthly_fee: number
   start_date: string
   end_date: string
+}
+
+// Helper to parse payment_month string to month/year
+function parsePaymentMonth(paymentMonth: string): { month: number; year: number } {
+  const [yearStr, monthStr] = paymentMonth.split('-')
+  return {
+    year: parseInt(yearStr, 10),
+    month: parseInt(monthStr, 10),
+  }
+}
+
+// Helper to convert DB record to UI record
+function toPaymentRecord(dbRecord: TuitionPaymentRecord): PaymentRecord {
+  const { month, year } = parsePaymentMonth(dbRecord.payment_month)
+  return {
+    id: dbRecord.id,
+    enrollment_id: dbRecord.enrollment_id,
+    month,
+    year,
+    amount_due: dbRecord.amount,
+    amount_paid: dbRecord.final_amount ?? 0,
+    payment_status: dbRecord.status || 'pending',
+    payment_date: dbRecord.payment_date,
+  }
 }
 
 export default function StudentPaymentHistoryModal({
@@ -54,7 +91,7 @@ export default function StudentPaymentHistoryModal({
   const [isEditPaymentModalOpen, setIsEditPaymentModalOpen] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState<PaymentRecord | null>(null)
 
-  useEscapeKey(onClose, false, '', isOpen)
+  useEscapeKey(onClose, { enabled: isOpen })
 
   useEffect(() => {
     if (isOpen && enrollmentId) {
@@ -69,7 +106,9 @@ export default function StudentPaymentHistoryModal({
         .from('enrollments')
         .select(`
           scheduled_class:scheduled_class_id (
-            tuition_fee
+            tuition_fee,
+            start_date,
+            end_date
           )
         `)
         .eq('id', enrollmentId)
@@ -77,12 +116,18 @@ export default function StudentPaymentHistoryModal({
         .single()
 
       if (error) throw error
-      // Map the data to the expected structure
-      const classData = (data as { scheduled_class: { tuition_fee: number | null } | null })?.scheduled_class
+
+      type ScheduledClassData = {
+        tuition_fee: number | null
+        start_date: string | null
+        end_date: string | null
+      }
+
+      const classData = (data as { scheduled_class: ScheduledClassData | null })?.scheduled_class
       setEnrollmentInfo({
         monthly_fee: classData?.tuition_fee || 0,
-        start_date: new Date().toISOString().split('T')[0],
-        end_date: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+        start_date: classData?.start_date || new Date().toISOString().split('T')[0],
+        end_date: classData?.end_date || new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
       })
     } catch (error) {
       console.error('Error fetching enrollment info:', error)
@@ -93,76 +138,28 @@ export default function StudentPaymentHistoryModal({
     try {
       setLoading(true)
 
-      // Fetch enrollment info to generate missing payment records
-      const { data: enrollment, error: enrollmentError } = await supabase
-        .from('enrollments')
-        .select('monthly_fee, start_date, end_date')
-        .eq('id', enrollmentId)
-        .eq('organization_id', currentOrganizationId)
-        .single()
-
-      if (enrollmentError) throw enrollmentError
-
-      // Fetch existing monthly payments
+      // Fetch existing monthly payments using the correct schema
       const { data: existingPayments, error: paymentsError } = await supabase
         .from('tuition_monthly_payments')
-        .select('*')
+        .select('id, enrollment_id, payment_month, amount, final_amount, payment_date, status, due_date')
         .eq('enrollment_id', enrollmentId)
-        .order('year', { ascending: false })
-        .order('month', { ascending: false })
+        .eq('organization_id', currentOrganizationId)
+        .order('payment_month', { ascending: false })
 
       if (paymentsError) throw paymentsError
 
-      // Generate all payment records for the enrollment period
-      const monthlyFee = parseFloat(String(enrollment.monthly_fee)) || 0
-      const startDate = enrollment.start_date ? new Date(enrollment.start_date) : null
-      const endDate = enrollment.end_date ? new Date(enrollment.end_date) : null
-
-      const allPayments: PaymentRecord[] = []
-
-      if (startDate && endDate && monthlyFee > 0) {
-        let currentMonth = new Date(startDate.getFullYear(), startDate.getMonth(), 1)
-        const endMonth = new Date(endDate.getFullYear(), endDate.getMonth(), 1)
-
-        while (currentMonth <= endMonth) {
-          const month = currentMonth.getMonth() + 1
-          const year = currentMonth.getFullYear()
-
-          // Find existing payment for this month
-          const existingPayment = existingPayments?.find((p) => p.month === month && p.year === year)
-
-          if (existingPayment) {
-            allPayments.push(existingPayment)
-          } else {
-            // Create a placeholder for missing payment record
-            allPayments.push({
-              id: `placeholder-${year}-${month}`,
-              enrollment_id: enrollmentId,
-              month,
-              year,
-              amount_due: monthlyFee,
-              amount_paid: 0,
-              payment_status: 'Unpaid',
-              payment_date: null,
-            })
-          }
-
-          currentMonth.setMonth(currentMonth.getMonth() + 1)
-        }
-      } else {
-        // If no dates, just show existing payments
-        allPayments.push(...(existingPayments || []))
-      }
+      // Convert DB records to UI records
+      const paymentRecords: PaymentRecord[] = (existingPayments || []).map(toPaymentRecord)
 
       // Sort by year and month descending
-      allPayments.sort((a, b) => {
+      paymentRecords.sort((a, b) => {
         if (a.year !== b.year) {
           return b.year - a.year
         }
         return b.month - a.month
       })
 
-      setPayments(allPayments)
+      setPayments(paymentRecords)
     } catch (error) {
       console.error('Error fetching payment history:', error)
       setPayments([])
@@ -215,12 +212,11 @@ export default function StudentPaymentHistoryModal({
     const paymentMonthDate = new Date(payment.year, payment.month - 1, 1)
     const lastDayOfMonth = new Date(payment.year, payment.month, 0)
     const isPastMonth = lastDayOfMonth < today
-    const isFutureMonth = paymentMonthDate > today
     const amountPaid = parseFloat(String(payment.amount_paid)) || 0
     const amountDue = parseFloat(String(payment.amount_due)) || 0
     const isFullyPaid = amountPaid >= amountDue
 
-    if (isFullyPaid || payment.payment_status === 'Paid') {
+    if (isFullyPaid || payment.payment_status === 'paid') {
       return (
         <div className="flex items-center gap-2">
           <span className="px-2 py-1 text-xs font-medium rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-200 flex items-center gap-1">

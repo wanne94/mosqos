@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useMemo, useCallback } from 'react'
@@ -6,6 +5,10 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { supabase } from '@/lib/supabase/client'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Type assertion for tables not in generated types
+const db = supabase as SupabaseClient<any>
 import {
   Search,
   UserPlus,
@@ -32,23 +35,23 @@ interface Filters {
 
 interface CommunicationLog {
   id: string
-  type: 'email' | 'sms'
+  communication_type: string
   subject: string | null
-  body: string
-  status: string
+  content: string | null
+  status: string | null
   created_at: string
-  recipient_id: string | null
+  member_id: string | null
   household_id: string | null
   recipient?: {
     id: string
     first_name: string
     last_name: string
     email: string
-  }
+  } | null
   household?: {
     id: string
     name: string
-  }
+  } | null
 }
 
 interface Recipient {
@@ -130,11 +133,11 @@ export default function PeoplePage() {
     queryKey: ['communication-logs', currentOrganization?.id],
     queryFn: async () => {
       if (!currentOrganization?.id) return []
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('communication_logs')
         .select(`
           *,
-          recipient:recipient_id (
+          recipient:member_id (
             id,
             first_name,
             last_name,
@@ -150,7 +153,7 @@ export default function PeoplePage() {
         .limit(50)
 
       if (error) throw error
-      return data as CommunicationLog[]
+      return (data ?? []) as CommunicationLog[]
     },
     enabled: !!currentOrganization?.id && activeTab === 'communicate',
   })
@@ -289,19 +292,20 @@ export default function PeoplePage() {
       if (!user) throw new Error('User not authenticated')
 
       const logEntries = selectedRecipients.map(recipient => ({
-        type: communicationType,
+        communication_type: communicationType,
         subject: communicationType === 'email' ? subject : null,
-        body: body,
+        content: body,
         status: 'sent',
+        direction: 'outbound' as const,
         created_by: user.id,
         organization_id: currentOrganization?.id,
         ...(recipient.type === 'household'
           ? { household_id: recipient.id }
-          : { recipient_id: recipient.id }
+          : { member_id: recipient.id }
         ),
       }))
 
-      const { error } = await supabase
+      const { error } = await db
         .from('communication_logs')
         .insert(logEntries)
 
@@ -657,7 +661,7 @@ export default function PeoplePage() {
                         onMouseDown={(e) => e.preventDefault()}
                       >
                         {recipient.name}
-                        {recipient.contact_email && (
+                        {'contact_email' in recipient && recipient.contact_email && (
                           <span className="text-xs text-slate-500 ml-2">({recipient.contact_email})</span>
                         )}
                       </button>
@@ -810,11 +814,11 @@ export default function PeoplePage() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                            log.type === 'email'
+                            log.communication_type === 'email'
                               ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
                               : 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200'
                           }`}>
-                            {log.type.toUpperCase()}
+                            {(log.communication_type || 'unknown').toUpperCase()}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-sm text-slate-900 dark:text-white">
@@ -826,7 +830,7 @@ export default function PeoplePage() {
                               ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200'
                               : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
                           }`}>
-                            {log.status}
+                            {log.status || 'unknown'}
                           </span>
                         </td>
                       </tr>

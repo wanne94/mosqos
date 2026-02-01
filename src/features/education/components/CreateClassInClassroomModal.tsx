@@ -48,7 +48,7 @@ export default function CreateClassInClassroomModal({
     }
   }
 
-  useEscapeKey(handleClose, false, '', isOpen)
+  useEscapeKey(handleClose, { enabled: isOpen })
 
   useEffect(() => {
     if (isOpen) {

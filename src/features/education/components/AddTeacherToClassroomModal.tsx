@@ -24,7 +24,7 @@ interface TeacherMember {
   first_name: string
   last_name: string
   specialization: string | null
-  teacher_color: string | null
+  teacher_color?: string | null
 }
 
 const initialFormData = { selectedTeacherIds: [] as string[] }
@@ -87,7 +87,7 @@ export default function AddTeacherToClassroomModal({
     try {
       const { data, error } = await supabase
         .from('teachers')
-        .select('id, first_name, last_name, specialization, teacher_color')
+        .select('id, first_name, last_name, specialization')
         .eq('organization_id', currentOrganizationId)
         .eq('is_active', true)
         .order('first_name', { ascending: true })

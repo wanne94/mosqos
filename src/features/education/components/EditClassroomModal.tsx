@@ -69,7 +69,7 @@ export default function EditClassroomModal({ isOpen, onClose, onSave, classroomI
       if (error) throw error
 
       if (data) {
-        const classroomData = data as { name: string; capacity: number | null; description: string | null }
+        const classroomData = data as unknown as { name: string; capacity: number | null; description: string | null }
         const initial: ClassroomFormData = {
           name: classroomData.name || '',
           capacity: classroomData.capacity?.toString() || '',

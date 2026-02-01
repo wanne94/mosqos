@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../../lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { BookOpen, Award, Users } from 'lucide-react'
 import { translateSchedule } from '../utils/scheduleTranslations'
 import { useOrganization } from '../../../hooks/useOrganization'
+
+// Type assertion for tables with columns not in generated types
+const db = supabase as SupabaseClient<any>
+
+interface EvaluationWithEnrollment {
+  id: string
+  enrollment_id: string
+  score: number | null
+  evaluation_date: string
+}
 
 interface EducationTabProps {
   memberId: string
@@ -111,7 +122,7 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
 
       // FIX N+1 QUERY: Fetch all evaluations in a single query
       const enrollmentIds = enrollments.map((e) => e.id)
-      const { data: allEvaluations, error: evalError } = await supabase
+      const { data: allEvaluations, error: evalError } = await db
         .from('evaluations')
         .select('*')
         .in('enrollment_id', enrollmentIds)
@@ -123,9 +134,9 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
       }
 
       // Group evaluations by enrollment_id (get only the latest for each enrollment)
-      const latestEvaluationsByEnrollment: Record<string, any> = {}
+      const latestEvaluationsByEnrollment: Record<string, EvaluationWithEnrollment> = {}
       if (allEvaluations) {
-        for (const evaluation of allEvaluations) {
+        for (const evaluation of allEvaluations as EvaluationWithEnrollment[]) {
           if (!latestEvaluationsByEnrollment[evaluation.enrollment_id]) {
             latestEvaluationsByEnrollment[evaluation.enrollment_id] = evaluation
           }
@@ -141,11 +152,11 @@ export default function EducationTab({ memberId, memberRole, householdId }: Educ
       // Combine enrollments with their evaluations
       const educationDataWithEvaluations = enrollments.map((enrollment) => ({
         ...enrollment,
-        studentName: studentNameLookup[enrollment.member_id],
+        studentName: studentNameLookup[enrollment.member_id] ?? undefined,
         latestEvaluation: latestEvaluationsByEnrollment[enrollment.id] || null,
       }))
 
-      setEducationData(educationDataWithEvaluations)
+      setEducationData(educationDataWithEvaluations as unknown as EnrollmentWithEvaluation[])
     } catch (error) {
       console.error('Error fetching education data:', error)
       setEducationData([])

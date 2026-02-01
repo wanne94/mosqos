@@ -1,9 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../../../lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useEscapeKey } from '../../../hooks/useEscapeKey'
 import { useOrganization } from '../../../hooks/useOrganization'
+
+// Type assertion for tables with columns not in generated types
+const db = supabase as SupabaseClient<any>
 
 const DEFAULT_COLORS = [
   '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#84CC16',
@@ -152,7 +156,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       }
 
       if (existingTeacher) {
-        const { error } = await supabase
+        const { error } = await db
           .from('teachers')
           .update({ teacher_color: selectedColor })
           .eq('id', (existingTeacher as { id: string }).id)
@@ -161,7 +165,7 @@ export default function AddTeacherModal({ isOpen, onClose, onSave }: AddTeacherM
       } else {
         // Get member info for teacher record
         const selectedMember = members.find(m => m.id === selectedMemberId)
-        const { error } = await supabase
+        const { error } = await db
           .from('teachers')
           .insert({
             member_id: selectedMemberId,

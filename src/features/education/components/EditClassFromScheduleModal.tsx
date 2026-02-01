@@ -10,7 +10,7 @@ interface TeacherMember {
   id: string
   first_name: string
   last_name: string
-  teacher_color?: string
+  teacher_color?: string | null
 }
 
 interface Course {
@@ -80,7 +80,7 @@ export default function EditClassFromScheduleModal({
     try {
       const { data, error } = await supabase
         .from('teachers')
-        .select('id, first_name, last_name, teacher_color')
+        .select('id, first_name, last_name')
         .eq('organization_id', currentOrganizationId)
         .eq('is_active', true)
         .order('first_name', { ascending: true })

@@ -1,10 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../../../lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { X, DollarSign } from 'lucide-react'
 import { useFormDirty } from '../../../hooks/useFormDirty'
 import { useEscapeKey } from '../../../hooks/useEscapeKey'
 import { useOrganization } from '../../../hooks/useOrganization'
+
+// Type assertion for tables not in generated types
+const db = supabase as SupabaseClient<any>
 
 interface LogTuitionPaymentModalProps {
   isOpen: boolean
@@ -103,13 +107,13 @@ export default function LogTuitionPaymentModal({
 
   const fetchFunds = async () => {
     try {
-      const { data, error } = await supabase
-        .from('organization_funds')
+      const { data, error } = await db
+        .from('funds')
         .select('*')
         .eq('organization_id', currentOrganizationId)
 
       if (error) throw error
-      await findOrCreateEducationFund(data || [])
+      await findOrCreateEducationFund((data || []) as Fund[])
     } catch (error) {
       console.error('Error fetching funds:', error)
     }
@@ -125,17 +129,17 @@ export default function LogTuitionPaymentModal({
 
       if (!fund) {
         // Create Education fund if it doesn't exist
-        const { data: newFund, error: createError } = await supabase
-          .from('organization_funds')
-          .insert([{ name: 'Education', organization_id: currentOrganizationId }] as never)
+        const { data: newFund, error: createError } = await db
+          .from('funds')
+          .insert([{ name: 'Education', organization_id: currentOrganizationId }])
           .select()
           .single()
 
         if (createError) {
           console.error('Error creating Education fund:', createError)
           // Try to fetch again in case it was created by another process
-          const { data: retryData } = await supabase
-            .from('organization_funds')
+          const { data: retryData } = await db
+            .from('funds')
             .select('*')
             .eq('organization_id', currentOrganizationId)
             .ilike('name', '%education%')
@@ -245,7 +249,7 @@ export default function LogTuitionPaymentModal({
         throw fetchError
       } else if (existingMonthlyPayment) {
         // Record exists, update it
-        const existingPayment = existingMonthlyPayment as { id: string; amount_paid: number | null; amount_due: number | null }
+        const existingPayment = existingMonthlyPayment as unknown as { id: string; amount_paid: number | null; amount_due: number | null }
         const newMonthlyAmountPaid = (parseFloat(existingPayment.amount_paid?.toString() || '0') || 0) + paymentAmount
         const monthlyAmountDue = parseFloat(existingPayment.amount_due?.toString() || '0') || tuitionFee
         const newMonthlyStatus = newMonthlyAmountPaid >= monthlyAmountDue ? 'Paid' : 'Unpaid'
@@ -274,7 +278,7 @@ export default function LogTuitionPaymentModal({
       if (!currentEducationFund) {
         // Try to fetch Education fund one more time
         const { data: fundData, error: fundError } = await supabase
-          .from('organization_funds')
+          .from('funds')
           .select('*')
           .eq('organization_id', currentOrganizationId)
           .ilike('name', '%education%')
@@ -284,7 +288,7 @@ export default function LogTuitionPaymentModal({
         if (fundError || !fundData) {
           // Create Education fund if it still doesn't exist
           const { data: newFund, error: createError } = await supabase
-            .from('organization_funds')
+            .from('funds')
             .insert([{ name: 'Education', organization_id: currentOrganizationId }] as never)
             .select()
             .single()

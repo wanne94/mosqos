@@ -6,6 +6,10 @@ import { useOrganization } from '../../../hooks/useOrganization'
 import { toast } from 'sonner'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../../lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Type assertion for tables with columns not in generated types
+const db = supabase as SupabaseClient<any>
 import {
   AddClassModal,
   EditClassModal,
@@ -31,7 +35,13 @@ import type {
   Classroom,
 } from '../types/education.types'
 
-interface EnrollmentWithPayment extends Enrollment {
+interface EnrollmentWithPayment {
+  id: string
+  member_id: string
+  scheduled_class_id: string
+  organization_id: string
+  status?: string | null
+  created_at?: string
   member?: {
     id: string
     first_name: string
@@ -98,7 +108,7 @@ export default function EducationPage() {
         .order('name', { ascending: true })
 
       if (error) throw error
-      return data as Course[]
+      return data as unknown as Course[]
     },
     enabled: !!currentOrganizationId && activeTab === 'courses',
   })
@@ -132,7 +142,7 @@ export default function EducationPage() {
     queryKey: ['teachers', currentOrganizationId],
     queryFn: async () => {
       if (!currentOrganizationId) return []
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from('teachers')
         .select(`
           id,
@@ -168,8 +178,8 @@ export default function EducationPage() {
         } | null
       }
 
-      return ((data || []) as TeacherQueryResult[])
-        .map((teacher) => ({
+      return ((data || []) as unknown as TeacherQueryResult[])
+        .map((teacher: TeacherQueryResult) => ({
           id: teacher.member?.id || teacher.id,
           first_name: teacher.member?.first_name || '',
           last_name: teacher.member?.last_name || '',
@@ -179,7 +189,7 @@ export default function EducationPage() {
           phone: teacher.member?.contact_phone || '',
           teacher_id: teacher.id,
         }))
-        .filter((teacher) => teacher.first_name && teacher.last_name) as Teacher[]
+        .filter((teacher) => teacher.first_name && teacher.last_name) as unknown as Teacher[]
     },
     enabled: !!currentOrganizationId && activeTab === 'teachers',
   })
@@ -196,7 +206,7 @@ export default function EducationPage() {
         .order('name', { ascending: true })
 
       if (error) throw error
-      return data as Classroom[]
+      return data as unknown as Classroom[]
     },
     enabled: !!currentOrganizationId && activeTab === 'classrooms',
   })
@@ -556,10 +566,10 @@ export default function EducationPage() {
           setIsStudentNotesModalOpen(false)
           setSelectedEnrollmentForNotes(null)
         }}
-        enrollment={selectedEnrollmentForNotes as any}
+        enrollment={selectedEnrollmentForNotes ? { id: selectedEnrollmentForNotes.id } : null}
         memberId={selectedEnrollmentForNotes?.member_id || ''}
-        classId={null}
-        studentName="Student"
+        classId={selectedEnrollmentForNotes?.scheduled_class_id || null}
+        studentName={selectedEnrollmentForNotes?.member ? `${selectedEnrollmentForNotes.member.first_name} ${selectedEnrollmentForNotes.member.last_name}` : 'Student'}
         className="Enrollment"
       />
       <StudentPaymentHistoryModal
