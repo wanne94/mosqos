@@ -32,11 +32,11 @@ import type {
 } from '../types/education.types'
 
 interface EnrollmentWithPayment extends Enrollment {
-  organization_members?: {
+  member?: {
     id: string
     first_name: string
     last_name: string
-  }
+  } | null
 }
 
 type TabType = 'enrollments' | 'classrooms' | 'teachers' | 'courses' | 'attendance'
@@ -104,7 +104,7 @@ export default function EducationPage() {
   })
 
   // Fetch enrollments
-  const { data: enrollments = [], isLoading: enrollmentsLoading } = useQuery({
+  const { data: enrollments = [], isLoading: enrollmentsLoading } = useQuery<EnrollmentWithPayment[]>({
     queryKey: ['enrollments', currentOrganizationId],
     queryFn: async () => {
       if (!currentOrganizationId) return []
@@ -112,7 +112,7 @@ export default function EducationPage() {
         .from('enrollments')
         .select(`
           *,
-          organization_members:member_id (
+          member:member_id (
             id,
             first_name,
             last_name
@@ -122,7 +122,7 @@ export default function EducationPage() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      return data as EnrollmentWithPayment[]
+      return (data || []) as EnrollmentWithPayment[]
     },
     enabled: !!currentOrganizationId && activeTab === 'enrollments',
   })
@@ -139,11 +139,11 @@ export default function EducationPage() {
           teacher_color,
           created_at,
           updated_at,
-          organization_members:member_id (
+          member:member_id (
             id,
             first_name,
             last_name,
-            role,
+            membership_type,
             contact_email,
             contact_phone
           )
@@ -153,18 +153,33 @@ export default function EducationPage() {
 
       if (error) throw error
 
-      return (data || [])
-        .map((teacher: any) => ({
-          id: teacher.organization_members?.id || teacher.id,
-          first_name: teacher.organization_members?.first_name || '',
-          last_name: teacher.organization_members?.last_name || '',
-          role: teacher.organization_members?.role || '',
+      type TeacherQueryResult = {
+        id: string
+        teacher_color: string | null
+        created_at: string
+        updated_at: string
+        member: {
+          id: string
+          first_name: string
+          last_name: string
+          membership_type: string | null
+          contact_email: string | null
+          contact_phone: string | null
+        } | null
+      }
+
+      return ((data || []) as TeacherQueryResult[])
+        .map((teacher) => ({
+          id: teacher.member?.id || teacher.id,
+          first_name: teacher.member?.first_name || '',
+          last_name: teacher.member?.last_name || '',
+          role: teacher.member?.membership_type || '',
           teacher_color: teacher.teacher_color,
-          email: teacher.organization_members?.contact_email || '',
-          phone: teacher.organization_members?.contact_phone || '',
+          email: teacher.member?.contact_email || '',
+          phone: teacher.member?.contact_phone || '',
           teacher_id: teacher.id,
         }))
-        .filter((teacher: any) => teacher.first_name && teacher.last_name) as Teacher[]
+        .filter((teacher) => teacher.first_name && teacher.last_name) as Teacher[]
     },
     enabled: !!currentOrganizationId && activeTab === 'teachers',
   })
@@ -187,11 +202,24 @@ export default function EducationPage() {
   })
 
   // Fetch attendance records
-  const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery({
+  interface AttendanceRecord {
+    id: string
+    member_id: string
+    attendance_date: string
+    status: string
+    notes: string | null
+    member: {
+      id: string
+      first_name: string
+      last_name: string
+    } | null
+  }
+
+  const { data: attendanceRecords = [], isLoading: attendanceLoading } = useQuery<AttendanceRecord[]>({
     queryKey: ['attendance', currentOrganizationId],
     queryFn: async () => {
       if (!currentOrganizationId) return []
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('attendance')
         .select(`
           *,
@@ -206,7 +234,7 @@ export default function EducationPage() {
         .limit(100)
 
       if (error) throw error
-      return data || []
+      return (data || []) as AttendanceRecord[]
     },
     enabled: !!currentOrganizationId && activeTab === 'attendance',
   })
