@@ -1,10 +1,9 @@
 import { useState, useMemo, useCallback } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, DollarSign, FileText, Download, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
-import { ServiceCase } from '../types'
 import { CaseModal } from '../components'
-import { supabase } from '@/lib/supabase/client'
+import { useCases } from '../hooks'
+import type { ServiceCase } from '../types'
 
 interface SortState {
   column: string
@@ -12,44 +11,21 @@ interface SortState {
 }
 
 export default function CasesPage() {
-  const { currentOrganizationId } = useOrganization()
-  const queryClient = useQueryClient()
+  const { currentOrganization } = useOrganization()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null)
   const [sortState, setSortState] = useState<SortState>({
     column: 'date',
     direction: 'desc',
   })
-  const [statusFilter, setStatusFilter] = useState<string>('')
 
-  // Fetch cases with TanStack Query
-  const { data: cases = [], isLoading } = useQuery({
-    queryKey: ['cases', currentOrganizationId],
-    queryFn: async () => {
-      if (!currentOrganizationId) return []
-
-      const { data, error } = await supabase
-        .from('service_cases')
-        .select(`
-          *,
-          members:member_id (
-            id,
-            first_name,
-            last_name,
-            households:household_id (
-              id,
-              name
-            )
-          )
-        `)
-        .eq('organization_id', currentOrganizationId)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data as ServiceCase[]
-    },
-    enabled: !!currentOrganizationId,
-  })
+  // Use the cases hook
+  const {
+    cases,
+    isLoading,
+    stats,
+    refetch,
+  } = useCases({ organizationId: currentOrganization?.id })
 
   const formatDate = useCallback((dateString: string | null) => {
     if (!dateString) return 'N/A'
@@ -92,8 +68,8 @@ export default function CasesPage() {
     return colors[status || ''] || 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-200'
   }
 
-  const sortCases = useCallback((a: any, b: any, column: string, direction: 'asc' | 'desc') => {
-    let aValue: any, bValue: any
+  const sortCases = useCallback((a: ServiceCase, b: ServiceCase, column: string, direction: 'asc' | 'desc') => {
+    let aValue: string | number, bValue: string | number
 
     switch (column) {
       case 'date':
@@ -101,11 +77,11 @@ export default function CasesPage() {
         bValue = new Date(b.created_at || 0).getTime()
         break
       case 'member':
-        aValue = a.organization_members
-          ? `${a.organization_members.first_name || ''} ${a.organization_members.last_name || ''}`.toLowerCase().trim()
+        aValue = a.member
+          ? `${a.member.first_name || ''} ${a.member.last_name || ''}`.toLowerCase().trim()
           : ''
-        bValue = b.organization_members
-          ? `${b.organization_members.first_name || ''} ${b.organization_members.last_name || ''}`.toLowerCase().trim()
+        bValue = b.member
+          ? `${b.member.first_name || ''} ${b.member.last_name || ''}`.toLowerCase().trim()
           : ''
         break
       case 'category':
@@ -117,12 +93,12 @@ export default function CasesPage() {
         bValue = (b.case_type || 'Assistance').toLowerCase()
         break
       case 'amount':
-        aValue = parseFloat(a.amount || 0)
-        bValue = parseFloat(b.amount || 0)
+        aValue = a.requested_amount || 0
+        bValue = b.requested_amount || 0
         break
       case 'status':
-        aValue = (a.status || 'Open').toLowerCase()
-        bValue = (b.status || 'Open').toLowerCase()
+        aValue = (a.status || 'open').toLowerCase()
+        bValue = (b.status || 'open').toLowerCase()
         break
       default:
         return 0
@@ -153,23 +129,17 @@ export default function CasesPage() {
   const sortedCases = useMemo(() => {
     if (cases.length === 0) return cases
 
-    let filtered = cases
-    if (statusFilter) {
-      filtered = cases.filter((caseItem) =>
-        (caseItem.status || 'Open') === statusFilter
-      )
-    }
+    return [...cases].sort((a, b) => sortCases(a, b, sortState.column, sortState.direction))
+  }, [cases, sortState.column, sortState.direction, sortCases])
 
-    return [...filtered].sort((a, b) => sortCases(a, b, sortState.column, sortState.direction))
-  }, [cases, sortState.column, sortState.direction, statusFilter, sortCases])
-
-  const totalCases = sortedCases.length
-  const totalAssistance = sortedCases
-    .filter((caseItem) => (caseItem.case_type || 'Assistance') === 'Assistance' && caseItem.status !== 'Cancelled')
-    .reduce((sum, caseItem) => sum + (parseFloat(caseItem.amount as any) || 0), 0)
-  const totalCollected = sortedCases
-    .filter((caseItem) => caseItem.case_type === 'Collection' && caseItem.status !== 'Cancelled')
-    .reduce((sum, caseItem) => sum + (parseFloat(caseItem.amount as any) || 0), 0)
+  // Use stats from hook if available, fallback to local calculation
+  const totalCases = stats?.total_cases ?? sortedCases.length
+  const totalAssistance = stats?.total_disbursed ?? sortedCases
+    .filter((caseItem) => (caseItem.case_type || 'Assistance') === 'Assistance' && caseItem.status !== 'cancelled')
+    .reduce((sum, caseItem) => sum + (caseItem.requested_amount || 0), 0)
+  const totalCollected = stats?.total_approved ?? sortedCases
+    .filter((caseItem) => caseItem.case_type === 'Collection' && caseItem.status !== 'cancelled')
+    .reduce((sum, caseItem) => sum + (caseItem.requested_amount || 0), 0)
 
   const handleEditCase = (caseId: string) => {
     setSelectedCaseId(caseId)
@@ -187,7 +157,7 @@ export default function CasesPage() {
   }
 
   const handleSaveSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['cases', currentOrganizationId] })
+    refetch()
     handleCloseModal()
   }
 
@@ -340,14 +310,14 @@ export default function CasesPage() {
                         {formatDate(caseItem.created_at)}
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
-                        {caseItem.organization_members ? (
+                        {caseItem.member ? (
                           <div>
                             <div className="text-sm font-semibold text-slate-900 dark:text-slate-200">
-                              {caseItem.organization_members.first_name} {caseItem.organization_members.last_name}
+                              {caseItem.member.first_name} {caseItem.member.last_name}
                             </div>
-                            {caseItem.organization_members.households && (
+                            {caseItem.member.email && (
                               <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                {caseItem.organization_members.households.name}
+                                {caseItem.member.email}
                               </div>
                             )}
                           </div>
@@ -365,7 +335,7 @@ export default function CasesPage() {
                         </span>
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-semibold text-slate-900 dark:text-slate-200">
-                        {formatCurrency(caseItem.amount as any)}
+                        {formatCurrency(caseItem.requested_amount)}
                       </td>
                       <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                         <span

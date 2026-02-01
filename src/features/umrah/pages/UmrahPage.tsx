@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Plus,
   Plane,
@@ -8,11 +7,8 @@ import {
   Users,
   Edit,
   Trash2,
-  RefreshCw,
-  Download,
 } from 'lucide-react'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
-import { Trip, TripRegistration } from '../types'
 import {
   CreateTripModal,
   EditTripModal,
@@ -23,13 +19,13 @@ import {
   PilgrimDetailModal,
   UpdateVisaStatusModal,
 } from '../components'
-import { supabase } from '@/lib/supabase/client'
+import { useTrips, useRegistrations } from '../hooks'
+import type { Trip, TripRegistration } from '../types'
 
 type TabType = 'trips' | 'pilgrims'
 
 export default function UmrahPage() {
-  const { currentOrganizationId } = useOrganization()
-  const queryClient = useQueryClient()
+  const { currentOrganization } = useOrganization()
 
   const [activeTab, setActiveTab] = useState<TabType>('trips')
   const [selectedTripId, setSelectedTripId] = useState<string>('')
@@ -54,66 +50,28 @@ export default function UmrahPage() {
   const [selectedPilgrimForVisa, setSelectedPilgrimForVisa] = useState<TripRegistration | null>(null)
 
   const [selectedPilgrimIds, setSelectedPilgrimIds] = useState<string[]>([])
-  const [pilgrimPayments, setPilgrimPayments] = useState<Record<string, number>>({})
 
-  // Fetch trips
-  const { data: trips = [], isLoading: tripsLoading } = useQuery({
-    queryKey: ['trips', currentOrganizationId],
-    queryFn: async () => {
-      if (!currentOrganizationId) return []
+  // Use trips hook
+  const {
+    trips,
+    isLoading: tripsLoading,
+    refetch: refetchTrips,
+  } = useTrips({ organizationId: currentOrganization?.id })
 
-      const { data, error } = await supabase
-        .from('trips')
-        .select('*')
-        .eq('organization_id', currentOrganizationId)
-        .order('start_date', { ascending: false })
-
-      if (error) throw error
-
-      // Auto-select first trip if none selected
-      if (activeTab === 'pilgrims' && !selectedTripId && data && data.length > 0) {
-        setSelectedTripId(data[0].id.toString())
-      }
-
-      return data as Trip[]
-    },
-    enabled: !!currentOrganizationId,
+  // Use registrations hook for selected trip
+  const {
+    registrations: pilgrims = [],
+    isLoading: pilgrimsLoading,
+    refetch: refetchPilgrims,
+  } = useRegistrations({
+    tripId: selectedTripId || undefined,
+    organizationId: currentOrganization?.id,
   })
 
-  // Fetch pilgrims for selected trip
-  const { data: pilgrims = [], isLoading: pilgrimsLoading } = useQuery({
-    queryKey: ['pilgrims', currentOrganizationId, selectedTripId],
-    queryFn: async () => {
-      if (!currentOrganizationId || !selectedTripId) return []
-
-      const tripIdNum = typeof selectedTripId === 'string' ? parseInt(selectedTripId, 10) : selectedTripId
-      if (isNaN(tripIdNum)) return []
-
-      const { data, error } = await supabase
-        .from('trip_registrations')
-        .select(`
-          *,
-          organization_members:member_id (
-            id,
-            first_name,
-            last_name,
-            household_id
-          ),
-          trips:trip_id (
-            id,
-            name,
-            cost_per_person
-          )
-        `)
-        .eq('organization_id', currentOrganizationId)
-        .eq('trip_id', tripIdNum)
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-      return data as TripRegistration[]
-    },
-    enabled: !!currentOrganizationId && activeTab === 'pilgrims' && !!selectedTripId,
-  })
+  // Auto-select first trip when switching to pilgrims tab
+  if (activeTab === 'pilgrims' && !selectedTripId && trips.length > 0) {
+    setSelectedTripId(trips[0].id)
+  }
 
   const formatDate = useCallback((dateString: string | null) => {
     if (!dateString) return 'N/A'
@@ -192,8 +150,8 @@ export default function UmrahPage() {
   }
 
   const handleSaveSuccess = () => {
-    queryClient.invalidateQueries({ queryKey: ['trips', currentOrganizationId] })
-    queryClient.invalidateQueries({ queryKey: ['pilgrims', currentOrganizationId, selectedTripId] })
+    refetchTrips()
+    refetchPilgrims()
   }
 
   const isLoading = tripsLoading || (activeTab === 'pilgrims' && pilgrimsLoading)
@@ -328,14 +286,152 @@ export default function UmrahPage() {
           </div>
         )}
 
-        {/* Pilgrims Tab - Summary placeholder */}
+        {/* Pilgrims Tab */}
         {activeTab === 'pilgrims' && (
-          <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-12 text-center shadow-sm">
-            <Users className="mx-auto text-slate-400 dark:text-slate-500 mb-4" size={48} />
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Pilgrims Management</h3>
-            <p className="text-slate-600 dark:text-slate-400">
-              Pilgrim registration and management features will be available here.
-            </p>
+          <div>
+            {/* Trip Selector */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Select Trip
+              </label>
+              <select
+                value={selectedTripId}
+                onChange={(e) => setSelectedTripId(e.target.value)}
+                className="w-full sm:w-96 px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                <option value="">Select a trip...</option>
+                {trips.map((trip) => (
+                  <option key={trip.id} value={trip.id}>
+                    {trip.name} - {formatDate(trip.start_date)}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Pilgrims Table */}
+            {selectedTripId ? (
+              isLoading ? (
+                <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-12 text-center shadow-sm">
+                  <div className="text-slate-600 dark:text-slate-400">Loading pilgrims...</div>
+                </div>
+              ) : pilgrims.length === 0 ? (
+                <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-12 text-center shadow-sm">
+                  <Users className="mx-auto text-slate-400 dark:text-slate-500 mb-4" size={48} />
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Pilgrims Registered</h3>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4">No pilgrims have been registered for this trip yet.</p>
+                  <button
+                    onClick={() => setIsRegisterPilgrimModalOpen(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                  >
+                    <Plus size={18} />
+                    Register First Pilgrim
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-slate-100 dark:bg-slate-700 border-b border-slate-200 dark:border-slate-600">
+                        <tr>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
+                            <input
+                              type="checkbox"
+                              checked={selectedPilgrimIds.length === pilgrims.length}
+                              onChange={handleSelectAll}
+                              className="rounded"
+                            />
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
+                            Name
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
+                            Visa Status
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
+                            Payment Status
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
+                            Room
+                          </th>
+                          <th className="px-3 sm:px-6 py-3 text-left text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white dark:bg-slate-800 divide-y divide-slate-200 dark:divide-slate-700">
+                        {pilgrims.map((pilgrim) => (
+                          <tr
+                            key={pilgrim.id}
+                            className="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                          >
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                checked={selectedPilgrimIds.includes(pilgrim.id)}
+                                onChange={() => handleSelectPilgrim(pilgrim.id)}
+                                className="rounded"
+                              />
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <div className="text-sm font-semibold text-slate-900 dark:text-slate-200">
+                                {pilgrim.member?.first_name} {pilgrim.member?.last_name}
+                              </div>
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <span
+                                className={`px-2.5 py-1 text-xs font-medium rounded-full ${getVisaStatusColor(
+                                  pilgrim.visa_status as any
+                                )}`}
+                              >
+                                {pilgrim.visa_status || 'Pending'}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                              <span
+                                className={`px-2.5 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(
+                                  pilgrim.payment_status as any
+                                )}`}
+                              >
+                                {pilgrim.payment_status || 'Unpaid'}
+                              </span>
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                              —
+                            </td>
+                            <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-sm">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleEditPilgrim(pilgrim)}
+                                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 p-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition"
+                                  title="Edit"
+                                >
+                                  <Edit size={16} />
+                                </button>
+                                <button
+                                  onClick={() => handleDeletePilgrim(pilgrim)}
+                                  className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition"
+                                  title="Delete"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )
+            ) : (
+              <div className="bg-white dark:bg-slate-800 border dark:border-slate-700 rounded-lg p-12 text-center shadow-sm">
+                <Plane className="mx-auto text-slate-400 dark:text-slate-500 mb-4" size={48} />
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">Select a Trip</h3>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Please select a trip from the dropdown above to view pilgrims.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -347,15 +443,17 @@ export default function UmrahPage() {
         onSave={handleSaveSuccess}
       />
 
-      <EditTripModal
-        isOpen={isEditTripModalOpen}
-        onClose={() => {
-          setIsEditTripModalOpen(false)
-          setSelectedTripForEdit(null)
-        }}
-        onSave={handleSaveSuccess}
-        tripId={selectedTripForEdit}
-      />
+      {selectedTripForEdit && (
+        <EditTripModal
+          isOpen={isEditTripModalOpen}
+          onClose={() => {
+            setIsEditTripModalOpen(false)
+            setSelectedTripForEdit(null)
+          }}
+          onSave={handleSaveSuccess}
+          tripId={selectedTripForEdit}
+        />
+      )}
 
       <DeleteTripModal
         isOpen={isDeleteTripModalOpen}
@@ -377,15 +475,17 @@ export default function UmrahPage() {
         onSave={handleSaveSuccess}
       />
 
-      <EditPilgrimModal
-        isOpen={isEditPilgrimModalOpen}
-        onClose={() => {
-          setIsEditPilgrimModalOpen(false)
-          setSelectedPilgrimForEdit(null)
-        }}
-        onSave={handleSaveSuccess}
-        pilgrimId={selectedPilgrimForEdit}
-      />
+      {selectedPilgrimForEdit && (
+        <EditPilgrimModal
+          isOpen={isEditPilgrimModalOpen}
+          onClose={() => {
+            setIsEditPilgrimModalOpen(false)
+            setSelectedPilgrimForEdit(null)
+          }}
+          onSave={handleSaveSuccess}
+          pilgrimId={selectedPilgrimForEdit}
+        />
+      )}
 
       <DeletePilgrimModal
         isOpen={isDeletePilgrimModalOpen}
@@ -399,32 +499,36 @@ export default function UmrahPage() {
           setSelectedPilgrimForDelete(null)
         }}
         pilgrimName={
-          selectedPilgrimForDelete?.organization_members
-            ? `${selectedPilgrimForDelete.organization_members.first_name} ${selectedPilgrimForDelete.organization_members.last_name}`
+          selectedPilgrimForDelete?.member
+            ? `${selectedPilgrimForDelete.member.first_name} ${selectedPilgrimForDelete.member.last_name}`
             : 'this pilgrim'
         }
       />
 
-      <PilgrimDetailModal
-        isOpen={isPilgrimDetailModalOpen}
-        onClose={() => {
-          setIsPilgrimDetailModalOpen(false)
-          setSelectedPilgrimForDetail(null)
-        }}
-        pilgrim={selectedPilgrimForDetail}
-        trip={trips.find((t) => t.id.toString() === selectedTripId)}
-      />
+      {selectedPilgrimForDetail && trips.find((t) => t.id === selectedTripId) && (
+        <PilgrimDetailModal
+          isOpen={isPilgrimDetailModalOpen}
+          onClose={() => {
+            setIsPilgrimDetailModalOpen(false)
+            setSelectedPilgrimForDetail(null)
+          }}
+          pilgrim={selectedPilgrimForDetail}
+          trip={trips.find((t) => t.id === selectedTripId)!}
+        />
+      )}
 
-      <UpdateVisaStatusModal
-        isOpen={isUpdateVisaStatusModalOpen}
-        onClose={() => {
-          setIsUpdateVisaStatusModalOpen(false)
-          setSelectedPilgrimForVisa(null)
-        }}
-        onSave={handleSaveSuccess}
-        pilgrim={selectedPilgrimForVisa}
-        currentStatus={selectedPilgrimForVisa?.visa_status as any}
-      />
+      {selectedPilgrimForVisa && (
+        <UpdateVisaStatusModal
+          isOpen={isUpdateVisaStatusModalOpen}
+          onClose={() => {
+            setIsUpdateVisaStatusModalOpen(false)
+            setSelectedPilgrimForVisa(null)
+          }}
+          onSave={handleSaveSuccess}
+          pilgrim={selectedPilgrimForVisa}
+          currentStatus={selectedPilgrimForVisa.visa_status as any}
+        />
+      )}
     </div>
   )
 }

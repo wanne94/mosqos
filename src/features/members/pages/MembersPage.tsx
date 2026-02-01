@@ -1,8 +1,24 @@
 import { useState } from 'react'
-import { Plus, Search, Filter, Download, Upload } from 'lucide-react'
+import { Plus, Search, Filter, Download, Upload, Edit, Trash2 } from 'lucide-react'
+import { useOrganization } from '@/app/providers/OrganizationProvider'
+import { useMembers } from '../hooks'
 
 export default function MembersPage() {
+  const { currentOrganization } = useOrganization()
   const [searchQuery, setSearchQuery] = useState('')
+
+  // Use members hook
+  const {
+    members,
+    isLoading,
+    error,
+    stats,
+  } = useMembers({
+    organizationId: currentOrganization?.id,
+    filters: {
+      search: searchQuery || undefined,
+    },
+  })
 
   return (
     <div>
@@ -66,21 +82,93 @@ export default function MembersPage() {
               </tr>
             </thead>
             <tbody className="divide-y">
+              {/* Loading state */}
+              {isLoading && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center">
+                    <div className="text-muted-foreground">Loading members...</div>
+                  </td>
+                </tr>
+              )}
+
+              {/* Error state */}
+              {error && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center">
+                    <div className="text-destructive">
+                      Error loading members. Please try again.
+                    </div>
+                  </td>
+                </tr>
+              )}
+
               {/* Empty state */}
-              <tr>
-                <td colSpan={7} className="px-4 py-12 text-center">
-                  <div className="text-muted-foreground">
-                    <p className="font-medium">No members yet</p>
-                    <p className="text-sm">
-                      Add your first member to get started
-                    </p>
-                    <button className="mt-4 inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition">
-                      <Plus className="w-4 h-4" />
-                      Add Member
-                    </button>
-                  </div>
-                </td>
-              </tr>
+              {!isLoading && !error && members.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center">
+                    <div className="text-muted-foreground">
+                      <p className="font-medium">No members yet</p>
+                      <p className="text-sm">
+                        Add your first member to get started
+                      </p>
+                      <button className="mt-4 inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-md text-sm font-medium hover:opacity-90 transition">
+                        <Plus className="w-4 h-4" />
+                        Add Member
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
+              {/* Members list */}
+              {!isLoading && !error && members.map((member) => (
+                <tr key={member.id} className="hover:bg-muted/50 transition">
+                  <td className="px-4 py-3">
+                    <input type="checkbox" className="rounded" />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-medium">
+                      {member.first_name} {member.last_name}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {member.email || '—'}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {member.phone || '—'}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      member.membership_status === 'active'
+                        ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
+                        : member.membership_status === 'inactive'
+                        ? 'bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300'
+                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300'
+                    }`}>
+                      {member.membership_status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-muted-foreground">
+                    {new Date(member.joined_date).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="p-1 hover:bg-muted rounded transition"
+                        title="Edit member"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1 hover:bg-destructive/10 text-destructive rounded transition"
+                        title="Delete member"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
@@ -89,7 +177,7 @@ export default function MembersPage() {
       {/* Pagination */}
       <div className="flex items-center justify-between mt-4">
         <p className="text-sm text-muted-foreground">
-          Showing 0 of 0 members
+          Showing {members.length} of {stats?.total || members.length} members
         </p>
         <div className="flex gap-2">
           <button

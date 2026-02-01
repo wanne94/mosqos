@@ -14,6 +14,7 @@ const PortalLayout = lazy(() => import('./layouts/PortalLayout'))
 const LandingPage = lazy(() => import('@/features/auth/pages/LandingPage'))
 const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'))
 const SignupPage = lazy(() => import('@/features/auth/pages/SignupPage'))
+const PricingPage = lazy(() => import('@/features/billing/pages/PricingPage'))
 
 // Platform Pages
 const PlatformDashboardPage = lazy(() => import('@/features/platform/pages/DashboardPage'))
@@ -25,6 +26,7 @@ const PlatformSettingsPage = lazy(() => import('@/features/platform/pages/Settin
 
 // Admin Pages
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
+const HouseholdsPage = lazy(() => import('@/features/households/pages/HouseholdsPage'))
 const DonorsPage = lazy(() => import('@/features/donations/pages/DonorsPage'))
 const ExpensesPage = lazy(() => import('@/features/expenses/pages/ExpensesPage'))
 const EducationPage = lazy(() => import('@/features/education/pages/EducationPage'))
@@ -88,6 +90,7 @@ export function AppRoutes() {
       {/* Public Routes */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
       </Route>
 
       {/* Auth Routes */}
@@ -142,6 +145,7 @@ export function AppRoutes() {
       >
         <Route index element={<Navigate to="people" replace />} />
         <Route path="people" element={<PeoplePage />} />
+        <Route path="households" element={<HouseholdsPage />} />
         <Route path="donors" element={<DonorsPage />} />
         <Route path="expenses" element={<ExpensesPage />} />
         <Route path="education" element={<EducationPage />} />
