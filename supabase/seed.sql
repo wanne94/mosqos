@@ -92,12 +92,12 @@ SELECT
     gen_random_uuid(),
     o.id,
     (SELECT id FROM public.subscription_plans WHERE slug = 'basic' LIMIT 1),
-    'trialing',
+    'active',
     NOW(),
     NOW() + INTERVAL '30 days',
     'monthly',
-    NOW(),
-    NOW() + INTERVAL '30 days'
+    NULL,
+    NULL
 FROM public.organizations o
 WHERE NOT EXISTS (
     SELECT 1 FROM public.organization_subscriptions
