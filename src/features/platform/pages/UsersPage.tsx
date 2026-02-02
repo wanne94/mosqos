@@ -113,23 +113,6 @@ export default function UsersPage() {
                 to={`/platform/users/${user.id}`}
                 className="flex items-center p-4 hover:bg-muted dark:hover:bg-slate-700/50 transition-colors"
               >
-                {/* Avatar */}
-                <div className="flex-shrink-0 mr-4">
-                  {user.user_metadata.avatar_url ? (
-                    <img
-                      src={user.user_metadata.avatar_url as string}
-                      alt=""
-                      className="h-12 w-12 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                      <span className="text-primary font-semibold text-lg">
-                        {(user.user_metadata.full_name as string || user.email || '?')[0].toUpperCase()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
