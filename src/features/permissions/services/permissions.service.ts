@@ -281,7 +281,6 @@ export const permissionsService = {
           first_name,
           last_name,
           email,
-          photo_url
         )
       `)
       .eq('permission_group_id', groupId)
@@ -320,7 +319,6 @@ export const permissionsService = {
           first_name,
           last_name,
           email,
-          photo_url
         )
       `)
       .single()
@@ -404,7 +402,7 @@ export const permissionsService = {
     // Get all organization members not in the group
     let query = db
       .from(MEMBERS_TABLE)
-      .select('id, first_name, last_name, email, photo_url')
+      .select('id, first_name, last_name, email')
       .eq('organization_id', organizationId)
       .order('first_name')
 
