@@ -62,20 +62,12 @@ export default function UserDetailPage() {
         </button>
         <div className="flex-1">
           <div className="flex items-center gap-3">
-            {/* Avatar */}
-            {user.user_metadata.avatar_url ? (
-              <img
-                src={user.user_metadata.avatar_url as string}
-                alt=""
-                className="h-14 w-14 rounded-full object-cover"
-              />
-            ) : (
-              <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-primary font-semibold text-xl">
-                  {(user.user_metadata.full_name as string || user.email || '?')[0].toUpperCase()}
-                </span>
-              </div>
-            )}
+            {/* Avatar - Initials only */}
+            <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-primary font-semibold text-xl">
+                {(user.user_metadata.full_name as string || user.email || '?')[0].toUpperCase()}
+              </span>
+            </div>
             <div>
               <h1 className="text-2xl font-bold">
                 {user.user_metadata.full_name as string || user.email}

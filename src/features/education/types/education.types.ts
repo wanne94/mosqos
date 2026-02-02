@@ -187,7 +187,6 @@ export interface Teacher {
   is_active: boolean
   hire_date: string | null
   end_date: string | null
-  photo_url: string | null
   created_at: string
   updated_at: string
   created_by: string | null
@@ -502,7 +501,6 @@ export interface CreateTeacherInput {
   currency?: string
   is_active?: boolean
   hire_date?: string | null
-  photo_url?: string | null
 }
 
 export interface UpdateTeacherInput {
@@ -523,7 +521,6 @@ export interface UpdateTeacherInput {
   is_active?: boolean
   hire_date?: string | null
   end_date?: string | null
-  photo_url?: string | null
 }
 
 export interface CreateScheduledClassInput {

@@ -28,7 +28,6 @@ export interface Member {
   membership_type: MembershipType
   membership_status: MembershipStatus
   joined_date: string
-  photo_url: string | null
   notes: string | null
   custom_fields: Json
   self_registered: boolean
@@ -94,7 +93,6 @@ export interface CreateMemberInput {
   membership_type?: MembershipType
   membership_status?: MembershipStatus
   joined_date?: string
-  photo_url?: string | null
   notes?: string | null
   custom_fields?: Json
   self_registered?: boolean
@@ -118,7 +116,6 @@ export interface UpdateMemberInput {
   membership_type?: MembershipType
   membership_status?: MembershipStatus
   joined_date?: string
-  photo_url?: string | null
   notes?: string | null
   custom_fields?: Json
 }
