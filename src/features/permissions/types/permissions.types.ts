@@ -79,7 +79,6 @@ export interface GroupMember {
     first_name: string
     last_name: string
     email: string | null
-    photo_url: string | null
   }
 }
 
