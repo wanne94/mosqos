@@ -113,6 +113,10 @@ export const organizationsService = {
   async adminCreate(input: AdminCreateOrganizationInput): Promise<Organization> {
     const slug = await organizationsService.generateUniqueSlug(input.name)
 
+    // Get current user ID
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+
     const { data, error } = await db
       .from('organizations')
       .insert({
@@ -128,6 +132,7 @@ export const organizationsService = {
         timezone: input.timezone || null,
         status: input.status || 'approved',
         is_active: true,
+        created_by: user.id,
       })
       .select()
       .single()
