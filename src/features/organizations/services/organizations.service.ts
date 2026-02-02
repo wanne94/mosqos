@@ -113,9 +113,14 @@ export const organizationsService = {
   async adminCreate(input: AdminCreateOrganizationInput): Promise<Organization> {
     const slug = await organizationsService.generateUniqueSlug(input.name)
 
-    // Get current user ID
+    // Get current user ID (optional in dev mode with RLS bypass)
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+
+    // In dev mode with RLS bypassed, created_by is optional
+    // In production, user must be authenticated
+    if (!user && !isDevMode) {
+      throw new Error('Not authenticated')
+    }
 
     const { data, error } = await db
       .from('organizations')
@@ -132,7 +137,7 @@ export const organizationsService = {
         timezone: input.timezone || null,
         status: input.status || 'approved',
         is_active: true,
-        created_by: user.id,
+        created_by: user?.id || null,
       })
       .select()
       .single()
