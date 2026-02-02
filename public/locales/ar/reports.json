@@ -1,0 +1,66 @@
+{
+  "title": "التقارير",
+  "subtitle": "إنشاء وعرض تقارير المؤسسة",
+  "generate": "إنشاء تقرير",
+  "export": "تصدير",
+  "exportPDF": "تصدير كملف PDF",
+  "exportExcel": "تصدير كملف Excel",
+  "dateRange": "النطاق الزمني",
+  "startDate": "تاريخ البداية",
+  "endDate": "تاريخ النهاية",
+  "selectDateRange": "اختر النطاق الزمني",
+  "noReports": "لم يتم إنشاء تقارير بعد",
+  "noReportsDesc": "أنشئ تقريرك الأول للبدء.",
+  "generateFirst": "إنشاء أول تقرير",
+  "types": {
+    "financial": "التقرير المالي",
+    "donations": "تقرير التبرعات",
+    "expenses": "تقرير المصروفات",
+    "members": "تقرير الأعضاء",
+    "education": "تقرير التعليم",
+    "cases": "تقرير حالات الخدمة",
+    "attendance": "تقرير الحضور",
+    "all": "جميع التقارير"
+  },
+  "financial": {
+    "title": "التقرير المالي",
+    "summary": "الملخص المالي",
+    "totalIncome": "إجمالي الإيرادات",
+    "totalExpenses": "إجمالي المصروفات",
+    "netBalance": "الرصيد الصافي",
+    "byFund": "حسب الصندوق",
+    "byCategory": "حسب الفئة",
+    "incomeVsExpenses": "الإيرادات مقابل المصروفات"
+  },
+  "members": {
+    "title": "تقرير الأعضاء",
+    "totalMembers": "إجمالي الأعضاء",
+    "newMembers": "الأعضاء الجدد",
+    "activeMembers": "الأعضاء النشطون",
+    "byAge": "حسب الفئة العمرية",
+    "byGender": "حسب الجنس",
+    "byHousehold": "حسب الأسرة"
+  },
+  "education": {
+    "title": "تقرير التعليم",
+    "totalClasses": "إجمالي الصفوف",
+    "totalStudents": "إجمالي الطلاب",
+    "averageAttendance": "متوسط الحضور",
+    "byClass": "حسب الصف",
+    "byTeacher": "حسب المعلم"
+  },
+  "cases": {
+    "title": "تقرير حالات الخدمة",
+    "totalCases": "إجمالي الحالات",
+    "openCases": "الحالات المفتوحة",
+    "closedCases": "الحالات المغلقة",
+    "avgResponseTime": "متوسط وقت الاستجابة",
+    "avgResolutionTime": "متوسط وقت الحل",
+    "byCategory": "حسب الفئة",
+    "byPriority": "حسب الأولوية",
+    "byHandler": "حسب المسؤول"
+  },
+  "preview": "معاينة التقرير",
+  "generatedOn": "تم الإنشاء في",
+  "period": "الفترة"
+}

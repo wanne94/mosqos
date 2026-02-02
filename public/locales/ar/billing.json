@@ -1,0 +1,62 @@
+{
+  "title": "الفوترة والاشتراك",
+  "subtitle": "إدارة خطة الاشتراك والفوترة",
+  "currentPlan": "الخطة الحالية",
+  "upgrade": "ترقية الخطة",
+  "downgrade": "تخفيض الخطة",
+  "cancelSubscription": "إلغاء الاشتراك",
+  "changePlan": "تغيير الخطة",
+  "billingCycle": "دورة الفوترة",
+  "monthly": "شهري",
+  "yearly": "سنوي",
+  "annualSave": "وفر 20٪ مع الفوترة السنوية",
+  "plans": {
+    "free": "مجاني",
+    "basic": "أساسي",
+    "standard": "قياسي",
+    "premium": "مميز",
+    "enterprise": "مؤسسي"
+  },
+  "features": {
+    "members": "الأعضاء",
+    "storage": "مساحة التخزين",
+    "support": "الدعم",
+    "customization": "التخصيص",
+    "reports": "التقارير المتقدمة",
+    "multiLanguage": "دعم متعدد اللغات",
+    "unlimited": "غير محدود"
+  },
+  "paymentMethod": {
+    "title": "طريقة الدفع",
+    "addCard": "إضافة بطاقة",
+    "updateCard": "تحديث البطاقة",
+    "cardEnding": "بطاقة تنتهي بـ",
+    "expires": "تنتهي في",
+    "default": "افتراضي",
+    "setDefault": "تعيين كافتراضي"
+  },
+  "invoices": {
+    "title": "الفواتير",
+    "invoiceNumber": "فاتورة رقم",
+    "date": "التاريخ",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "download": "تحميل",
+    "paid": "مدفوع",
+    "pending": "معلق",
+    "overdue": "متأخر",
+    "noInvoices": "لا توجد فواتير بعد"
+  },
+  "confirmation": {
+    "upgrade": "هل أنت متأكد من الترقية إلى {{plan}}؟",
+    "downgrade": "هل أنت متأكد من التخفيض إلى {{plan}}؟",
+    "cancel": "هل أنت متأكد من إلغاء اشتراكك؟",
+    "cancelWarning": "ستفقد الوصول إلى الميزات المميزة في نهاية فترة الفوترة."
+  },
+  "success": {
+    "upgraded": "تمت الترقية بنجاح إلى {{plan}}",
+    "downgraded": "تم التخفيض بنجاح إلى {{plan}}",
+    "cancelled": "تم إلغاء الاشتراك بنجاح",
+    "paymentUpdated": "تم تحديث طريقة الدفع بنجاح"
+  }
+}

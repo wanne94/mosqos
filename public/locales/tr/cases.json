@@ -1,0 +1,73 @@
+{
+  "title": "Hizmet Vakaları",
+  "subtitle": "Hizmet taleplerini ve vakaları takip edin ve yönetin",
+  "newCase": "Yeni Vaka",
+  "editCase": "Vakayı Düzenle",
+  "deleteCase": "Vakayı Sil",
+  "deleteConfirmation": "Bu vakayı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "created": "Vaka başarıyla oluşturuldu",
+  "updated": "Vaka başarıyla güncellendi",
+  "deleted": "Vaka başarıyla silindi",
+  "closed": "Vaka başarıyla kapatıldı",
+  "reopened": "Vaka başarıyla yeniden açıldı",
+  "caseTitle": "Vaka Başlığı",
+  "category": "Kategori",
+  "selectCategory": "Kategori seçin...",
+  "description": "Açıklama",
+  "descriptionPlaceholder": "Vakayı açıklayın...",
+  "priority": "Öncelik",
+  "assignedTo": "Atanan",
+  "status": "Durum",
+  "searchPlaceholder": "Vakalarda ara...",
+  "noCases": "Vaka bulunamadı",
+  "noCasesDesc": "Başlamak için ilk vakanızı oluşturun.",
+  "createFirst": "İlk Vakayı Oluştur",
+  "total": "Toplam Vakalar",
+  "open": "Açık Vakalar",
+  "closed": "Kapalı Vakalar",
+  "priorities": {
+    "low": "Düşük",
+    "medium": "Orta",
+    "high": "Yüksek",
+    "urgent": "Acil"
+  },
+  "statuses": {
+    "open": "Açık",
+    "in_progress": "Devam Ediyor",
+    "resolved": "Çözüldü",
+    "closed": "Kapalı"
+  },
+  "details": {
+    "title": "Vaka Detayları",
+    "overview": "Genel Bakış",
+    "activity": "Aktivite",
+    "notes": "Notlar",
+    "createdBy": "Oluşturan",
+    "createdAt": "Oluşturulma Tarihi",
+    "updatedAt": "Son Güncelleme",
+    "closedAt": "Kapanma Tarihi",
+    "handledBy": "İşleyen",
+    "responseTime": "Yanıt Süresi",
+    "resolutionTime": "Çözüm Süresi"
+  },
+  "activity": {
+    "title": "Aktivite Günlüğü",
+    "addNote": "Not Ekle",
+    "notePlaceholder": "Not veya yorum ekleyin...",
+    "noteAdded": "Not başarıyla eklendi",
+    "statusChanged": "Durum değiştirildi",
+    "assignedTo": "Atanan",
+    "priorityChanged": "Öncelik değiştirildi",
+    "caseCreated": "Vaka oluşturuldu",
+    "caseClosed": "Vaka kapatıldı",
+    "caseReopened": "Vaka yeniden açıldı"
+  },
+  "kpi": {
+    "title": "Performans Metrikleri",
+    "avgResponseTime": "Ort. Yanıt Süresi",
+    "avgResolutionTime": "Ort. Çözüm Süresi",
+    "casesByHandler": "İşleyiciye Göre Vakalar",
+    "casesByCategory": "Kategoriye Göre Vakalar",
+    "casesByPriority": "Önceliğe Göre Vakalar"
+  }
+}

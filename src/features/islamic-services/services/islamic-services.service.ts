@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
   IslamicService,
   IslamicServiceType,
@@ -10,6 +11,9 @@ import type {
   ServiceStatus,
 } from '../types/islamic-services.types'
 
+// Type assertion for tables with columns not in generated types
+const db = supabase as SupabaseClient<any>
+
 const SERVICES_TABLE = 'islamic_services'
 const TYPES_TABLE = 'islamic_service_types'
 
@@ -19,7 +23,7 @@ export const islamicServicesService = {
   // =====================
 
   async getServiceTypes(organizationId: string, activeOnly = false): Promise<IslamicServiceType[]> {
-    let query = (supabase as any)
+    let query = db
       .from(TYPES_TABLE)
       .select('*')
       .eq('organization_id', organizationId)
@@ -36,7 +40,7 @@ export const islamicServicesService = {
   },
 
   async getServiceType(id: string): Promise<IslamicServiceType | null> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(TYPES_TABLE)
       .select('*')
       .eq('id', id)
@@ -50,7 +54,7 @@ export const islamicServicesService = {
   },
 
   async createServiceType(input: IslamicServiceTypeInput): Promise<IslamicServiceType> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(TYPES_TABLE)
       .insert([input])
       .select()
@@ -61,7 +65,7 @@ export const islamicServicesService = {
   },
 
   async updateServiceType(id: string, input: Partial<IslamicServiceTypeInput>): Promise<IslamicServiceType> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(TYPES_TABLE)
       .update(input)
       .eq('id', id)
@@ -73,7 +77,7 @@ export const islamicServicesService = {
   },
 
   async deleteServiceType(id: string): Promise<void> {
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(TYPES_TABLE)
       .delete()
       .eq('id', id)
@@ -128,7 +132,7 @@ export const islamicServicesService = {
       },
     ]
 
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(TYPES_TABLE)
       .insert(defaultTypes)
 
@@ -140,7 +144,7 @@ export const islamicServicesService = {
   // =====================
 
   async getAll(organizationId: string, filters?: IslamicServiceFilters): Promise<IslamicService[]> {
-    let query = (supabase as any)
+    let query = db
       .from(SERVICES_TABLE)
       .select(`
         *,
@@ -177,7 +181,7 @@ export const islamicServicesService = {
   },
 
   async getById(id: string): Promise<IslamicService | null> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(SERVICES_TABLE)
       .select(`
         *,
@@ -200,7 +204,7 @@ export const islamicServicesService = {
     if (!serviceType) throw new Error('Invalid service type')
 
     // Generate case number
-    const { data: caseData, error: caseError } = await (supabase as any)
+    const { data: caseData, error: caseError } = await db
       .rpc('generate_service_case_number', {
         org_id: input.organization_id,
         service_slug: serviceType.slug,
@@ -208,7 +212,7 @@ export const islamicServicesService = {
 
     if (caseError) throw caseError
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(SERVICES_TABLE)
       .insert([{
         ...input,
@@ -236,7 +240,7 @@ export const islamicServicesService = {
       (updateData as any).completed_at = new Date().toISOString()
     }
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(SERVICES_TABLE)
       .update(updateData)
       .eq('id', id)
@@ -292,7 +296,7 @@ export const islamicServicesService = {
   },
 
   async delete(id: string): Promise<void> {
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(SERVICES_TABLE)
       .delete()
       .eq('id', id)
@@ -301,30 +305,38 @@ export const islamicServicesService = {
   },
 
   async getStats(organizationId: string): Promise<IslamicServiceStats> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(SERVICES_TABLE)
       .select('id, status, service_type_id, fee_amount, fee_paid')
       .eq('organization_id', organizationId)
 
     if (error) throw error
 
-    const services = data || []
+    interface ServiceStatsRow {
+      id: string
+      status: ServiceStatus
+      service_type_id: string
+      fee_amount: number | null
+      fee_paid: number | null
+    }
+
+    const services = (data || []) as ServiceStatsRow[]
 
     const byType: Record<string, number> = {}
-    services.forEach((s: any) => {
+    services.forEach((s) => {
       byType[s.service_type_id] = (byType[s.service_type_id] || 0) + 1
     })
 
     return {
       total: services.length,
-      requested: services.filter((s: any) => s.status === 'requested').length,
-      scheduled: services.filter((s: any) => s.status === 'scheduled').length,
-      in_progress: services.filter((s: any) => s.status === 'in_progress').length,
-      completed: services.filter((s: any) => s.status === 'completed').length,
-      cancelled: services.filter((s: any) => s.status === 'cancelled').length,
+      requested: services.filter((s) => s.status === 'requested').length,
+      scheduled: services.filter((s) => s.status === 'scheduled').length,
+      in_progress: services.filter((s) => s.status === 'in_progress').length,
+      completed: services.filter((s) => s.status === 'completed').length,
+      cancelled: services.filter((s) => s.status === 'cancelled').length,
       by_type: byType,
-      total_fees: services.reduce((sum: number, s: any) => sum + (s.fee_amount || 0), 0),
-      fees_collected: services.reduce((sum: number, s: any) => sum + (s.fee_paid || 0), 0),
+      total_fees: services.reduce((sum, s) => sum + (s.fee_amount || 0), 0),
+      fees_collected: services.reduce((sum, s) => sum + (s.fee_paid || 0), 0),
     }
   },
 
@@ -332,7 +344,7 @@ export const islamicServicesService = {
   async getUpcoming(organizationId: string, limit = 10): Promise<IslamicService[]> {
     const today = new Date().toISOString().split('T')[0]
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(SERVICES_TABLE)
       .select(`
         *,

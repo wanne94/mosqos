@@ -1,0 +1,62 @@
+{
+  "title": "Faturalama ve Abonelik",
+  "subtitle": "Abonelik planınızı ve faturalamayı yönetin",
+  "currentPlan": "Mevcut Plan",
+  "upgrade": "Planı Yükselt",
+  "downgrade": "Planı Düşür",
+  "cancelSubscription": "Aboneliği İptal Et",
+  "changePlan": "Plan Değiştir",
+  "billingCycle": "Faturalama Döngüsü",
+  "monthly": "Aylık",
+  "yearly": "Yıllık",
+  "annualSave": "Yıllık faturalama ile %20 tasarruf edin",
+  "plans": {
+    "free": "Ücretsiz",
+    "basic": "Temel",
+    "standard": "Standart",
+    "premium": "Premium",
+    "enterprise": "Kurumsal"
+  },
+  "features": {
+    "members": "Üyeler",
+    "storage": "Depolama",
+    "support": "Destek",
+    "customization": "Özelleştirme",
+    "reports": "Gelişmiş Raporlar",
+    "multiLanguage": "Çoklu Dil Desteği",
+    "unlimited": "Sınırsız"
+  },
+  "paymentMethod": {
+    "title": "Ödeme Yöntemi",
+    "addCard": "Kart Ekle",
+    "updateCard": "Kartı Güncelle",
+    "cardEnding": "Son rakamları",
+    "expires": "Son kullanma",
+    "default": "Varsayılan",
+    "setDefault": "Varsayılan Olarak Ayarla"
+  },
+  "invoices": {
+    "title": "Faturalar",
+    "invoiceNumber": "Fatura No",
+    "date": "Tarih",
+    "amount": "Tutar",
+    "status": "Durum",
+    "download": "İndir",
+    "paid": "Ödendi",
+    "pending": "Beklemede",
+    "overdue": "Gecikmiş",
+    "noInvoices": "Henüz fatura yok"
+  },
+  "confirmation": {
+    "upgrade": "{{plan}} planına yükseltmek istediğinizden emin misiniz?",
+    "downgrade": "{{plan}} planına düşürmek istediğinizden emin misiniz?",
+    "cancel": "Aboneliğinizi iptal etmek istediğinizden emin misiniz?",
+    "cancelWarning": "Faturalama döneminin sonunda premium özelliklere erişiminizi kaybedeceksiniz."
+  },
+  "success": {
+    "upgraded": "{{plan}} planına başarıyla yükseltildi",
+    "downgraded": "{{plan}} planına başarıyla düşürüldü",
+    "cancelled": "Abonelik başarıyla iptal edildi",
+    "paymentUpdated": "Ödeme yöntemi başarıyla güncellendi"
+  }
+}

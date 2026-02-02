@@ -1,0 +1,73 @@
+{
+  "title": "حالات الخدمة",
+  "subtitle": "تتبع وإدارة طلبات الخدمة والحالات",
+  "newCase": "حالة جديدة",
+  "editCase": "تعديل الحالة",
+  "deleteCase": "حذف الحالة",
+  "deleteConfirmation": "هل أنت متأكد من أنك تريد حذف هذه الحالة؟ لا يمكن التراجع عن هذا الإجراء.",
+  "created": "تم إنشاء الحالة بنجاح",
+  "updated": "تم تحديث الحالة بنجاح",
+  "deleted": "تم حذف الحالة بنجاح",
+  "closed": "تم إغلاق الحالة بنجاح",
+  "reopened": "تم إعادة فتح الحالة بنجاح",
+  "caseTitle": "عنوان الحالة",
+  "category": "التصنيف",
+  "selectCategory": "اختر التصنيف...",
+  "description": "الوصف",
+  "descriptionPlaceholder": "وصف الحالة...",
+  "priority": "الأولوية",
+  "assignedTo": "مسند إلى",
+  "status": "الحالة",
+  "searchPlaceholder": "البحث في الحالات...",
+  "noCases": "لم يتم العثور على حالات",
+  "noCasesDesc": "قم بإنشاء أول حالة للبدء.",
+  "createFirst": "إنشاء أول حالة",
+  "total": "إجمالي الحالات",
+  "open": "الحالات المفتوحة",
+  "closed": "الحالات المغلقة",
+  "priorities": {
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "عالي",
+    "urgent": "عاجل"
+  },
+  "statuses": {
+    "open": "مفتوح",
+    "in_progress": "قيد التنفيذ",
+    "resolved": "محلول",
+    "closed": "مغلق"
+  },
+  "details": {
+    "title": "تفاصيل الحالة",
+    "overview": "نظرة عامة",
+    "activity": "النشاط",
+    "notes": "ملاحظات",
+    "createdBy": "أنشئت بواسطة",
+    "createdAt": "تاريخ الإنشاء",
+    "updatedAt": "آخر تحديث",
+    "closedAt": "تاريخ الإغلاق",
+    "handledBy": "تم التعامل بواسطة",
+    "responseTime": "وقت الاستجابة",
+    "resolutionTime": "وقت الحل"
+  },
+  "activity": {
+    "title": "سجل النشاط",
+    "addNote": "إضافة ملاحظة",
+    "notePlaceholder": "إضافة ملاحظة أو تعليق...",
+    "noteAdded": "تمت إضافة الملاحظة بنجاح",
+    "statusChanged": "تم تغيير الحالة",
+    "assignedTo": "مسند إلى",
+    "priorityChanged": "تم تغيير الأولوية",
+    "caseCreated": "تم إنشاء الحالة",
+    "caseClosed": "تم إغلاق الحالة",
+    "caseReopened": "تم إعادة فتح الحالة"
+  },
+  "kpi": {
+    "title": "مقاييس الأداء",
+    "avgResponseTime": "متوسط وقت الاستجابة",
+    "avgResolutionTime": "متوسط وقت الحل",
+    "casesByHandler": "الحالات حسب المعالج",
+    "casesByCategory": "الحالات حسب التصنيف",
+    "casesByPriority": "الحالات حسب الأولوية"
+  }
+}

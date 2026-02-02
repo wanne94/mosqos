@@ -1,0 +1,66 @@
+{
+  "title": "Raporlar",
+  "subtitle": "Kuruluş raporlarını oluşturun ve görüntüleyin",
+  "generate": "Rapor Oluştur",
+  "export": "Dışa Aktar",
+  "exportPDF": "PDF Olarak Dışa Aktar",
+  "exportExcel": "Excel Olarak Dışa Aktar",
+  "dateRange": "Tarih Aralığı",
+  "startDate": "Başlangıç Tarihi",
+  "endDate": "Bitiş Tarihi",
+  "selectDateRange": "Tarih aralığı seçin",
+  "noReports": "Henüz rapor oluşturulmadı",
+  "noReportsDesc": "Başlamak için ilk raporunuzu oluşturun.",
+  "generateFirst": "İlk Raporu Oluştur",
+  "types": {
+    "financial": "Mali Rapor",
+    "donations": "Bağışlar Raporu",
+    "expenses": "Giderler Raporu",
+    "members": "Üyeler Raporu",
+    "education": "Eğitim Raporu",
+    "cases": "Hizmet Vakaları Raporu",
+    "attendance": "Katılım Raporu",
+    "all": "Tüm Raporlar"
+  },
+  "financial": {
+    "title": "Mali Rapor",
+    "summary": "Mali Özet",
+    "totalIncome": "Toplam Gelir",
+    "totalExpenses": "Toplam Giderler",
+    "netBalance": "Net Bakiye",
+    "byFund": "Fona Göre",
+    "byCategory": "Kategoriye Göre",
+    "incomeVsExpenses": "Gelir - Gider Karşılaştırması"
+  },
+  "members": {
+    "title": "Üyeler Raporu",
+    "totalMembers": "Toplam Üye",
+    "newMembers": "Yeni Üyeler",
+    "activeMembers": "Aktif Üyeler",
+    "byAge": "Yaş Grubuna Göre",
+    "byGender": "Cinsiyete Göre",
+    "byHousehold": "Haneye Göre"
+  },
+  "education": {
+    "title": "Eğitim Raporu",
+    "totalClasses": "Toplam Sınıf",
+    "totalStudents": "Toplam Öğrenci",
+    "averageAttendance": "Ortalama Katılım",
+    "byClass": "Sınıfa Göre",
+    "byTeacher": "Öğretmene Göre"
+  },
+  "cases": {
+    "title": "Hizmet Vakaları Raporu",
+    "totalCases": "Toplam Vaka",
+    "openCases": "Açık Vakalar",
+    "closedCases": "Kapalı Vakalar",
+    "avgResponseTime": "Ort. Yanıt Süresi",
+    "avgResolutionTime": "Ort. Çözüm Süresi",
+    "byCategory": "Kategoriye Göre",
+    "byPriority": "Önceliğe Göre",
+    "byHandler": "Sorumluya Göre"
+  },
+  "preview": "Rapor Önizlemesi",
+  "generatedOn": "Oluşturulma Tarihi",
+  "period": "Dönem"
+}

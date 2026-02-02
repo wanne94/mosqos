@@ -1,0 +1,66 @@
+{
+  "title": "Reports",
+  "subtitle": "Generate and view organization reports",
+  "generate": "Generate Report",
+  "export": "Export",
+  "exportPDF": "Export as PDF",
+  "exportExcel": "Export as Excel",
+  "dateRange": "Date Range",
+  "startDate": "Start Date",
+  "endDate": "End Date",
+  "selectDateRange": "Select date range",
+  "noReports": "No reports generated yet",
+  "noReportsDesc": "Generate your first report to get started.",
+  "generateFirst": "Generate First Report",
+  "types": {
+    "financial": "Financial Report",
+    "donations": "Donations Report",
+    "expenses": "Expenses Report",
+    "members": "Members Report",
+    "education": "Education Report",
+    "cases": "Service Cases Report",
+    "attendance": "Attendance Report",
+    "all": "All Reports"
+  },
+  "financial": {
+    "title": "Financial Report",
+    "summary": "Financial Summary",
+    "totalIncome": "Total Income",
+    "totalExpenses": "Total Expenses",
+    "netBalance": "Net Balance",
+    "byFund": "By Fund",
+    "byCategory": "By Category",
+    "incomeVsExpenses": "Income vs Expenses"
+  },
+  "members": {
+    "title": "Members Report",
+    "totalMembers": "Total Members",
+    "newMembers": "New Members",
+    "activeMembers": "Active Members",
+    "byAge": "By Age Group",
+    "byGender": "By Gender",
+    "byHousehold": "By Household"
+  },
+  "education": {
+    "title": "Education Report",
+    "totalClasses": "Total Classes",
+    "totalStudents": "Total Students",
+    "averageAttendance": "Average Attendance",
+    "byClass": "By Class",
+    "byTeacher": "By Teacher"
+  },
+  "cases": {
+    "title": "Service Cases Report",
+    "totalCases": "Total Cases",
+    "openCases": "Open Cases",
+    "closedCases": "Closed Cases",
+    "avgResponseTime": "Avg Response Time",
+    "avgResolutionTime": "Avg Resolution Time",
+    "byCategory": "By Category",
+    "byPriority": "By Priority",
+    "byHandler": "By Handler"
+  },
+  "preview": "Report Preview",
+  "generatedOn": "Generated on",
+  "period": "Period"
+}

@@ -1,0 +1,62 @@
+{
+  "title": "Billing & Subscription",
+  "subtitle": "Manage your subscription plan and billing",
+  "currentPlan": "Current Plan",
+  "upgrade": "Upgrade Plan",
+  "downgrade": "Downgrade Plan",
+  "cancelSubscription": "Cancel Subscription",
+  "changePlan": "Change Plan",
+  "billingCycle": "Billing Cycle",
+  "monthly": "Monthly",
+  "yearly": "Yearly",
+  "annualSave": "Save 20% with annual billing",
+  "plans": {
+    "free": "Free",
+    "basic": "Basic",
+    "standard": "Standard",
+    "premium": "Premium",
+    "enterprise": "Enterprise"
+  },
+  "features": {
+    "members": "Members",
+    "storage": "Storage",
+    "support": "Support",
+    "customization": "Customization",
+    "reports": "Advanced Reports",
+    "multiLanguage": "Multi-language Support",
+    "unlimited": "Unlimited"
+  },
+  "paymentMethod": {
+    "title": "Payment Method",
+    "addCard": "Add Card",
+    "updateCard": "Update Card",
+    "cardEnding": "Card ending in",
+    "expires": "Expires",
+    "default": "Default",
+    "setDefault": "Set as Default"
+  },
+  "invoices": {
+    "title": "Invoices",
+    "invoiceNumber": "Invoice #",
+    "date": "Date",
+    "amount": "Amount",
+    "status": "Status",
+    "download": "Download",
+    "paid": "Paid",
+    "pending": "Pending",
+    "overdue": "Overdue",
+    "noInvoices": "No invoices yet"
+  },
+  "confirmation": {
+    "upgrade": "Are you sure you want to upgrade to {{plan}}?",
+    "downgrade": "Are you sure you want to downgrade to {{plan}}?",
+    "cancel": "Are you sure you want to cancel your subscription?",
+    "cancelWarning": "You will lose access to premium features at the end of your billing period."
+  },
+  "success": {
+    "upgraded": "Successfully upgraded to {{plan}}",
+    "downgraded": "Successfully downgraded to {{plan}}",
+    "cancelled": "Subscription cancelled successfully",
+    "paymentUpdated": "Payment method updated successfully"
+  }
+}

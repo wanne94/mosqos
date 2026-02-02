@@ -1,0 +1,73 @@
+{
+  "title": "Service Cases",
+  "subtitle": "Track and manage service requests and cases",
+  "newCase": "New Case",
+  "editCase": "Edit Case",
+  "deleteCase": "Delete Case",
+  "deleteConfirmation": "Are you sure you want to delete this case? This action cannot be undone.",
+  "created": "Case created successfully",
+  "updated": "Case updated successfully",
+  "deleted": "Case deleted successfully",
+  "closed": "Case closed successfully",
+  "reopened": "Case reopened successfully",
+  "caseTitle": "Case Title",
+  "category": "Category",
+  "selectCategory": "Select category...",
+  "description": "Description",
+  "descriptionPlaceholder": "Describe the case...",
+  "priority": "Priority",
+  "assignedTo": "Assigned To",
+  "status": "Status",
+  "searchPlaceholder": "Search cases...",
+  "noCases": "No cases found",
+  "noCasesDesc": "Create your first case to get started.",
+  "createFirst": "Create First Case",
+  "total": "Total Cases",
+  "open": "Open Cases",
+  "closed": "Closed Cases",
+  "priorities": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "statuses": {
+    "open": "Open",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed"
+  },
+  "details": {
+    "title": "Case Details",
+    "overview": "Overview",
+    "activity": "Activity",
+    "notes": "Notes",
+    "createdBy": "Created By",
+    "createdAt": "Created At",
+    "updatedAt": "Last Updated",
+    "closedAt": "Closed At",
+    "handledBy": "Handled By",
+    "responseTime": "Response Time",
+    "resolutionTime": "Resolution Time"
+  },
+  "activity": {
+    "title": "Activity Log",
+    "addNote": "Add Note",
+    "notePlaceholder": "Add a note or comment...",
+    "noteAdded": "Note added successfully",
+    "statusChanged": "Status changed",
+    "assignedTo": "Assigned to",
+    "priorityChanged": "Priority changed",
+    "caseCreated": "Case created",
+    "caseClosed": "Case closed",
+    "caseReopened": "Case reopened"
+  },
+  "kpi": {
+    "title": "Performance Metrics",
+    "avgResponseTime": "Avg Response Time",
+    "avgResolutionTime": "Avg Resolution Time",
+    "casesByHandler": "Cases by Handler",
+    "casesByCategory": "Cases by Category",
+    "casesByPriority": "Cases by Priority"
+  }
+}

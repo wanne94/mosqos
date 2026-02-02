@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
   Donation,
   Fund,
@@ -13,6 +14,9 @@ import type {
   PaymentMethod,
 } from '../types/donations.types'
 
+// Type assertion for tables with columns not in generated types
+const db = supabase as SupabaseClient<any>
+
 const DONATIONS_TABLE = 'donations'
 const FUNDS_TABLE = 'funds'
 
@@ -23,7 +27,7 @@ export const donationsService = {
 
   // Get all donations for an organization
   async getAll(organizationId: string, filters?: DonationFilters): Promise<Donation[]> {
-    let query = (supabase as any)
+    let query = db
       .from(DONATIONS_TABLE)
       .select(`
         *,
@@ -90,7 +94,7 @@ export const donationsService = {
 
   // Get single donation by ID
   async getById(id: string): Promise<Donation | null> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(DONATIONS_TABLE)
       .select(`
         *,
@@ -109,7 +113,7 @@ export const donationsService = {
 
   // Create a new donation
   async create(organizationId: string, input: CreateDonationInput): Promise<Donation> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(DONATIONS_TABLE)
       .insert([{
         organization_id: organizationId,
@@ -142,7 +146,7 @@ export const donationsService = {
     const oldDonation = await this.getById(id)
     const oldFundId = oldDonation?.fund_id
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(DONATIONS_TABLE)
       .update(input)
       .eq('id', id)
@@ -170,7 +174,7 @@ export const donationsService = {
   async delete(id: string): Promise<void> {
     const donation = await this.getById(id)
 
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(DONATIONS_TABLE)
       .delete()
       .eq('id', id)
@@ -185,7 +189,7 @@ export const donationsService = {
 
   // Get donations by member
   async getByMember(memberId: string): Promise<Donation[]> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(DONATIONS_TABLE)
       .select(`
         *,
@@ -200,7 +204,7 @@ export const donationsService = {
 
   // Get donation summary
   async getSummary(organizationId: string, dateRange?: { from?: string; to?: string }): Promise<DonationSummary> {
-    let query = (supabase as any)
+    let query = db
       .from(DONATIONS_TABLE)
       .select(`
         id, amount, donation_type, payment_method, fund_id,
@@ -220,8 +224,17 @@ export const donationsService = {
 
     if (error) throw error
 
-    const donations = data || []
-    const totalAmount = donations.reduce((sum: number, d: any) => sum + (d.amount || 0), 0)
+    interface DonationSummaryRow {
+      id: string
+      amount: number
+      donation_type: DonationType
+      payment_method: PaymentMethod
+      fund_id: string | null
+      fund?: { id: string; name: string } | null
+    }
+
+    const donations = (data || []) as unknown as DonationSummaryRow[]
+    const totalAmount = donations.reduce((sum, d) => sum + (d.amount || 0), 0)
     const count = donations.length
 
     // Group by fund
@@ -281,7 +294,7 @@ export const donationsService = {
 
   // Send donation receipt (placeholder)
   async sendReceipt(donationId: string): Promise<void> {
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(DONATIONS_TABLE)
       .update({
         receipt_sent: true,
@@ -299,7 +312,7 @@ export const donationsService = {
 
   // Get all funds
   async getFunds(organizationId: string, filters?: FundFilters): Promise<Fund[]> {
-    let query = (supabase as any)
+    let query = db
       .from(FUNDS_TABLE)
       .select('*')
       .eq('organization_id', organizationId)
@@ -332,7 +345,7 @@ export const donationsService = {
 
   // Get single fund
   async getFundById(id: string): Promise<Fund | null> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(FUNDS_TABLE)
       .select('*')
       .eq('id', id)
@@ -347,7 +360,7 @@ export const donationsService = {
 
   // Create fund
   async createFund(organizationId: string, input: CreateFundInput): Promise<Fund> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(FUNDS_TABLE)
       .insert([{
         organization_id: organizationId,
@@ -364,7 +377,7 @@ export const donationsService = {
 
   // Update fund
   async updateFund(id: string, input: UpdateFundInput): Promise<Fund> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(FUNDS_TABLE)
       .update(input)
       .eq('id', id)
@@ -377,7 +390,7 @@ export const donationsService = {
 
   // Delete fund
   async deleteFund(id: string): Promise<void> {
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(FUNDS_TABLE)
       .delete()
       .eq('id', id)
@@ -387,7 +400,7 @@ export const donationsService = {
 
   // Update fund current amount (internal)
   async updateFundAmount(fundId: string): Promise<void> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(DONATIONS_TABLE)
       .select('amount')
       .eq('fund_id', fundId)
@@ -395,9 +408,13 @@ export const donationsService = {
 
     if (error) throw error
 
-    const total = (data || []).reduce((sum: number, d: any) => sum + (d.amount || 0), 0)
+    interface AmountRow {
+      amount: number
+    }
 
-    await (supabase as any)
+    const total = ((data || []) as AmountRow[]).reduce((sum, d) => sum + (d.amount || 0), 0)
+
+    await db
       .from(FUNDS_TABLE)
       .update({ current_amount: total })
       .eq('id', fundId)

@@ -1,4 +1,8 @@
 import { supabase } from '@/lib/supabase/client'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// Type assertion for tables with columns not in generated types
+const db = supabase as SupabaseClient<any>
 import {
   PledgeStatus,
   RecurringStatus,
@@ -24,7 +28,7 @@ export const pledgesService = {
 
   // Get all pledges
   async getAll(organizationId: string, filters?: PledgeFilters): Promise<Pledge[]> {
-    let query = (supabase as any)
+    let query = db
       .from(PLEDGES_TABLE)
       .select(`
         *,
@@ -66,7 +70,7 @@ export const pledgesService = {
 
   // Get single pledge
   async getById(id: string): Promise<Pledge | null> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(PLEDGES_TABLE)
       .select(`
         *,
@@ -86,7 +90,7 @@ export const pledgesService = {
 
   // Create pledge
   async create(organizationId: string, input: CreatePledgeInput): Promise<Pledge> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(PLEDGES_TABLE)
       .insert([{
         organization_id: organizationId,
@@ -108,7 +112,7 @@ export const pledgesService = {
 
   // Update pledge
   async update(id: string, input: UpdatePledgeInput): Promise<Pledge> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(PLEDGES_TABLE)
       .update(input)
       .eq('id', id)
@@ -125,7 +129,7 @@ export const pledgesService = {
 
   // Delete pledge
   async delete(id: string): Promise<void> {
-    const { error } = await (supabase as any)
+    const { error } = await db
       .from(PLEDGES_TABLE)
       .delete()
       .eq('id', id)
@@ -148,7 +152,7 @@ export const pledgesService = {
 
   // Get pledges by member
   async getByMember(memberId: string): Promise<Pledge[]> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(PLEDGES_TABLE)
       .select(`
         *,
@@ -165,7 +169,7 @@ export const pledgesService = {
   async getOverdue(organizationId: string): Promise<Pledge[]> {
     const today = new Date().toISOString().split('T')[0]
 
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(PLEDGES_TABLE)
       .select(`
         *,
@@ -187,7 +191,7 @@ export const pledgesService = {
 
   // Get all recurring donations
   async getRecurringDonations(organizationId: string, filters?: RecurringDonationFilters): Promise<RecurringDonation[]> {
-    let query = (supabase as any)
+    let query = db
       .from(RECURRING_TABLE)
       .select(`
         *,
@@ -225,7 +229,7 @@ export const pledgesService = {
 
   // Get single recurring donation
   async getRecurringById(id: string): Promise<RecurringDonation | null> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(RECURRING_TABLE)
       .select(`
         *,
@@ -244,7 +248,7 @@ export const pledgesService = {
 
   // Create recurring donation
   async createRecurring(organizationId: string, input: CreateRecurringDonationInput): Promise<RecurringDonation> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(RECURRING_TABLE)
       .insert([{
         organization_id: organizationId,
@@ -268,7 +272,7 @@ export const pledgesService = {
 
   // Update recurring donation
   async updateRecurring(id: string, input: UpdateRecurringDonationInput): Promise<RecurringDonation> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(RECURRING_TABLE)
       .update(input)
       .eq('id', id)
@@ -300,7 +304,7 @@ export const pledgesService = {
 
   // Get recurring donations by member
   async getRecurringByMember(memberId: string): Promise<RecurringDonation[]> {
-    const { data, error } = await (supabase as any)
+    const { data, error } = await db
       .from(RECURRING_TABLE)
       .select(`
         *,
