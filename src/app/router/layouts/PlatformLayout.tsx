@@ -11,6 +11,8 @@ import {
   LogOut,
   ChevronDown,
   Tag,
+  Users,
+  UserCheck,
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { usePermissions } from '@/features/permissions/hooks/usePermissions'
@@ -20,6 +22,8 @@ import { type UserRole } from '@/shared/utils/roleDisplay'
 const navItems = [
   { path: '/platform', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { path: '/platform/organizations', label: 'Organizations', icon: Building2 },
+  { path: '/platform/users', label: 'Users', icon: Users },
+  { path: '/platform/imams', label: 'Imams', icon: UserCheck },
   { path: '/platform/plans', label: 'Plans', icon: CreditCard },
   { path: '/platform/discount-codes', label: 'Discount Codes', icon: Tag },
   { path: '/platform/analytics', label: 'Analytics', icon: BarChart3 },
@@ -41,7 +45,7 @@ export default function PlatformLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-900">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -58,12 +62,12 @@ export default function PlatformLayout() {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-4 border-b border-slate-800">
-          <Link to="/platform" className="text-xl font-bold text-primary">
+          <Link to="/platform" className="text-xl font-bold text-emerald-400">
             MosqOS Platform
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 hover:bg-muted rounded"
+            className="lg:hidden p-1 hover:bg-slate-700 rounded"
           >
             <X className="w-5 h-5" />
           </button>
@@ -81,8 +85,8 @@ export default function PlatformLayout() {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   active
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-emerald-500 text-white'
+                    : 'text-slate-400 hover:bg-slate-700 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -96,10 +100,10 @@ export default function PlatformLayout() {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Header */}
-        <header className="h-16 border-b bg-card flex items-center justify-between px-4">
+        <header className="h-16 border-b border-slate-700 bg-slate-800 flex items-center justify-between px-4">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 hover:bg-muted rounded"
+            className="lg:hidden p-2 hover:bg-slate-700 rounded"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -110,9 +114,9 @@ export default function PlatformLayout() {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-muted rounded-md"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-700 rounded-md"
             >
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+              <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
               <ChevronDown className="w-4 h-4" />
@@ -124,10 +128,10 @@ export default function PlatformLayout() {
                   className="fixed inset-0 z-10"
                   onClick={() => setUserMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-card border rounded-md shadow-lg z-20">
-                  <div className="px-4 py-3 border-b">
+                <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-md shadow-lg z-20">
+                  <div className="px-4 py-3 border-b border-slate-700">
                     <p className="text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-slate-400">
                       {roleLoading ? <RoleDisplaySkeleton /> : <RoleDisplay role={role as UserRole | null} />}
                     </p>
                   </div>
@@ -137,7 +141,7 @@ export default function PlatformLayout() {
                         setUserMenuOpen(false)
                         signOut()
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted rounded"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-slate-700 rounded"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign out

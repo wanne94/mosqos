@@ -20,6 +20,8 @@ export const supabase = createClient<Database>(
   }
 )
 
+export const isDevMode = import.meta.env.DEV
+
 // Helper to check if Supabase is configured with real values (not placeholders)
 export const isSupabaseConfigured = () => {
   const isRealUrl = supabaseUrl &&

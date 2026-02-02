@@ -19,10 +19,18 @@ const PricingPage = lazy(() => import('@/features/billing/pages/PricingPage'))
 // Platform Pages
 const PlatformDashboardPage = lazy(() => import('@/features/platform/pages/DashboardPage'))
 const OrganizationsPage = lazy(() => import('@/features/platform/pages/OrganizationsPage'))
+const OrganizationDetailPage = lazy(() => import('@/features/platform/pages/OrganizationDetailPage'))
+const UsersPage = lazy(() => import('@/features/platform/pages/UsersPage'))
+const UserDetailPage = lazy(() => import('@/features/platform/pages/UserDetailPage'))
+const ImamsPage = lazy(() => import('@/features/platform/pages/ImamsPage'))
 const PlansPage = lazy(() => import('@/features/platform/pages/PlansPage'))
 const DiscountCodesPage = lazy(() => import('@/features/platform/pages/DiscountCodesPage'))
 const AnalyticsPage = lazy(() => import('@/features/platform/pages/AnalyticsPage'))
 const PlatformSettingsPage = lazy(() => import('@/features/platform/pages/SettingsPage'))
+
+// Auth Pages (Approval Flow)
+const PendingApprovalPage = lazy(() => import('@/features/auth/pages/PendingApprovalPage'))
+const NoOrganizationPage = lazy(() => import('@/features/auth/pages/NoOrganizationPage'))
 
 // Admin Pages
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
@@ -114,6 +122,24 @@ export function AppRoutes() {
         />
       </Route>
 
+      {/* Approval Flow Routes */}
+      <Route
+        path="/pending-approval"
+        element={
+          <ProtectedRoute>
+            <PendingApprovalPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/no-organization"
+        element={
+          <ProtectedRoute>
+            <NoOrganizationPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Platform Admin Routes */}
       <Route
         path="/platform"
@@ -127,6 +153,10 @@ export function AppRoutes() {
       >
         <Route index element={<PlatformDashboardPage />} />
         <Route path="organizations" element={<OrganizationsPage />} />
+        <Route path="organizations/:id" element={<OrganizationDetailPage />} />
+        <Route path="users" element={<UsersPage />} />
+        <Route path="users/:id" element={<UserDetailPage />} />
+        <Route path="imams" element={<ImamsPage />} />
         <Route path="plans" element={<PlansPage />} />
         <Route path="discount-codes" element={<DiscountCodesPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />

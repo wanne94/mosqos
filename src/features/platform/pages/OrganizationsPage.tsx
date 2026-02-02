@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Building2, Search, Users, Calendar, ChevronRight } from 'lucide-react'
+import { Building2, Search, Users, Calendar, ChevronRight, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase/client'
 import type { Database } from '@/shared/types/database.types'
+import CreateOrganizationModal from '../components/CreateOrganizationModal'
+import { usePendingOrganizationsCount } from '@/features/organizations/hooks/useOrganizations'
 
 type OrganizationCountry = {
   id: string
@@ -48,9 +51,14 @@ type Plan = {
 type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'paused'
 
 export default function OrganizationsPage() {
+  const { t } = useTranslation('platform')
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCountry, setFilterCountry] = useState('')
   const [filterPlan, setFilterPlan] = useState('')
+  const [createModalOpen, setCreateModalOpen] = useState(false)
+
+  // Pending count for badge
+  const { data: pendingCount = 0 } = usePendingOrganizationsCount()
 
   // Fetch organizations
   const { data: organizations = [], isLoading } = useQuery({
@@ -126,7 +134,7 @@ export default function OrganizationsPage() {
     if (!subscription) {
       return (
         <span className="px-2 py-1 text-xs rounded-full bg-slate-600 dark:bg-slate-700 text-slate-300 dark:text-slate-400">
-          No Plan
+          {t('organizations.noPlan')}
         </span>
       )
     }
@@ -186,13 +194,27 @@ export default function OrganizationsPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">Organizations</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">{t('organizations.title')}</h1>
+            {pendingCount > 0 && (
+              <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-500/20 text-yellow-600 dark:text-yellow-400">
+                {pendingCount} {t('dashboard.pendingApplications')}
+              </span>
+            )}
+          </div>
           <p className="text-muted-foreground mt-1">
-            {organizations.length} total organizations
+            {t('organizations.totalCount', { count: organizations.length })}
           </p>
         </div>
+        <button
+          onClick={() => setCreateModalOpen(true)}
+          className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg font-medium hover:opacity-90 transition"
+        >
+          <Plus className="w-4 h-4" />
+          Create Organization
+        </button>
       </div>
 
       {/* Filters */}
@@ -202,7 +224,7 @@ export default function OrganizationsPage() {
           <Search size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search organizations..."
+            placeholder={t('organizations.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-background dark:bg-slate-800 border border-border dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -215,7 +237,7 @@ export default function OrganizationsPage() {
           onChange={(e) => setFilterCountry(e.target.value)}
           className="px-4 py-2 bg-background dark:bg-slate-800 border border-border dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="">All Countries</option>
+          <option value="">{t('organizations.allCountries')}</option>
           {countries.map(country => (
             <option key={country.id} value={country.id}>
               {country.name}
@@ -229,7 +251,7 @@ export default function OrganizationsPage() {
           onChange={(e) => setFilterPlan(e.target.value)}
           className="px-4 py-2 bg-background dark:bg-slate-800 border border-border dark:border-slate-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          <option value="">All Plans</option>
+          <option value="">{t('organizations.allPlans')}</option>
           {plans.map(plan => (
             <option key={plan.id} value={plan.slug}>
               {plan.name}
@@ -276,7 +298,9 @@ export default function OrganizationsPage() {
                   <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Users size={14} />
-                      {org.memberCount} members
+                      {typeof org.memberCount === 'number'
+                        ? t('organizations.members', { count: org.memberCount })
+                        : `${org.memberCount} members`}
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar size={14} />
@@ -297,16 +321,39 @@ export default function OrganizationsPage() {
             ))}
           </div>
         ) : (
-          <div className="p-8 text-center">
+          <div className="p-12 text-center">
             <Building2 size={48} className="mx-auto text-muted-foreground dark:text-slate-600 mb-4" />
-            <p className="text-muted-foreground">
+            <h3 className="text-lg font-semibold mb-2">
               {searchQuery || filterCountry || filterPlan
-                ? 'No organizations match your filters'
-                : 'No organizations yet. Use the invite system to create new organizations.'}
+                ? t('organizations.noResults')
+                : t('dashboard.noOrganizations')}
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              {searchQuery || filterCountry || filterPlan
+                ? t('organizations.tryAdjusting')
+                : t('dashboard.createFirst')}
             </p>
+            {!searchQuery && !filterCountry && !filterPlan && (
+              <button
+                onClick={() => setCreateModalOpen(true)}
+                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-lg font-medium hover:opacity-90 transition"
+              >
+                <Plus className="w-5 h-5" />
+                Create First Organization
+              </button>
+            )}
           </div>
         )}
       </div>
+
+      {/* Create Organization Modal */}
+      <CreateOrganizationModal
+        isOpen={createModalOpen}
+        onClose={() => setCreateModalOpen(false)}
+        onSuccess={() => {
+          setCreateModalOpen(false)
+        }}
+      />
     </div>
   )
 }

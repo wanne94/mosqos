@@ -34,7 +34,7 @@ export default function PortalLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-900">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div
@@ -45,18 +45,18 @@ export default function PortalLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-card border-r transform transition-transform duration-200 lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-full w-64 bg-slate-800 border-r border-slate-700 transform transition-transform duration-200 lg:translate-x-0 ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b">
-          <Link to={`/${slug}/portal`} className="text-xl font-bold text-primary">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-700">
+          <Link to={`/${slug}/portal`} className="text-xl font-bold text-emerald-400">
             {currentOrganization?.name || 'Member Portal'}
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="lg:hidden p-1 hover:bg-muted rounded"
+            className="lg:hidden p-1 hover:bg-slate-700 rounded"
           >
             <X className="w-5 h-5" />
           </button>
@@ -75,8 +75,8 @@ export default function PortalLayout() {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   active
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    ? 'bg-emerald-500 text-white'
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -90,10 +90,10 @@ export default function PortalLayout() {
       {/* Main content */}
       <div className="lg:pl-64">
         {/* Header */}
-        <header className="h-16 border-b bg-card flex items-center justify-between px-4">
+        <header className="h-16 border-b border-slate-700 bg-slate-800 flex items-center justify-between px-4">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="lg:hidden p-2 hover:bg-muted rounded"
+            className="lg:hidden p-2 hover:bg-slate-700 rounded"
           >
             <Menu className="w-5 h-5" />
           </button>
@@ -104,9 +104,9 @@ export default function PortalLayout() {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-2 px-3 py-2 hover:bg-muted rounded-md"
+              className="flex items-center gap-2 px-3 py-2 hover:bg-slate-700 rounded-md"
             >
-              <div className="w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-sm font-medium">
+              <div className="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-medium">
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
               <ChevronDown className="w-4 h-4" />
@@ -118,10 +118,10 @@ export default function PortalLayout() {
                   className="fixed inset-0 z-10"
                   onClick={() => setUserMenuOpen(false)}
                 />
-                <div className="absolute right-0 mt-2 w-48 bg-card border rounded-md shadow-lg z-20">
-                  <div className="px-4 py-3 border-b">
+                <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-md shadow-lg z-20">
+                  <div className="px-4 py-3 border-b border-slate-700">
                     <p className="text-sm font-medium truncate">{user?.email}</p>
-                    <p className="text-xs text-muted-foreground">Member</p>
+                    <p className="text-xs text-slate-400">Member</p>
                   </div>
                   <div className="p-1">
                     <button
@@ -129,7 +129,7 @@ export default function PortalLayout() {
                         setUserMenuOpen(false)
                         signOut()
                       }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-destructive hover:bg-muted rounded"
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-slate-700 rounded"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign out

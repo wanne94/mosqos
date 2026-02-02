@@ -9,7 +9,7 @@ const db = supabase as unknown as {
     select: (query: string) => {
       eq: (column: string, value: string) => {
         limit: (count: number) => {
-          maybeSingle: () => Promise<{ data: { organization: { slug: string } } | null }>
+          maybeSingle: () => Promise<{ data: { organization: { slug: string; status: string } } | null }>
         }
       }
     }
@@ -54,25 +54,47 @@ export async function getPostLoginRedirectUrl(userEmail: string): Promise<string
   // 2. Check if organization owner
   const { data: ownerOrg } = await db
     .from('organization_owners')
-    .select('organization:organizations(slug)')
+    .select('organization:organizations(slug, status)')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (ownerOrg?.organization && typeof ownerOrg.organization === 'object' && 'slug' in ownerOrg.organization) {
-    return `/${ownerOrg.organization.slug}/admin`
+    const org = ownerOrg.organization as { slug: string; status: string }
+
+    switch (org.status) {
+      case 'pending':
+        return '/pending-approval'
+      case 'rejected':
+        return '/no-organization'
+      case 'approved':
+        return `/${org.slug}/admin`
+      default:
+        return '/no-organization'
+    }
   }
 
   // 3. Check if organization delegate
   const { data: delegateOrg } = await db
     .from('organization_delegates')
-    .select('organization:organizations(slug)')
+    .select('organization:organizations(slug, status)')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (delegateOrg?.organization && typeof delegateOrg.organization === 'object' && 'slug' in delegateOrg.organization) {
-    return `/${delegateOrg.organization.slug}/admin`
+    const org = delegateOrg.organization as { slug: string; status: string }
+
+    switch (org.status) {
+      case 'pending':
+        return '/pending-approval'
+      case 'rejected':
+        return '/no-organization'
+      case 'approved':
+        return `/${org.slug}/admin`
+      default:
+        return '/no-organization'
+    }
   }
 
   // 4. Check if organization member
