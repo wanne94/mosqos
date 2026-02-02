@@ -27,7 +27,13 @@ export const usersService = {
     // First, get ALL users from auth.users
     const { data: authUsers, error: authError } = await db.auth.admin.listUsers()
 
-    if (authError) throw authError
+    if (authError) {
+      console.error('[users.service] Error fetching auth users:', authError)
+      throw authError
+    }
+
+    console.log('[users.service] Fetched auth users:', authUsers.users?.length || 0)
+    console.log('[users.service] Users:', authUsers.users?.map(u => ({ email: u.email, id: u.id })))
 
     // Build user map from auth users
     const userMap = new Map<string, UserWithOrganizations>()
@@ -210,6 +216,9 @@ export const usersService = {
 
     // Sort by created_at descending
     result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+    console.log('[users.service] Final result after filters:', result.length, 'users')
+    console.log('[users.service] Users:', result.map(u => ({ email: u.email, id: u.id, orgs: u.organizations.length })))
 
     return result
   },
