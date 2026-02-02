@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react'
-import { supabase } from '../../../lib/supabase/client'
 import { X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useFormDirty } from '../../../hooks/useFormDirty'
 import { useEscapeKey } from '../../../hooks/useEscapeKey'
 import { useOrganization } from '../../../hooks/useOrganization'
+import { useCreateClassroom } from '../hooks/useClassrooms'
 
 interface CreateClassroomModalProps {
   isOpen: boolean
@@ -27,7 +27,7 @@ const initialFormData: ClassroomFormData = {
 export default function CreateClassroomModal({ isOpen, onClose, onSave }: CreateClassroomModalProps) {
   const { t } = useTranslation(['classroom', 'common'])
   const { currentOrganizationId } = useOrganization()
-  const [loading, setLoading] = useState(false)
+  const createClassroom = useCreateClassroom()
   const [formData, setFormData] = useState<ClassroomFormData>(initialFormData)
   const isDirty = useFormDirty(formData, initialFormData)
 
@@ -59,19 +59,23 @@ export default function CreateClassroomModal({ isOpen, onClose, onSave }: Create
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
+
+    if (!formData.name.trim()) {
+      alert('Classroom name is required')
+      return
+    }
 
     try {
       const classroomData = {
         name: formData.name,
         capacity: formData.capacity ? parseInt(formData.capacity) : null,
         description: formData.description || null,
-        organization_id: currentOrganizationId,
+        organization_id: currentOrganizationId!,
       }
 
-      const { error } = await supabase.from('classrooms').insert([classroomData])
+      console.log('Creating classroom:', classroomData) // DEBUG
 
-      if (error) throw error
+      await createClassroom.mutateAsync(classroomData)
 
       // Reset form
       setFormData(initialFormData)
@@ -80,9 +84,7 @@ export default function CreateClassroomModal({ isOpen, onClose, onSave }: Create
       onClose()
     } catch (error) {
       console.error('Error creating classroom:', error)
-      alert(`Failed to create classroom: ${(error as any).message}`)
-    } finally {
-      setLoading(false)
+      // Error je već handlean od hook-a via toast
     }
   }
 
@@ -158,10 +160,10 @@ export default function CreateClassroomModal({ isOpen, onClose, onSave }: Create
             </button>
             <button
               type="submit"
-              disabled={loading}
+              disabled={createClassroom.isPending}
               className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? (t('saving', { ns: 'common' }) || 'Saving...') : (t('save', { ns: 'common' }) || 'Save')}
+              {createClassroom.isPending ? (t('saving', { ns: 'common' }) || 'Saving...') : (t('save', { ns: 'common' }) || 'Save')}
             </button>
           </div>
         </form>

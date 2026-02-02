@@ -106,7 +106,7 @@ export default function PeoplePage() {
         .order('first_name', { ascending: true })
 
       if (error) throw error
-      return data as (Member & { household?: Pick<Household, 'name'> })[]
+      return data as unknown as (Member & { household?: Pick<Household, 'name'> })[]
     },
     enabled: !!currentOrganization?.id,
   })
@@ -354,21 +354,21 @@ export default function PeoplePage() {
             </Link>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm"
             >
-              <UserPlus size={18} />
+              <UserPlus size={20} />
               Add Member
             </button>
             <button
               onClick={() => setIsHouseholdModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm"
+              className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm"
             >
-              <Plus size={18} />
+              <Plus size={20} />
               Add Family
             </button>
             <button
               onClick={() => setIsInviteModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm"
+              className="flex items-center gap-2 px-6 py-3 border-2 border-emerald-600 text-emerald-600 bg-transparent rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors font-medium shadow-sm"
             >
               <Mail size={20} />
               Invite Member

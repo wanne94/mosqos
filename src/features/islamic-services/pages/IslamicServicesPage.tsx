@@ -21,7 +21,7 @@ import type { IslamicService, IslamicServiceFilters, ServiceStatus } from '../ty
 type TabType = 'all' | 'nikah' | 'janazah' | 'shahada'
 
 export default function IslamicServicesPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['islamic-services', 'common'])
   const { currentOrganizationId } = useOrganization()
 
   // Tab and filter state
@@ -63,7 +63,7 @@ export default function IslamicServicesPage() {
   const handleStatusChange = async (id: string, status: ServiceStatus) => {
     try {
       await updateStatus({ id, status })
-      toast.success(t('services.statusUpdated') || 'Status updated')
+      toast.success(t('statusUpdated') || 'Status updated')
     } catch (error: any) {
       toast.error(t('common.error') || 'Error', { description: error.message })
     }
@@ -73,7 +73,7 @@ export default function IslamicServicesPage() {
     if (!deletingService) return
     try {
       await deleteService(deletingService.id)
-      toast.success(t('services.deleted') || 'Service deleted')
+      toast.success(t('deleted') || 'Service deleted')
       setDeletingService(null)
     } catch (error: any) {
       toast.error(t('common.error') || 'Error', { description: error.message })
@@ -83,7 +83,7 @@ export default function IslamicServicesPage() {
   const handleSeedDefaults = async () => {
     try {
       await seedDefaultTypes()
-      toast.success(t('services.defaultTypesCreated') || 'Default service types created')
+      toast.success(t('defaultTypesCreated') || 'Default service types created')
     } catch (error: any) {
       toast.error(t('common.error') || 'Error', { description: error.message })
     }
@@ -100,10 +100,10 @@ export default function IslamicServicesPage() {
   }
 
   const tabs: { id: TabType; label: string; icon: string }[] = [
-    { id: 'all', label: t('services.tabs.all') || 'All Services', icon: '📋' },
-    { id: 'nikah', label: t('services.tabs.nikah') || 'Nikah', icon: '💒' },
-    { id: 'janazah', label: t('services.tabs.janazah') || 'Janazah', icon: '🕌' },
-    { id: 'shahada', label: t('services.tabs.shahada') || 'Shahada', icon: '☪️' },
+    { id: 'all', label: t('tabs.all') || 'All Services', icon: '📋' },
+    { id: 'nikah', label: t('tabs.nikah') || 'Nikah', icon: '💒' },
+    { id: 'janazah', label: t('tabs.janazah') || 'Janazah', icon: '🕌' },
+    { id: 'shahada', label: t('tabs.shahada') || 'Shahada', icon: '☪️' },
   ]
 
   return (
@@ -116,10 +116,10 @@ export default function IslamicServicesPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-              {t('services.title') || 'Islamic Services'}
+              {t('title') || 'Islamic Services'}
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
-              {t('services.subtitle') || 'Manage Nikah, Janazah, Shahada, and other services'}
+              {t('subtitle') || 'Manage Nikah, Janazah, Shahada, and other services'}
             </p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export default function IslamicServicesPage() {
               className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700"
             >
               <Settings size={18} />
-              {isSeeding ? (t('common.loading') || 'Loading...') : (t('services.setupTypes') || 'Setup Service Types')}
+              {isSeeding ? (t('common.loading') || 'Loading...') : (t('setupTypes') || 'Setup Service Types')}
             </button>
           )}
           <button
@@ -140,7 +140,7 @@ export default function IslamicServicesPage() {
             className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
           >
             <Plus size={20} />
-            {t('services.newService') || 'New Service'}
+            {t('newService') || 'New Service'}
           </button>
         </div>
       </div>
@@ -151,42 +151,42 @@ export default function IslamicServicesPage() {
           <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
               <FileText size={16} />
-              <span className="text-xs">{t('services.total') || 'Total'}</span>
+              <span className="text-xs">{t('total') || 'Total'}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.total}</p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 text-blue-500 mb-1">
               <Clock size={16} />
-              <span className="text-xs">{t('services.status.requested') || 'Requested'}</span>
+              <span className="text-xs">{t('status.requested') || 'Requested'}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.requested}</p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 text-indigo-500 mb-1">
               <Calendar size={16} />
-              <span className="text-xs">{t('services.status.scheduled') || 'Scheduled'}</span>
+              <span className="text-xs">{t('status.scheduled') || 'Scheduled'}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.scheduled}</p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 text-emerald-500 mb-1">
               <CheckCircle size={16} />
-              <span className="text-xs">{t('services.status.completed') || 'Completed'}</span>
+              <span className="text-xs">{t('status.completed') || 'Completed'}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.completed}</p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 mb-1">
               <DollarSign size={16} />
-              <span className="text-xs">{t('services.totalFees') || 'Total Fees'}</span>
+              <span className="text-xs">{t('totalFees') || 'Total Fees'}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">${stats.total_fees.toLocaleString()}</p>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
             <div className="flex items-center gap-2 text-emerald-500 mb-1">
               <DollarSign size={16} />
-              <span className="text-xs">{t('services.collected') || 'Collected'}</span>
+              <span className="text-xs">{t('collected') || 'Collected'}</span>
             </div>
             <p className="text-2xl font-bold text-slate-900 dark:text-white">${stats.fees_collected.toLocaleString()}</p>
           </div>
@@ -223,7 +223,7 @@ export default function IslamicServicesPage() {
               type="text"
               value={filters.search || ''}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              placeholder={t('services.searchPlaceholder') || 'Search by case number or name...'}
+              placeholder={t('searchPlaceholder') || 'Search by case number or name...'}
               className="w-full ps-10 pe-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
             />
           </div>
@@ -237,13 +237,13 @@ export default function IslamicServicesPage() {
               className="px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
             >
               <option value="all">{t('common.allStatuses') || 'All Statuses'}</option>
-              <option value="requested">{t('services.status.requested') || 'Requested'}</option>
-              <option value="pending_documents">{t('services.status.pending_documents') || 'Pending Documents'}</option>
-              <option value="documents_received">{t('services.status.documents_received') || 'Documents Received'}</option>
-              <option value="scheduled">{t('services.status.scheduled') || 'Scheduled'}</option>
-              <option value="in_progress">{t('services.status.in_progress') || 'In Progress'}</option>
-              <option value="completed">{t('services.status.completed') || 'Completed'}</option>
-              <option value="cancelled">{t('services.status.cancelled') || 'Cancelled'}</option>
+              <option value="requested">{t('status.requested') || 'Requested'}</option>
+              <option value="pending_documents">{t('status.pending_documents') || 'Pending Documents'}</option>
+              <option value="documents_received">{t('status.documents_received') || 'Documents Received'}</option>
+              <option value="scheduled">{t('status.scheduled') || 'Scheduled'}</option>
+              <option value="in_progress">{t('status.in_progress') || 'In Progress'}</option>
+              <option value="completed">{t('status.completed') || 'Completed'}</option>
+              <option value="cancelled">{t('status.cancelled') || 'Cancelled'}</option>
             </select>
           </div>
         </div>
@@ -257,7 +257,7 @@ export default function IslamicServicesPage() {
             className="text-sm text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
           >
             <Plus size={16} />
-            {t('services.newSpecific', { type: tabs.find((t) => t.id === activeTab)?.label }) ||
+            {t('newSpecific', { type: tabs.find((t) => t.id === activeTab)?.label }) ||
               `New ${tabs.find((t) => t.id === activeTab)?.label}`}
           </button>
         </div>
@@ -272,12 +272,12 @@ export default function IslamicServicesPage() {
         <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 p-12 text-center">
           <Heart size={48} className="mx-auto text-slate-300 dark:text-slate-600 mb-4" />
           <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
-            {t('services.noServices') || 'No services'}
+            {t('noServices') || 'No services'}
           </h3>
           <p className="text-slate-500 dark:text-slate-400 mb-4">
             {serviceTypes.length === 0
-              ? (t('services.setupTypesFirst') || 'Set up service types first to start recording services.')
-              : (t('services.noServicesDesc') || 'Create your first service request to get started.')}
+              ? (t('setupTypesFirst') || 'Set up service types first to start recording services.')
+              : (t('noServicesDesc') || 'Create your first service request to get started.')}
           </p>
           {serviceTypes.length > 0 && (
             <button
@@ -285,7 +285,7 @@ export default function IslamicServicesPage() {
               className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
             >
               <Plus size={18} />
-              {t('services.createFirst') || 'Create First Service'}
+              {t('createFirst') || 'Create First Service'}
             </button>
           )}
         </div>

@@ -18,7 +18,7 @@ import { AnnouncementCard, AnnouncementModal, DeleteAnnouncementModal } from '..
 import type { Announcement, AnnouncementFilters, AnnouncementStatus, AnnouncementPriority } from '../types/announcements.types'
 
 export default function AnnouncementsPage() {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['announcements', 'common'])
   const { currentOrganizationId } = useOrganization()
 
   // Filter state

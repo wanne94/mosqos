@@ -52,7 +52,7 @@ interface EnrollmentWithPayment {
 type TabType = 'enrollments' | 'classrooms' | 'teachers' | 'courses' | 'attendance'
 
 export default function EducationPage() {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation(['education', 'classroom', 'attendance', 'common'])
   const navigate = useNavigate()
   const { currentOrganizationId } = useOrganization()
   const queryClient = useQueryClient()
