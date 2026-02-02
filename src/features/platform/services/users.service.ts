@@ -24,6 +24,27 @@ export const usersService = {
    * Get all users with their organization memberships
    */
   async getAll(filters?: UserFilters): Promise<UserWithOrganizations[]> {
+    // First, get ALL users from auth.users
+    const { data: authUsers, error: authError } = await db.auth.admin.listUsers()
+
+    if (authError) throw authError
+
+    // Build user map from auth users
+    const userMap = new Map<string, UserWithOrganizations>()
+
+    for (const authUser of authUsers.users || []) {
+      userMap.set(authUser.id, {
+        id: authUser.id,
+        email: authUser.email || '',
+        created_at: authUser.created_at,
+        last_sign_in_at: authUser.last_sign_in_at || null,
+        email_confirmed_at: authUser.email_confirmed_at || null,
+        user_metadata: authUser.user_metadata || {},
+        organizations: [],
+        is_active: true,
+      })
+    }
+
     // Get owners
     const { data: owners, error: ownersError } = await db
       .from('organization_owners')
@@ -62,9 +83,6 @@ export const usersService = {
       .not('user_id', 'is', null)
 
     if (membersError) throw membersError
-
-    // Build user map
-    const userMap = new Map<string, UserWithOrganizations>()
 
     // Process owners
     for (const owner of owners || []) {
