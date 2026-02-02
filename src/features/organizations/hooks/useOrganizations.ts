@@ -151,7 +151,9 @@ export function useAdminCreateOrganization() {
   return useMutation({
     mutationFn: (input: AdminCreateOrganizationInput) => organizationsService.adminCreate(input),
     onSuccess: () => {
+      // Invalidate all organization queries including platform page
       queryClient.invalidateQueries({ queryKey: organizationKeys.all })
+      queryClient.invalidateQueries({ queryKey: ['platform-organizations'] })
     },
   })
 }
