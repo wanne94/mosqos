@@ -114,20 +114,13 @@ export function GroupMembersPanel({ groupId }: GroupMembersPanelProps) {
                   className="flex items-center justify-between p-2 rounded-lg hover:bg-white dark:hover:bg-slate-700"
                 >
                   <div className="flex items-center gap-3">
-                    {member.photo_url ? (
-                      <img
-                        src={member.photo_url}
-                        alt=""
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
-                        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                          {member.first_name?.[0]}
-                          {member.last_name?.[0]}
-                        </span>
-                      </div>
-                    )}
+                    {/* Member initials only */}
+                    <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        {member.first_name?.[0]}
+                        {member.last_name?.[0]}
+                      </span>
+                    </div>
                     <div>
                       <p className="text-sm font-medium text-slate-900 dark:text-white">
                         {member.first_name} {member.last_name}
@@ -177,20 +170,13 @@ export function GroupMembersPanel({ groupId }: GroupMembersPanelProps) {
                 className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50"
               >
                 <div className="flex items-center gap-3">
-                  {gm.member.photo_url ? (
-                    <img
-                      src={gm.member.photo_url}
-                      alt=""
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
-                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                        {gm.member.first_name?.[0]}
-                        {gm.member.last_name?.[0]}
-                      </span>
-                    </div>
-                  )}
+                  {/* Member initials only */}
+                  <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-600 flex items-center justify-center">
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                      {gm.member.first_name?.[0]}
+                      {gm.member.last_name?.[0]}
+                    </span>
+                  </div>
                   <div>
                     <p className="font-medium text-slate-900 dark:text-white">
                       {gm.member.first_name} {gm.member.last_name}
