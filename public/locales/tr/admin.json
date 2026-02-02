@@ -1,0 +1,28 @@
+{
+  "dashboard": {
+    "title": "Gösterge Paneli",
+    "welcome": "{{organizationName}}'e Hoş Geldiniz",
+    "subtitle": "Organizasyonunuza genel bakış",
+    "stats": {
+      "totalMembers": "Toplam Üyeler",
+      "activeMembers": "Aktif Üyeler",
+      "newThisMonth": "Bu Ay Yeniler",
+      "totalHouseholds": "Toplam Haneler",
+      "averageHouseholdSize": "Ort. Hane Büyüklüğü",
+      "loading": "İstatistikler yükleniyor..."
+    },
+    "quickActions": {
+      "title": "Hızlı İşlemler",
+      "addMember": "Yeni Üye Ekle",
+      "addMemberDesc": "Yeni bir üye kaydet",
+      "addHousehold": "Yeni Hane Ekle",
+      "addHouseholdDesc": "Bir hane oluştur",
+      "viewPeople": "Tüm Üyeleri Görüntüle",
+      "viewPeopleDesc": "Üye dizinini yönet",
+      "viewHouseholds": "Tüm Haneleri Görüntüle",
+      "viewHouseholdsDesc": "Haneleri yönet"
+    },
+    "error": "Gösterge paneli yükleme hatası",
+    "errorMessage": "Gösterge paneli verileri yüklenemedi. Lütfen tekrar deneyin."
+  }
+}

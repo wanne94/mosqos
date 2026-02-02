@@ -33,6 +33,7 @@ const PendingApprovalPage = lazy(() => import('@/features/auth/pages/PendingAppr
 const NoOrganizationPage = lazy(() => import('@/features/auth/pages/NoOrganizationPage'))
 
 // Admin Pages
+const AdminDashboardPage = lazy(() => import('@/features/admin/pages/DashboardPage'))
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
 const HouseholdsPage = lazy(() => import('@/features/households/pages/HouseholdsPage'))
 const DonorsPage = lazy(() => import('@/features/donations/pages/DonorsPage'))
@@ -174,7 +175,7 @@ export function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="people" replace />} />
+        <Route index element={<AdminDashboardPage />} />
         <Route path="people" element={<PeoplePage />} />
         <Route path="households" element={<HouseholdsPage />} />
         <Route path="donors" element={<DonorsPage />} />

@@ -1,0 +1,28 @@
+{
+  "dashboard": {
+    "title": "لوحة التحكم",
+    "welcome": "مرحبا بك في {{organizationName}}",
+    "subtitle": "نظرة عامة على منظمتك",
+    "stats": {
+      "totalMembers": "إجمالي الأعضاء",
+      "activeMembers": "الأعضاء النشطون",
+      "newThisMonth": "جديد هذا الشهر",
+      "totalHouseholds": "إجمالي العائلات",
+      "averageHouseholdSize": "متوسط حجم العائلة",
+      "loading": "جاري تحميل الإحصائيات..."
+    },
+    "quickActions": {
+      "title": "إجراءات سريعة",
+      "addMember": "إضافة عضو جديد",
+      "addMemberDesc": "تسجيل عضو جديد",
+      "addHousehold": "إضافة عائلة جديدة",
+      "addHouseholdDesc": "إنشاء عائلة",
+      "viewPeople": "عرض جميع الأعضاء",
+      "viewPeopleDesc": "إدارة دليل الأعضاء",
+      "viewHouseholds": "عرض جميع العائلات",
+      "viewHouseholdsDesc": "إدارة العائلات"
+    },
+    "error": "خطأ في تحميل لوحة التحكم",
+    "errorMessage": "فشل تحميل بيانات لوحة التحكم. يرجى المحاولة مرة أخرى."
+  }
+}

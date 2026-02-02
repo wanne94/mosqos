@@ -15,6 +15,7 @@ import {
   LogOut,
   ChevronDown,
   BarChart3,
+  LayoutDashboard,
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
@@ -23,6 +24,7 @@ import { RoleDisplay, RoleDisplaySkeleton } from '@/shared/components/RoleDispla
 import { type UserRole } from '@/shared/utils/roleDisplay'
 
 const navItems = [
+  { path: '', label: 'Dashboard', icon: LayoutDashboard },
   { path: 'people', label: 'People', icon: Users },
   { path: 'donors', label: 'Donors', icon: DollarSign },
   { path: 'expenses', label: 'Expenses', icon: DollarSign },
@@ -47,6 +49,10 @@ export default function AdminLayout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
 
   const isActive = (path: string) => {
+    // Handle dashboard (index route)
+    if (path === '') {
+      return location.pathname === `/${slug}/admin` || location.pathname === `/${slug}/admin/`
+    }
     return location.pathname.includes(`/${slug}/admin/${path}`)
   }
 

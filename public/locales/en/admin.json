@@ -1,0 +1,28 @@
+{
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to {{organizationName}}",
+    "subtitle": "Overview of your organization",
+    "stats": {
+      "totalMembers": "Total Members",
+      "activeMembers": "Active Members",
+      "newThisMonth": "New This Month",
+      "totalHouseholds": "Total Households",
+      "averageHouseholdSize": "Avg. Household Size",
+      "loading": "Loading statistics..."
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "addMember": "Add New Member",
+      "addMemberDesc": "Register a new member",
+      "addHousehold": "Add New Household",
+      "addHouseholdDesc": "Create a household",
+      "viewPeople": "View All Members",
+      "viewPeopleDesc": "Manage member directory",
+      "viewHouseholds": "View All Households",
+      "viewHouseholdsDesc": "Manage households"
+    },
+    "error": "Error loading dashboard",
+    "errorMessage": "Failed to load dashboard data. Please try again."
+  }
+}
