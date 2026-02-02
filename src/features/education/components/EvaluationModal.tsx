@@ -35,7 +35,7 @@ export default function EvaluationModal({
   memberId,
   classId,
 }: EvaluationModalProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['education', 'common'])
   const { currentOrganizationId } = useOrganization()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState<EvaluationFormData>(initialFormData)
@@ -44,7 +44,7 @@ export default function EvaluationModal({
   useEscapeKey(
     onClose,
     isDirty,
-    t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?',
+    t('unsavedChangesWarning', { ns: 'common' }),
     isOpen
   )
 
@@ -53,7 +53,7 @@ export default function EvaluationModal({
     if (isDirty) {
       if (
         window.confirm(
-          t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?'
+          t('unsavedChangesWarning', { ns: 'common' })
         )
       ) {
         onClose()
@@ -125,18 +125,18 @@ export default function EvaluationModal({
   }
 
   const getScoreLabel = (score: number): string => {
-    if (score >= 90) return 'Excellent'
-    if (score >= 80) return 'Good'
-    if (score >= 70) return 'Average'
-    if (score >= 60) return 'Below Average'
-    return 'Needs Improvement'
+    if (score >= 90) return t('scoreExcellent')
+    if (score >= 80) return t('scoreGood')
+    if (score >= 70) return t('scoreAverage')
+    if (score >= 60) return t('scoreBelowAverage')
+    return t('scoreNeedsImprovement')
   }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Evaluate Student</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{t('evaluateStudent')}</h2>
           <button
             onClick={handleClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
@@ -149,7 +149,7 @@ export default function EvaluationModal({
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Score: {formData.score} / 100
+                {t('scoreDisplay', { score: formData.score })}
               </label>
               <span className={`text-sm font-semibold ${getScoreColor(formData.score)}`}>
                 {getScoreLabel(formData.score)}
@@ -177,13 +177,13 @@ export default function EvaluationModal({
               value={formData.score}
               onChange={handleChange}
               className="w-full mt-3 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-              placeholder="Or enter score directly"
+              placeholder={t('orEnterScoreDirectly')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Evaluation Date *
+              {t('evaluationDate')} *
             </label>
             <input
               type="date"
@@ -197,7 +197,7 @@ export default function EvaluationModal({
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Behavior Notes
+              {t('behaviorNotes')}
             </label>
             <textarea
               name="behavior_notes"
@@ -215,14 +215,14 @@ export default function EvaluationModal({
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
-              Cancel
+              {t('cancel', { ns: 'common' })}
             </button>
             <button
               type="submit"
               disabled={loading}
               className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Saving...' : 'Save Evaluation'}
+              {loading ? t('saving', { ns: 'common' }) : t('saveEvaluation')}
             </button>
           </div>
         </form>

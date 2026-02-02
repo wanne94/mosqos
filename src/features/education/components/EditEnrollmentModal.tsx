@@ -27,7 +27,7 @@ interface EnrollmentFormData {
 }
 
 export default function EditEnrollmentModal({ isOpen, onClose, onSave, enrollmentId }: EditEnrollmentModalProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['education', 'common'])
   const { currentOrganizationId } = useOrganization()
   const [members, setMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(false)
@@ -45,7 +45,7 @@ export default function EditEnrollmentModal({ isOpen, onClose, onSave, enrollmen
   useEscapeKey(
     onClose,
     isDirty,
-    t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?',
+    t('unsavedChangesWarning', { ns: 'common' }),
     isOpen
   )
 
@@ -196,7 +196,7 @@ export default function EditEnrollmentModal({ isOpen, onClose, onSave, enrollmen
     <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Edit Enrollment</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t('editEnrollment')}</h2>
           <button
             onClick={handleClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
@@ -206,7 +206,7 @@ export default function EditEnrollmentModal({ isOpen, onClose, onSave, enrollmen
         </div>
 
         {fetching ? (
-          <div className="p-6 text-center text-slate-600 dark:text-slate-400">Loading enrollment data...</div>
+          <div className="p-6 text-center text-slate-600 dark:text-slate-400">{t('loadingEnrollmentData')}</div>
         ) : (
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div>

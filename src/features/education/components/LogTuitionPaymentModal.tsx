@@ -57,7 +57,7 @@ export default function LogTuitionPaymentModal({
   selectedMonth,
   selectedYear,
 }: LogTuitionPaymentModalProps) {
-  const { t } = useTranslation()
+  const { t } = useTranslation(['education', 'common'])
   const { currentOrganizationId } = useOrganization()
   const [educationFund, setEducationFund] = useState<Fund | null>(null)
   const [loading, setLoading] = useState(false)
@@ -67,7 +67,7 @@ export default function LogTuitionPaymentModal({
   useEscapeKey(
     onClose,
     isDirty,
-    t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?',
+    t('unsavedChangesWarning', { ns: 'common' }),
     isOpen
   )
 
@@ -76,7 +76,7 @@ export default function LogTuitionPaymentModal({
     if (isDirty) {
       if (
         window.confirm(
-          t('unsavedChangesWarning') || 'You have unsaved changes. Are you sure you want to close?'
+          t('unsavedChangesWarning', { ns: 'common' })
         )
       ) {
         onClose()
@@ -366,7 +366,7 @@ export default function LogTuitionPaymentModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Log Tuition Payment</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{t('logTuitionPayment')}</h2>
           <button
             onClick={handleClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
@@ -380,21 +380,21 @@ export default function LogTuitionPaymentModal({
             <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4">
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400">Student:</span>
+                  <span className="text-slate-600 dark:text-slate-400">{t('student')}:</span>
                   <span className="font-medium text-slate-900 dark:text-white">
                     {enrollment.member
                       ? `${enrollment.member.first_name} ${enrollment.member.last_name}`
-                      : t('common.notAvailable')}
+                      : t('notAvailable', { ns: 'common' })}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400">{t('education.class')}:</span>
+                  <span className="text-slate-600 dark:text-slate-400">{t('class')}:</span>
                   <span className="font-medium text-slate-900 dark:text-white">
-                    {enrollment.scheduled_class?.name || t('common.notAvailable')}
+                    {enrollment.scheduled_class?.name || t('notAvailable', { ns: 'common' })}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400">Tuition Fee:</span>
+                  <span className="text-slate-600 dark:text-slate-400">{t('tuitionFee')}:</span>
                   <span className="font-medium text-slate-900 dark:text-white">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
@@ -403,7 +403,7 @@ export default function LogTuitionPaymentModal({
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-600 dark:text-slate-400">Paid So Far:</span>
+                  <span className="text-slate-600 dark:text-slate-400">{t('paidSoFar')}:</span>
                   <span className="font-medium text-slate-900 dark:text-white">
                     {new Intl.NumberFormat('en-US', {
                       style: 'currency',
@@ -412,7 +412,7 @@ export default function LogTuitionPaymentModal({
                   </span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-slate-200 dark:border-slate-600">
-                  <span className="text-slate-600 dark:text-slate-400 font-medium">Remaining:</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-medium">{t('remaining')}:</span>
                   <span
                     className={`font-bold ${
                       remaining > 0
@@ -432,7 +432,7 @@ export default function LogTuitionPaymentModal({
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Payment Amount ($) *
+              {t('paymentAmount')} ($) *
             </label>
             <div className="relative">
               <DollarSign
@@ -455,7 +455,7 @@ export default function LogTuitionPaymentModal({
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Payment Date *
+              {t('paymentDate')} *
             </label>
             <input
               type="date"
@@ -469,7 +469,7 @@ export default function LogTuitionPaymentModal({
 
           <div>
             <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-              Payment Method *
+              {t('paymentMethod')} *
             </label>
             <select
               name="payment_method"
@@ -478,12 +478,12 @@ export default function LogTuitionPaymentModal({
               required
               className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
             >
-              <option value="Cash">Cash</option>
-              <option value="Check">Check</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Debit Card">Debit Card</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Other">Other</option>
+              <option value="Cash">{t('cash')}</option>
+              <option value="Check">{t('check')}</option>
+              <option value="Credit Card">{t('creditCard')}</option>
+              <option value="Debit Card">{t('creditCard')}</option>
+              <option value="Bank Transfer">{t('bankTransfer')}</option>
+              <option value="Other">{t('other')}</option>
             </select>
           </div>
 
@@ -493,7 +493,7 @@ export default function LogTuitionPaymentModal({
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
-              Cancel
+              {t('cancel', { ns: 'common' })}
             </button>
             <button
               type="submit"

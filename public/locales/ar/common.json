@@ -37,6 +37,8 @@
   "required": "مطلوب",
   "due": "مستحق",
   "allStatuses": "جميع الحالات",
+  "failedToSaveEvaluation": "فشل في حفظ التقييم",
+  "unsavedChangesWarning": "لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد الإغلاق؟",
   "months": {
     "january": "يناير",
     "february": "فبراير",

@@ -1,4 +1,5 @@
 import { X, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useEscapeKey } from '../../../hooks/useEscapeKey'
 
 interface DeleteEnrollmentModalProps {
@@ -16,6 +17,7 @@ export default function DeleteEnrollmentModal({
   studentName,
   className
 }: DeleteEnrollmentModalProps) {
+  const { t } = useTranslation(['education', 'common'])
   useEscapeKey(onClose, false, '', isOpen)
 
   if (!isOpen) return null
@@ -24,7 +26,7 @@ export default function DeleteEnrollmentModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Remove Enrollment</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">{t('removeEnrollment')}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
@@ -40,12 +42,12 @@ export default function DeleteEnrollmentModal({
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                Are you sure you want to remove this enrollment?
+                {t('confirmRemoveEnrollmentTitle')}
               </h3>
-              <p className="text-slate-600 dark:text-slate-400">
-                This will remove <strong className="text-slate-900 dark:text-slate-100">{studentName}</strong> from{' '}
-                <strong className="text-slate-900 dark:text-slate-100">{className}</strong>. This action cannot be undone.
-              </p>
+              <p
+                className="text-slate-600 dark:text-slate-400"
+                dangerouslySetInnerHTML={{ __html: t('confirmRemoveEnrollment', { studentName, className }) }}
+              />
             </div>
           </div>
 
@@ -55,14 +57,14 @@ export default function DeleteEnrollmentModal({
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
-              Cancel
+              {t('cancel', { ns: 'common' })}
             </button>
             <button
               type="button"
               onClick={onConfirm}
               className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Remove Enrollment
+              {t('removeEnrollment')}
             </button>
           </div>
         </div>

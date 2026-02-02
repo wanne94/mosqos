@@ -1,4 +1,5 @@
 import { X, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useEscapeKey } from '../../../shared/hooks/useEscapeKey'
 
 interface DeleteClassModalProps {
@@ -14,6 +15,7 @@ export default function DeleteClassModal({
   onConfirm,
   className,
 }: DeleteClassModalProps) {
+  const { t } = useTranslation(['education', 'common'])
   useEscapeKey(onClose, { enabled: isOpen })
 
   if (!isOpen) return null
@@ -22,7 +24,7 @@ export default function DeleteClassModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">Delete Course</h2>
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-gray-100">{t('deleteClass')}</h2>
           <button
             onClick={onClose}
             className="text-slate-400 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
@@ -39,11 +41,12 @@ export default function DeleteClassModal({
             </div>
             <div className="flex-1">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-gray-100 mb-2">
-                Are you sure you want to delete this class?
+                {t('confirmDeleteClassTitle')}
               </h3>
-              <p className="text-slate-600 dark:text-gray-400">
-                This will permanently delete <strong>{className}</strong> and all associated enrollments. This action cannot be undone.
-              </p>
+              <p
+                className="text-slate-600 dark:text-gray-400"
+                dangerouslySetInnerHTML={{ __html: t('confirmDeleteClass', { className }) }}
+              />
             </div>
           </div>
 
@@ -53,14 +56,14 @@ export default function DeleteClassModal({
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-slate-300 dark:border-gray-600 text-slate-700 dark:text-gray-300 rounded-lg hover:bg-slate-50 dark:hover:bg-gray-700 transition-colors"
             >
-              Cancel
+              {t('cancel', { ns: 'common' })}
             </button>
             <button
               type="button"
               onClick={onConfirm}
               className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Delete
+              {t('delete', { ns: 'common' })}
             </button>
           </div>
         </div>

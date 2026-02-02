@@ -11,5 +11,9 @@
   "name": "Classroom Name",
   "capacity": "Capacity",
   "location": "Location",
-  "description": "Description"
+  "description": "Description",
+  "namePlaceholder": "e.g., Room 101, Main Hall",
+  "capacityPlaceholder": "e.g., 30",
+  "descriptionPlaceholder": "Optional description of the classroom",
+  "locationPlaceholder": "e.g., Ground Floor, Building A"
 }

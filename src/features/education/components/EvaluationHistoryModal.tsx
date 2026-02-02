@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../../../lib/supabase/client'
 import { X, Calendar, FileText } from 'lucide-react'
 import { useEscapeKey } from '../../../hooks/useEscapeKey'
@@ -26,6 +27,7 @@ export default function EvaluationHistoryModal({
   studentName,
   className: classNameProp,
 }: EvaluationHistoryModalProps) {
+  const { t } = useTranslation(['education', 'common'])
   const { currentOrganizationId } = useOrganization()
   const [evaluations, setEvaluations] = useState<Evaluation[]>([])
   const [loading, setLoading] = useState(true)
@@ -76,11 +78,11 @@ export default function EvaluationHistoryModal({
   }
 
   const getScoreLabel = (score: number): string => {
-    if (score >= 90) return 'Excellent'
-    if (score >= 80) return 'Good'
-    if (score >= 70) return 'Average'
-    if (score >= 60) return 'Below Average'
-    return 'Needs Improvement'
+    if (score >= 90) return t('scoreExcellent')
+    if (score >= 80) return t('scoreGood')
+    if (score >= 70) return t('scoreAverage')
+    if (score >= 60) return t('scoreBelowAverage')
+    return t('scoreNeedsImprovement')
   }
 
   const averageScore =
@@ -95,7 +97,7 @@ export default function EvaluationHistoryModal({
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800">
           <div>
-            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Evaluation History</h2>
+            <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{t('evaluationHistory')}</h2>
             <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
               {studentName} - {classNameProp}
             </p>
@@ -110,12 +112,12 @@ export default function EvaluationHistoryModal({
 
         <div className="p-6">
           {loading ? (
-            <div className="text-center py-8 text-slate-600 dark:text-slate-400">Loading evaluations...</div>
+            <div className="text-center py-8 text-slate-600 dark:text-slate-400">{t('loading', { ns: 'common' })}</div>
           ) : evaluations.length === 0 ? (
             <div className="text-center py-8">
               <FileText className="mx-auto text-slate-400 dark:text-slate-500 mb-4" size={48} />
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">No Evaluations Found</h3>
-              <p className="text-slate-600 dark:text-slate-400">No evaluations have been recorded for this student yet.</p>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">{t('noEvaluationsFound')}</h3>
+              <p className="text-slate-600 dark:text-slate-400">{t('noEvaluationsDescription')}</p>
             </div>
           ) : (
             <>

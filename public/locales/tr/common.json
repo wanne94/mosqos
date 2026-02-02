@@ -37,6 +37,8 @@
   "required": "Gerekli",
   "due": "Ödeme Tarihi",
   "allStatuses": "Tüm Durumlar",
+  "failedToSaveEvaluation": "Değerlendirme kaydedilemedi",
+  "unsavedChangesWarning": "Kaydedilmemiş değişiklikleriniz var. Kapatmak istediğinizden emin misiniz?",
   "months": {
     "january": "Ocak",
     "february": "Şubat",

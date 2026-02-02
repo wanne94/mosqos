@@ -37,7 +37,7 @@ export default function StudentNotesModal({
   studentName,
   className,
 }: StudentNotesModalProps) {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation(['education', 'common'])
   const { currentOrganizationId } = useOrganization()
   const currentLanguage = i18n.language || 'en'
   const [notes, setNotes] = useState<StudentNote[]>([])
@@ -233,7 +233,7 @@ export default function StudentNotesModal({
                     rows={5}
                     required
                     className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent bg-white dark:bg-slate-700 text-slate-900 dark:text-white"
-                    placeholder="Enter your note here..."
+                    placeholder={t('enterNoteHere')}
                   />
                 </div>
 

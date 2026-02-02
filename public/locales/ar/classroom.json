@@ -11,5 +11,9 @@
   "name": "اسم الفصل الدراسي",
   "capacity": "السعة",
   "location": "الموقع",
-  "description": "الوصف"
+  "description": "الوصف",
+  "namePlaceholder": "مثال: الغرفة 101، القاعة الرئيسية",
+  "capacityPlaceholder": "مثال: 30",
+  "descriptionPlaceholder": "وصف اختياري للفصل الدراسي",
+  "locationPlaceholder": "مثال: الطابق الأرضي، المبنى أ"
 }

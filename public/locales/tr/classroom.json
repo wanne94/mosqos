@@ -11,5 +11,9 @@
   "name": "Sınıf Adı",
   "capacity": "Kapasite",
   "location": "Konum",
-  "description": "Açıklama"
+  "description": "Açıklama",
+  "namePlaceholder": "örn: Oda 101, Ana Salon",
+  "capacityPlaceholder": "örn: 30",
+  "descriptionPlaceholder": "Sınıfın isteğe bağlı açıklaması",
+  "locationPlaceholder": "örn: Zemin Kat, A Binası"
 }
