@@ -1,13 +1,22 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { User, Session } from '@supabase/supabase-js'
+import { useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase/client'
+import {
+  isSessionExpiringSoon,
+  extendSession,
+  cleanupSession,
+} from '@/lib/supabase/auth-helpers'
+import { SessionTimeoutWarning } from '@/shared/components/SessionTimeoutWarning'
 
 interface AuthContextType {
   user: User | null
   session: Session | null
   isLoading: boolean
   isDevMode: boolean
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
+  signIn: (email: string, password: string, rememberMe?: boolean) => Promise<{ error: Error | null }>
   signUp: (email: string, password: string, metadata?: Record<string, unknown>) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: Error | null }>
@@ -51,6 +60,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [showTimeoutWarning, setShowTimeoutWarning] = useState(false)
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const isDevMode = FORCE_DEV_MODE || !isSupabaseConfigured()
 
   useEffect(() => {
@@ -78,17 +90,96 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
+      (event, session) => {
+        console.log('Auth state changed:', event)
+
+        if (event === 'SIGNED_OUT') {
+          setUser(null)
+          setSession(null)
+          setShowTimeoutWarning(false)
+          queryClient.clear()
+          navigate('/login')
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully')
+          setShowTimeoutWarning(false)
+          toast.success('Session extended successfully')
+        }
+
+        if (event === 'USER_UPDATED' || event === 'SIGNED_IN') {
+          setSession(session)
+          setUser(session?.user ?? null)
+        }
+
         setIsLoading(false)
       }
     )
 
     return () => subscription.unsubscribe()
-  }, [isDevMode])
+  }, [isDevMode, navigate, queryClient])
 
-  const signIn = async (email: string, password: string) => {
+  // Monitor session expiration (check every minute)
+  useEffect(() => {
+    if (isDevMode || !user) return
+
+    const checkSessionExpiry = async () => {
+      const expiringSoon = await isSessionExpiringSoon()
+      if (expiringSoon && !showTimeoutWarning) {
+        console.log('Session expiring soon, showing warning')
+        setShowTimeoutWarning(true)
+      }
+    }
+
+    // Check immediately
+    checkSessionExpiry()
+
+    // Then check every minute
+    const interval = setInterval(checkSessionExpiry, 60000)
+
+    return () => clearInterval(interval)
+  }, [isDevMode, user, showTimeoutWarning])
+
+  // Auto-refresh token on user activity if session is expiring soon
+  useEffect(() => {
+    if (isDevMode || !user) return
+
+    const handleUserActivity = async () => {
+      const expiringSoon = await isSessionExpiringSoon()
+      if (expiringSoon) {
+        console.log('User active and session expiring, refreshing token')
+        const success = await extendSession()
+        if (success) {
+          console.log('Session auto-refreshed on user activity')
+        }
+      }
+    }
+
+    // Listen for user activity events
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart']
+    let lastActivityTime = Date.now()
+
+    const throttledHandler = () => {
+      const now = Date.now()
+      // Throttle to once per minute
+      if (now - lastActivityTime > 60000) {
+        lastActivityTime = now
+        handleUserActivity()
+      }
+    }
+
+    events.forEach(event => {
+      window.addEventListener(event, throttledHandler)
+    })
+
+    return () => {
+      events.forEach(event => {
+        window.removeEventListener(event, throttledHandler)
+      })
+    }
+  }, [isDevMode, user])
+
+  const signIn = async (email: string, password: string, rememberMe = false) => {
     if (isDevMode) {
       const devUser = DEV_USERS.find(u => u.email === email && u.password === password)
       if (devUser) {

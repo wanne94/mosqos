@@ -292,18 +292,39 @@ export const donationsService = {
     }
   },
 
-  // Send donation receipt (placeholder)
+  // Send donation receipt
   async sendReceipt(donationId: string): Promise<void> {
-    const { error } = await db
-      .from(DONATIONS_TABLE)
-      .update({
-        receipt_sent: true,
-        receipt_sent_at: new Date().toISOString(),
-      })
-      .eq('id', donationId)
+    // Get donation details first
+    const donation = await this.getById(donationId)
 
-    if (error) throw error
-    // TODO: Integrate with email service to actually send receipt
+    if (!donation) {
+      throw new Error('Donation not found')
+    }
+
+    if (!donation.member?.email) {
+      throw new Error('No email address found for this donation')
+    }
+
+    // Call Supabase Edge Function to send email
+    const { data, error } = await supabase.functions.invoke('send-donation-receipt', {
+      body: {
+        donationId: donationId,
+        recipientEmail: donation.member.email,
+        organizationId: donation.organization_id,
+      },
+    })
+
+    if (error) {
+      console.error('Failed to send receipt email:', error)
+      throw new Error(`Failed to send receipt: ${error.message}`)
+    }
+
+    if (!data?.success) {
+      throw new Error('Email service returned unsuccessful response')
+    }
+
+    // Receipt sent and donation record already updated by Edge Function
+    return
   },
 
   // ============================================================================

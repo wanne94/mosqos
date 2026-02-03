@@ -32,6 +32,10 @@ const PlatformSettingsPage = lazy(() => import('@/features/platform/pages/Settin
 const PendingApprovalPage = lazy(() => import('@/features/auth/pages/PendingApprovalPage'))
 const NoOrganizationPage = lazy(() => import('@/features/auth/pages/NoOrganizationPage'))
 
+// Password Reset Pages
+const PasswordResetRequestPage = lazy(() => import('@/features/auth/pages/PasswordResetRequestPage'))
+const PasswordResetConfirmPage = lazy(() => import('@/features/auth/pages/PasswordResetConfirmPage'))
+
 // Admin Pages
 const AdminDashboardPage = lazy(() => import('@/features/admin/pages/DashboardPage'))
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
@@ -120,6 +124,18 @@ export function AppRoutes() {
               <SignupPage />
             </PublicOnlyRoute>
           }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <PublicOnlyRoute>
+              <PasswordResetRequestPage />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/reset-password/confirm"
+          element={<PasswordResetConfirmPage />}
         />
       </Route>
 

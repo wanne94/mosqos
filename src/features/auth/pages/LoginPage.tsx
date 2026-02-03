@@ -123,7 +123,7 @@ export default function LoginPage() {
             Remember me
           </label>
           <Link
-            to="/forgot-password"
+            to="/reset-password"
             className="text-sm text-primary hover:underline"
           >
             Forgot password?

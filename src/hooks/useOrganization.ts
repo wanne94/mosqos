@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase/client'
+import { useOrganization as useOrganizationContext } from '../app/providers/OrganizationProvider'
 
 interface UseOrganizationReturn {
   currentOrganizationId: string
@@ -8,41 +7,17 @@ interface UseOrganizationReturn {
   refresh: () => Promise<void>
 }
 
+/**
+ * Compatibility wrapper around OrganizationProvider's useOrganization hook.
+ * Provides a simplified interface for components that only need org ID and name.
+ */
 export function useOrganization(): UseOrganizationReturn {
-  const [currentOrganizationId] = useState('1') // Default organization ID
-  const [organizationName, setOrganizationName] = useState('')
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchOrganizationName()
-  }, [])
-
-  const fetchOrganizationName = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('organizations')
-        .select('name')
-        .eq('id', currentOrganizationId)
-        .maybeSingle()
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching organization name:', error)
-      }
-
-      if (data?.name) {
-        setOrganizationName(data.name)
-      }
-    } catch (error) {
-      console.error('Error fetching organization name:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const { currentOrganization, isLoading, refreshOrganizations } = useOrganizationContext()
 
   return {
-    currentOrganizationId,
-    organizationName,
-    loading,
-    refresh: fetchOrganizationName
+    currentOrganizationId: currentOrganization?.id || '',
+    organizationName: currentOrganization?.name || '',
+    loading: isLoading,
+    refresh: refreshOrganizations
   }
 }
