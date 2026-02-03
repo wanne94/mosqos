@@ -298,11 +298,15 @@ export default function EducationPage() {
   const loading = coursesLoading || enrollmentsLoading || teachersLoading || classroomsLoading || attendanceLoading
 
   const refetchData = () => {
-    queryClient.invalidateQueries({ queryKey: ['courses'] })
-    queryClient.invalidateQueries({ queryKey: ['enrollments'] })
-    queryClient.invalidateQueries({ queryKey: ['teachers'] })
-    queryClient.invalidateQueries({ queryKey: ['classrooms'] })
-    queryClient.invalidateQueries({ queryKey: ['attendance'] })
+    // Precizna invalidacija - samo za trenutnu organizaciju
+    // Sprječava broad invalidation koja može uzrokovati infinite loops
+    queryClient.invalidateQueries({ queryKey: ['courses', currentOrganizationId] })
+    queryClient.invalidateQueries({ queryKey: ['enrollments', currentOrganizationId] })
+    queryClient.invalidateQueries({ queryKey: ['teachers', currentOrganizationId] })
+    queryClient.invalidateQueries({ queryKey: ['classrooms', currentOrganizationId] })
+    queryClient.invalidateQueries({ queryKey: ['attendance', currentOrganizationId] })
+    // Također invalidiraj scheduled-classes koji se koristi u modalima
+    queryClient.invalidateQueries({ queryKey: ['scheduled-classes', currentOrganizationId] })
   }
 
   return (

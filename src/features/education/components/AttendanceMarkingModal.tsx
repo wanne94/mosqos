@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Check, Users, Calendar, Search, CheckCircle2, XCircle } from 'lucide-react'
 import { toast } from 'sonner'
@@ -114,8 +114,25 @@ export default function AttendanceMarkingModal({
     enabled: !!currentOrganizationId && !!selectedClassId && !!attendanceDate && isOpen,
   })
 
+  // Refs za praćenje prethodnih vrijednosti - sprječava infinite loop
+  const prevEnrollmentIdsRef = useRef<string>('')
+  const prevAttendanceIdsRef = useRef<string>('')
+
   // Initialize records when enrollments load
   useEffect(() => {
+    // Kreiraj stabilan string za poređenje - samo ID-jevi
+    const enrollmentIds = enrollments.map((e) => e.id).sort().join(',')
+    const attendanceIds = existingAttendance.map((a) => a.id).sort().join(',')
+
+    // Guard: Provjeri da li su se STVARNO podaci promijenili
+    if (enrollmentIds === prevEnrollmentIdsRef.current && attendanceIds === prevAttendanceIdsRef.current) {
+      return // Ne raditi ništa ako se podaci nisu promijenili
+    }
+
+    // Ažuriraj ref-ove
+    prevEnrollmentIdsRef.current = enrollmentIds
+    prevAttendanceIdsRef.current = attendanceIds
+
     if (enrollments.length > 0) {
       const newRecords = enrollments.map((enrollment) => {
         const existing = existingAttendance.find((a) => a.member_id === enrollment.member_id)
@@ -158,8 +175,8 @@ export default function AttendanceMarkingModal({
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+      // Ne invalidirati ovdje - onSave() već poziva refetchData() koji invalidiara
+      // Uklonjena dvostruka invalidacija koja je uzrokovala infinite loop
       toast.success(t('attendance.savedSuccessfully') || 'Attendance saved successfully')
       onSave()
       onClose()

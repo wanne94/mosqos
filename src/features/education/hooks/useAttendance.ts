@@ -39,8 +39,12 @@ export function useAttendance(options: UseAttendanceOptions = {}) {
       return attendanceService.create(organizationId, input)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+      // Precizna invalidacija - samo za ovu organizaciju
+      queryClient.invalidateQueries({ queryKey: ['attendance', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'class', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'student', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'summary'] })
+      queryClient.invalidateQueries({ queryKey: ['enrollments', organizationId] })
     },
   })
 
@@ -51,8 +55,12 @@ export function useAttendance(options: UseAttendanceOptions = {}) {
       return attendanceService.bulkUpsert(organizationId, input)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+      // Precizna invalidacija - samo za ovu organizaciju
+      queryClient.invalidateQueries({ queryKey: ['attendance', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'class', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'student', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'summary'] })
+      queryClient.invalidateQueries({ queryKey: ['enrollments', organizationId] })
     },
   })
 
@@ -70,8 +78,12 @@ export function useAttendance(options: UseAttendanceOptions = {}) {
       return attendanceService.update(id, status, notes)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+      // Precizna invalidacija - samo za ovu organizaciju
+      queryClient.invalidateQueries({ queryKey: ['attendance', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'class', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'student', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'summary'] })
+      queryClient.invalidateQueries({ queryKey: ['enrollments', organizationId] })
     },
   })
 
@@ -81,8 +93,12 @@ export function useAttendance(options: UseAttendanceOptions = {}) {
       return attendanceService.delete(id)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attendance'] })
-      queryClient.invalidateQueries({ queryKey: ['enrollments'] })
+      // Precizna invalidacija - samo za ovu organizaciju
+      queryClient.invalidateQueries({ queryKey: ['attendance', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'class', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'student', organizationId] })
+      queryClient.invalidateQueries({ queryKey: ['attendance', 'summary'] })
+      queryClient.invalidateQueries({ queryKey: ['enrollments', organizationId] })
     },
   })
 
