@@ -8,3 +8,7 @@ export { DonationInvoice } from './DonationInvoice'
 // Expense Components
 export { LogExpenseModal } from './LogExpenseModal'
 export { EditExpenseModal } from './EditExpenseModal'
+
+// Tax Receipts Components
+export { YearEndStatementModal } from './YearEndStatementModal'
+export { BatchExportProgress } from './BatchExportProgress'

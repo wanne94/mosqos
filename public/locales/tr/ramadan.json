@@ -1,0 +1,113 @@
+{
+  "title": "Ramazan",
+  "dashboard": "Ramazan Paneli",
+  "zakatCalculator": "Zekat Hesaplayıcı",
+  "iftarSchedule": "İftar Programı",
+  "taraweehSchedule": "Teravih Programı",
+  "daysRemaining": "Kalan Günler",
+  "daysUntilRamadan": "Ramazan'a Kalan Günler",
+  "ramadanInProgress": "Ramazan Devam Ediyor",
+  "ramadanEnded": "Ramazan Sona Erdi",
+  "nisab": "Nisab Eşiği",
+  "nisabDescription": "Zekatın farz olması için gereken minimum servet miktarı",
+  "currentNisab": "Mevcut Nisab Değeri",
+  "goldNisab": "Altın Nisabı (87.48g)",
+  "silverNisab": "Gümüş Nisabı (612.36g)",
+  "settings": {
+    "title": "Ramazan Ayarları",
+    "hijriYear": "Hicri Yıl",
+    "startDate": "Başlangıç Tarihi",
+    "endDate": "Bitiş Tarihi",
+    "suhoorTime": "Sahur Vakti",
+    "iftarTime": "İftar Vakti",
+    "taraweehTime": "Teravih Vakti",
+    "taraweehRakats": "Teravih Rekatları",
+    "isActive": "Aktif Ramazan",
+    "notes": "Notlar",
+    "save": "Ayarları Kaydet",
+    "saved": "Ayarlar başarıyla kaydedildi"
+  },
+  "assets": {
+    "title": "Varlıklar",
+    "cash": "Nakit ve Banka Bakiyeleri",
+    "cashDescription": "Eldeki nakit, vadesiz hesaplar, tasarruf hesapları",
+    "gold": "Altın ve Gümüş",
+    "goldDescription": "Altın takılar, madeni paralar, külçeler ve gümüş eşyalar",
+    "stocks": "Hisse Senetleri ve Yatırımlar",
+    "stocksDescription": "Hisse senetleri, tahviller, yatırım fonları, emeklilik hesapları",
+    "property": "Yatırım Amaçlı Gayrimenkul",
+    "propertyDescription": "Yatırım için tutulan mülkler (asıl konut değil)",
+    "receivables": "Size Borçlu Olunan Paralar",
+    "receivablesDescription": "Verdiğiniz borçlar, beklenen ödemeler",
+    "businessAssets": "İş Varlıkları",
+    "businessAssetsDescription": "Envanter, ticari mallar, iş alacakları",
+    "otherAssets": "Diğer Varlıklar",
+    "otherAssetsDescription": "Zekata tabi diğer varlıklar"
+  },
+  "liabilities": {
+    "title": "Düşülecek Borçlar",
+    "debts": "Borçlar ve Krediler",
+    "debtsDescription": "Başkalarına borçlu olduğunuz paralar",
+    "duePayments": "Vadesi Gelen Ödemeler",
+    "duePaymentsDescription": "Yıl içinde vadesi gelen faturalar ve ödemeler",
+    "otherLiabilities": "Diğer Borçlar",
+    "otherLiabilitiesDescription": "Düşülebilecek diğer borçlar"
+  },
+  "calculation": {
+    "title": "Zekat Hesaplaması",
+    "totalAssets": "Toplam Varlıklar",
+    "totalLiabilities": "Toplam Borçlar",
+    "netWorth": "Net Zekatlık Değer",
+    "zakatDue": "Ödenecek Zekat (%2.5)",
+    "calculate": "Zekat Hesapla",
+    "recalculate": "Yeniden Hesapla",
+    "save": "Hesaplamayı Kaydet",
+    "saved": "Hesaplama başarıyla kaydedildi",
+    "print": "Yazdır / PDF İndir",
+    "belowNisab": "Nisab Altında",
+    "belowNisabMessage": "Net değeriniz nisab eşiğinin altında. Zekat farz değil.",
+    "aboveNisab": "Nisab Üstünde",
+    "aboveNisabMessage": "Net değeriniz nisab eşiğini aşıyor. Zekat farzdır."
+  },
+  "history": {
+    "title": "Hesaplama Geçmişi",
+    "date": "Tarih",
+    "nisabValue": "Nisab Değeri",
+    "totalAssets": "Toplam Varlıklar",
+    "zakatAmount": "Zekat Miktarı",
+    "noHistory": "Hesaplama geçmişi bulunamadı",
+    "viewDetails": "Detayları Görüntüle"
+  },
+  "events": {
+    "iftar": "İftar",
+    "taraweeh": "Teravih",
+    "suhoor": "Sahur",
+    "eid": "Bayram",
+    "noUpcoming": "Yaklaşan etkinlik yok",
+    "today": "Bugün",
+    "tomorrow": "Yarın",
+    "viewAll": "Tüm Etkinlikleri Görüntüle"
+  },
+  "countdown": {
+    "days": "Gün",
+    "hours": "Saat",
+    "minutes": "Dakika",
+    "seconds": "Saniye",
+    "ramadanMubarak": "Ramazan Mübarek!",
+    "untilRamadan": "Ramazan'a",
+    "remaining": "Kalan"
+  },
+  "quickActions": {
+    "title": "Hızlı İşlemler",
+    "calculateZakat": "Zekat Hesapla",
+    "viewSchedule": "Programı Görüntüle",
+    "addEvent": "İftar Etkinliği Ekle",
+    "settings": "Ramazan Ayarları"
+  },
+  "stats": {
+    "iftarEvents": "İftar Etkinlikleri",
+    "taraweehPrayers": "Teravih Namazları",
+    "daysCompleted": "Tamamlanan Günler",
+    "zakatCalculations": "Zekat Hesaplamaları"
+  }
+}

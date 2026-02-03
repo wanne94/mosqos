@@ -1,0 +1,113 @@
+{
+  "title": "رمضان",
+  "dashboard": "لوحة رمضان",
+  "zakatCalculator": "حاسبة الزكاة",
+  "iftarSchedule": "جدول الإفطار",
+  "taraweehSchedule": "جدول التراويح",
+  "daysRemaining": "الأيام المتبقية",
+  "daysUntilRamadan": "أيام حتى رمضان",
+  "ramadanInProgress": "رمضان جاري",
+  "ramadanEnded": "انتهى رمضان",
+  "nisab": "حد النصاب",
+  "nisabDescription": "الحد الأدنى من المال الذي تجب عليه الزكاة",
+  "currentNisab": "قيمة النصاب الحالية",
+  "goldNisab": "نصاب الذهب (87.48 جرام)",
+  "silverNisab": "نصاب الفضة (612.36 جرام)",
+  "settings": {
+    "title": "إعدادات رمضان",
+    "hijriYear": "السنة الهجرية",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية",
+    "suhoorTime": "وقت السحور",
+    "iftarTime": "وقت الإفطار",
+    "taraweehTime": "وقت التراويح",
+    "taraweehRakats": "عدد ركعات التراويح",
+    "isActive": "رمضان نشط",
+    "notes": "ملاحظات",
+    "save": "حفظ الإعدادات",
+    "saved": "تم حفظ الإعدادات بنجاح"
+  },
+  "assets": {
+    "title": "الأصول",
+    "cash": "النقد والأرصدة البنكية",
+    "cashDescription": "النقد في اليد، الحسابات الجارية، حسابات التوفير",
+    "gold": "الذهب والفضة",
+    "goldDescription": "المجوهرات الذهبية، العملات، السبائك، والفضيات",
+    "stocks": "الأسهم والاستثمارات",
+    "stocksDescription": "الأسهم، السندات، صناديق الاستثمار، حسابات التقاعد",
+    "property": "العقارات الاستثمارية",
+    "propertyDescription": "العقارات المحتفظ بها للاستثمار (ليس السكن الرئيسي)",
+    "receivables": "الديون المستحقة لك",
+    "receivablesDescription": "القروض التي أعطيتها، المدفوعات المتوقعة",
+    "businessAssets": "أصول الأعمال",
+    "businessAssetsDescription": "المخزون، البضائع، مستحقات الأعمال",
+    "otherAssets": "أصول أخرى",
+    "otherAssetsDescription": "أي أصول أخرى تخضع للزكاة"
+  },
+  "liabilities": {
+    "title": "الخصوم للخصم",
+    "debts": "الديون والقروض",
+    "debtsDescription": "المال الذي تدين به للآخرين",
+    "duePayments": "المدفوعات المستحقة",
+    "duePaymentsDescription": "الفواتير والمدفوعات المستحقة خلال السنة",
+    "otherLiabilities": "خصوم أخرى",
+    "otherLiabilitiesDescription": "أي خصوم أخرى قابلة للخصم"
+  },
+  "calculation": {
+    "title": "حساب الزكاة",
+    "totalAssets": "إجمالي الأصول",
+    "totalLiabilities": "إجمالي الخصوم",
+    "netWorth": "صافي الثروة الزكوية",
+    "zakatDue": "الزكاة المستحقة (2.5%)",
+    "calculate": "احسب الزكاة",
+    "recalculate": "إعادة الحساب",
+    "save": "حفظ الحساب",
+    "saved": "تم حفظ الحساب بنجاح",
+    "print": "طباعة / تحميل PDF",
+    "belowNisab": "أقل من النصاب",
+    "belowNisabMessage": "صافي ثروتك أقل من حد النصاب. الزكاة غير واجبة.",
+    "aboveNisab": "أعلى من النصاب",
+    "aboveNisabMessage": "صافي ثروتك يتجاوز حد النصاب. الزكاة واجبة."
+  },
+  "history": {
+    "title": "سجل الحسابات",
+    "date": "التاريخ",
+    "nisabValue": "قيمة النصاب",
+    "totalAssets": "إجمالي الأصول",
+    "zakatAmount": "مبلغ الزكاة",
+    "noHistory": "لا يوجد سجل حسابات",
+    "viewDetails": "عرض التفاصيل"
+  },
+  "events": {
+    "iftar": "إفطار",
+    "taraweeh": "تراويح",
+    "suhoor": "سحور",
+    "eid": "عيد",
+    "noUpcoming": "لا توجد أحداث قادمة",
+    "today": "اليوم",
+    "tomorrow": "غداً",
+    "viewAll": "عرض جميع الأحداث"
+  },
+  "countdown": {
+    "days": "أيام",
+    "hours": "ساعات",
+    "minutes": "دقائق",
+    "seconds": "ثواني",
+    "ramadanMubarak": "رمضان مبارك!",
+    "untilRamadan": "حتى رمضان",
+    "remaining": "متبقي"
+  },
+  "quickActions": {
+    "title": "إجراءات سريعة",
+    "calculateZakat": "احسب الزكاة",
+    "viewSchedule": "عرض الجدول",
+    "addEvent": "إضافة حدث إفطار",
+    "settings": "إعدادات رمضان"
+  },
+  "stats": {
+    "iftarEvents": "أحداث الإفطار",
+    "taraweehPrayers": "صلوات التراويح",
+    "daysCompleted": "الأيام المكتملة",
+    "zakatCalculations": "حسابات الزكاة"
+  }
+}

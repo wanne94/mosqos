@@ -17,6 +17,7 @@ import {
   BarChart3,
   LayoutDashboard,
   Calendar,
+  Moon,
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
@@ -38,6 +39,7 @@ const navItems = [
   { path: 'announcements', label: 'Announcements', icon: Bell },
   { path: 'billing', label: 'Billing', icon: DollarSign },
   { path: 'reports', label: 'Reports', icon: BarChart3 },
+  { path: 'ramadan', label: 'Ramadan', icon: Moon },
   { path: 'settings', label: 'Settings', icon: Settings },
 ]
 

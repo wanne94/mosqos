@@ -1,0 +1,113 @@
+{
+  "title": "Ramadan",
+  "dashboard": "Ramadan Dashboard",
+  "zakatCalculator": "Zakat Calculator",
+  "iftarSchedule": "Iftar Schedule",
+  "taraweehSchedule": "Taraweeh Schedule",
+  "daysRemaining": "Days Remaining",
+  "daysUntilRamadan": "Days Until Ramadan",
+  "ramadanInProgress": "Ramadan in Progress",
+  "ramadanEnded": "Ramadan Has Ended",
+  "nisab": "Nisab Threshold",
+  "nisabDescription": "The minimum amount of wealth required for Zakat to be obligatory",
+  "currentNisab": "Current Nisab Value",
+  "goldNisab": "Gold Nisab (87.48g)",
+  "silverNisab": "Silver Nisab (612.36g)",
+  "settings": {
+    "title": "Ramadan Settings",
+    "hijriYear": "Hijri Year",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "suhoorTime": "Suhoor Time",
+    "iftarTime": "Iftar Time",
+    "taraweehTime": "Taraweeh Time",
+    "taraweehRakats": "Taraweeh Rakats",
+    "isActive": "Active Ramadan",
+    "notes": "Notes",
+    "save": "Save Settings",
+    "saved": "Settings saved successfully"
+  },
+  "assets": {
+    "title": "Assets",
+    "cash": "Cash & Bank Balances",
+    "cashDescription": "Cash on hand, checking accounts, savings accounts",
+    "gold": "Gold & Silver",
+    "goldDescription": "Gold jewelry, coins, bars, and silver items",
+    "stocks": "Stocks & Investments",
+    "stocksDescription": "Stocks, bonds, mutual funds, retirement accounts",
+    "property": "Investment Property",
+    "propertyDescription": "Property held for investment (not primary residence)",
+    "receivables": "Money Owed to You",
+    "receivablesDescription": "Loans you have given, expected payments",
+    "businessAssets": "Business Assets",
+    "businessAssetsDescription": "Inventory, merchandise, business receivables",
+    "otherAssets": "Other Assets",
+    "otherAssetsDescription": "Any other zakatable assets"
+  },
+  "liabilities": {
+    "title": "Liabilities to Deduct",
+    "debts": "Debts & Loans",
+    "debtsDescription": "Money you owe to others",
+    "duePayments": "Due Payments",
+    "duePaymentsDescription": "Bills and payments due within the year",
+    "otherLiabilities": "Other Liabilities",
+    "otherLiabilitiesDescription": "Any other deductible liabilities"
+  },
+  "calculation": {
+    "title": "Zakat Calculation",
+    "totalAssets": "Total Assets",
+    "totalLiabilities": "Total Liabilities",
+    "netWorth": "Net Zakatable Worth",
+    "zakatDue": "Zakat Due (2.5%)",
+    "calculate": "Calculate Zakat",
+    "recalculate": "Recalculate",
+    "save": "Save Calculation",
+    "saved": "Calculation saved successfully",
+    "print": "Print / Download PDF",
+    "belowNisab": "Below Nisab",
+    "belowNisabMessage": "Your net worth is below the Nisab threshold. Zakat is not obligatory.",
+    "aboveNisab": "Above Nisab",
+    "aboveNisabMessage": "Your net worth exceeds the Nisab threshold. Zakat is obligatory."
+  },
+  "history": {
+    "title": "Calculation History",
+    "date": "Date",
+    "nisabValue": "Nisab Value",
+    "totalAssets": "Total Assets",
+    "zakatAmount": "Zakat Amount",
+    "noHistory": "No calculation history found",
+    "viewDetails": "View Details"
+  },
+  "events": {
+    "iftar": "Iftar",
+    "taraweeh": "Taraweeh",
+    "suhoor": "Suhoor",
+    "eid": "Eid",
+    "noUpcoming": "No upcoming events",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "viewAll": "View All Events"
+  },
+  "countdown": {
+    "days": "Days",
+    "hours": "Hours",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "ramadanMubarak": "Ramadan Mubarak!",
+    "untilRamadan": "Until Ramadan",
+    "remaining": "Remaining"
+  },
+  "quickActions": {
+    "title": "Quick Actions",
+    "calculateZakat": "Calculate Zakat",
+    "viewSchedule": "View Schedule",
+    "addEvent": "Add Iftar Event",
+    "settings": "Ramadan Settings"
+  },
+  "stats": {
+    "iftarEvents": "Iftar Events",
+    "taraweehPrayers": "Taraweeh Prayers",
+    "daysCompleted": "Days Completed",
+    "zakatCalculations": "Zakat Calculations"
+  }
+}

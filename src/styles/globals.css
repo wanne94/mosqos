@@ -50,6 +50,82 @@
 .ramadan {
   --color-primary: #7C3AED;
   --color-accent: #F59E0B;
+  --ramadan-gold: #D4AF37;
+  --ramadan-purple: #4C1D95;
+  --ramadan-purple-light: #8B5CF6;
+}
+
+.ramadan.dark {
+  --color-primary: #A78BFA;
+  --color-accent: #FBBF24;
+}
+
+/* Ramadan sidebar gradient */
+.ramadan .sidebar-gradient {
+  background: linear-gradient(180deg, var(--ramadan-purple) 0%, #1e1b4b 100%);
+}
+
+/* Ramadan decorative elements */
+.ramadan-glow {
+  box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+}
+
+/* Ramadan card styling */
+.ramadan .ramadan-card {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+/* Animated crescent moon */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.ramadan-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Ramadan lantern glow */
+@keyframes lantern-glow {
+  0%, 100% {
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
+  }
+  50% {
+    opacity: 0.8;
+    filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.9));
+  }
+}
+
+.ramadan-lantern {
+  animation: lantern-glow 2s ease-in-out infinite;
+}
+
+/* Ramadan stars background */
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.ramadan-star {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.ramadan-star:nth-child(2n) {
+  animation-delay: 0.5s;
+}
+
+.ramadan-star:nth-child(3n) {
+  animation-delay: 1s;
 }
 
 /* Base styles */

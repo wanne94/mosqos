@@ -45,6 +45,7 @@ const AdminDashboardPage = lazy(() => import('@/features/admin/pages/DashboardPa
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
 const HouseholdsPage = lazy(() => import('@/features/households/pages/HouseholdsPage'))
 const DonorsPage = lazy(() => import('@/features/donations/pages/DonorsPage'))
+const TaxReceiptsPage = lazy(() => import('@/features/donations/pages/TaxReceiptsPage'))
 const ExpensesPage = lazy(() => import('@/features/expenses/pages/ExpensesPage'))
 const EducationPage = lazy(() => import('@/features/education/pages/EducationPage'))
 const ClassEditPage = lazy(() => import('@/features/education/pages/ClassEditPage'))
@@ -55,6 +56,11 @@ const AnnouncementsPage = lazy(() => import('@/features/announcements/pages/Anno
 const IslamicServicesPage = lazy(() => import('@/features/islamic-services/pages/IslamicServicesPage'))
 const BillingPage = lazy(() => import('@/features/billing/pages/BillingPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
+const KPIReportsPage = lazy(() => import('@/features/reports/pages/KPIReportsPage'))
+
+// Ramadan Pages
+const RamadanDashboardPage = lazy(() => import('@/features/ramadan/pages/RamadanDashboardPage'))
+const ZakatCalculatorPage = lazy(() => import('@/features/ramadan/pages/ZakatCalculatorPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const PermissionsPage = lazy(() => import('@/features/permissions/pages/PermissionsPage'))
 
@@ -218,6 +224,7 @@ export function AppRoutes() {
         <Route path="people" element={<PeoplePage />} />
         <Route path="households" element={<HouseholdsPage />} />
         <Route path="donors" element={<DonorsPage />} />
+        <Route path="donations/tax-receipts" element={<TaxReceiptsPage />} />
         <Route path="expenses" element={<ExpensesPage />} />
         <Route path="education" element={<EducationPage />} />
         <Route path="education/class/:id" element={<ClassEditPage />} />
@@ -225,6 +232,9 @@ export function AppRoutes() {
         <Route path="umrah" element={<UmrahPage />} />
         <Route path="billing" element={<BillingPage />} />
         <Route path="reports" element={<ReportsPage />} />
+        <Route path="reports/kpi" element={<KPIReportsPage />} />
+        <Route path="ramadan" element={<RamadanDashboardPage />} />
+        <Route path="ramadan/zakat" element={<ZakatCalculatorPage />} />
         <Route path="settings" element={<SettingsPage />} />
 
         {/* Placeholder routes for future pages */}

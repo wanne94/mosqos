@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
-import { Users, Edit, Download, CreditCard, Plus } from 'lucide-react'
+import { Users, Edit, Download, CreditCard, Plus, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { EditDonationModal } from '../components/EditDonationModal'
 import { DonateModal } from '../components/DonateModal'
@@ -187,24 +187,33 @@ export default function DonorsPage() {
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Donations</h1>
             <p className="text-slate-600 dark:text-slate-400 mt-2 text-sm sm:text-base">Manage donor information and track contributions</p>
           </div>
-          {activeTab === 'donors' && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => setIsNewDonationModalOpen(true)}
-                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium shadow-sm text-sm sm:text-base"
-              >
-                <Plus size={20} />
-                <span>New Donation</span>
-              </button>
-              <button
-                onClick={() => setIsDonateModalOpen(true)}
-                className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm text-sm sm:text-base"
-              >
-                <CreditCard size={20} />
-                <span>Make Donation</span>
-              </button>
-            </div>
-          )}
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate(`/${currentOrganization?.slug}/admin/donations/tax-receipts`)}
+              className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-sm text-sm sm:text-base"
+            >
+              <FileText size={20} />
+              <span className="hidden sm:inline">Tax Receipts</span>
+            </button>
+            {activeTab === 'donors' && (
+              <>
+                <button
+                  onClick={() => setIsNewDonationModalOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition-colors font-medium shadow-sm text-sm sm:text-base"
+                >
+                  <Plus size={20} />
+                  <span>New Donation</span>
+                </button>
+                <button
+                  onClick={() => setIsDonateModalOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 sm:px-6 py-2 sm:py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium shadow-sm text-sm sm:text-base"
+                >
+                  <CreditCard size={20} />
+                  <span>Make Donation</span>
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

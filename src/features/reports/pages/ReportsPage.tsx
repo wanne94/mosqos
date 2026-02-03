@@ -4,7 +4,8 @@ import { useMemo, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '@/lib/supabase/client'
-import { FileText, Filter, Download } from 'lucide-react'
+import { FileText, Filter, Download, BarChart3 } from 'lucide-react'
+import { Link, useParams } from 'react-router-dom'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
 import { useUrlParam } from '@/shared/hooks/useUrlState'
 
@@ -64,6 +65,7 @@ export default function ReportsPage() {
   const { t, i18n } = useTranslation()
   const currentLanguage = i18n.language || 'en'
   const { currentOrganization } = useOrganization()
+  const { slug } = useParams()
 
   // URL state for filter persistence
   const [month, setMonth] = useUrlParam('month', '')
@@ -289,9 +291,18 @@ export default function ReportsPage() {
 
   return (
     <div className="p-4 md:p-8 animate-page-enter">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{t('reports.title')}</h1>
-        <p className="text-slate-600 dark:text-slate-400 mt-2">{t('reports.subtitle')}</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">{t('reports.title')}</h1>
+          <p className="text-slate-600 dark:text-slate-400 mt-2">{t('reports.subtitle')}</p>
+        </div>
+        <Link
+          to={`/${slug}/admin/reports/kpi`}
+          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+        >
+          <BarChart3 size={18} />
+          <span>KPI Reports</span>
+        </Link>
       </div>
 
       {/* Summary Cards */}

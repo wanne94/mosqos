@@ -14,3 +14,12 @@ export {
   useRecurringDonation,
   useMemberRecurringDonations,
 } from './usePledges'
+
+export {
+  useYearEndDonors,
+  useDonorYearSummary,
+  useAvailableYears,
+  useYearEndStats,
+  useMarkReceiptsSent,
+  useYearEndStatements,
+} from './useTaxReceipts'
