@@ -1,6 +1,7 @@
 // Modal components
 export { ConfirmModal, type ConfirmModalProps } from './ConfirmModal'
 export { ConfirmDeleteModal, type ConfirmDeleteModalProps } from './ConfirmDeleteModal'
+export { SessionTimeoutWarning, type SessionTimeoutWarningProps } from './SessionTimeoutWarning'
 
 // Loading components
 export { LoadingSpinner, InlineSpinner, type LoadingSpinnerProps } from './LoadingSpinner'

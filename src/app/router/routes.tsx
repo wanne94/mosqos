@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { lazy } from 'react'
 import { useAuth } from '../providers/AuthProvider'
-import { PlatformAdminGuard, OrganizationAdminGuard } from './guards'
+import { PlatformAdminGuard, OrganizationAdminGuard, VerificationGuard } from './guards'
 
 // Layouts
 const PublicLayout = lazy(() => import('./layouts/PublicLayout'))
@@ -36,6 +36,10 @@ const NoOrganizationPage = lazy(() => import('@/features/auth/pages/NoOrganizati
 const PasswordResetRequestPage = lazy(() => import('@/features/auth/pages/PasswordResetRequestPage'))
 const PasswordResetConfirmPage = lazy(() => import('@/features/auth/pages/PasswordResetConfirmPage'))
 
+// Email Verification Pages
+const EmailVerificationPage = lazy(() => import('@/features/auth/pages/EmailVerificationPage'))
+const EmailVerificationPendingPage = lazy(() => import('@/features/auth/pages/EmailVerificationPendingPage'))
+
 // Admin Pages
 const AdminDashboardPage = lazy(() => import('@/features/admin/pages/DashboardPage'))
 const PeoplePage = lazy(() => import('@/features/members/pages/PeoplePage'))
@@ -53,6 +57,10 @@ const BillingPage = lazy(() => import('@/features/billing/pages/BillingPage'))
 const ReportsPage = lazy(() => import('@/features/reports/pages/ReportsPage'))
 const SettingsPage = lazy(() => import('@/features/settings/pages/SettingsPage'))
 const PermissionsPage = lazy(() => import('@/features/permissions/pages/PermissionsPage'))
+
+// Events Pages
+const EventsPage = lazy(() => import('@/features/events/pages/EventsPage'))
+const EventDetailPage = lazy(() => import('@/features/events/pages/EventDetailPage'))
 
 // Portal Pages
 const PortalDashboardPage = lazy(() => import('@/features/portal/pages/DashboardPage'))
@@ -139,6 +147,17 @@ export function AppRoutes() {
         />
       </Route>
 
+      {/* Email Verification Routes */}
+      <Route path="/verify-email" element={<EmailVerificationPage />} />
+      <Route
+        path="/verify-email/pending"
+        element={
+          <ProtectedRoute>
+            <EmailVerificationPendingPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* Approval Flow Routes */}
       <Route
         path="/pending-approval"
@@ -162,9 +181,11 @@ export function AppRoutes() {
         path="/platform"
         element={
           <ProtectedRoute>
-            <PlatformAdminGuard>
-              <PlatformLayout />
-            </PlatformAdminGuard>
+            <VerificationGuard>
+              <PlatformAdminGuard>
+                <PlatformLayout />
+              </PlatformAdminGuard>
+            </VerificationGuard>
           </ProtectedRoute>
         }
       >
@@ -185,9 +206,11 @@ export function AppRoutes() {
         path="/:slug/admin"
         element={
           <ProtectedRoute>
-            <OrganizationAdminGuard>
-              <AdminLayout />
-            </OrganizationAdminGuard>
+            <VerificationGuard>
+              <OrganizationAdminGuard>
+                <AdminLayout />
+              </OrganizationAdminGuard>
+            </VerificationGuard>
           </ProtectedRoute>
         }
       >
@@ -209,6 +232,8 @@ export function AppRoutes() {
         <Route path="services" element={<IslamicServicesPage />} />
         <Route path="announcements" element={<AnnouncementsPage />} />
         <Route path="permissions" element={<PermissionsPage />} />
+        <Route path="events" element={<EventsPage />} />
+        <Route path="events/:eventId" element={<EventDetailPage />} />
       </Route>
 
       {/* Member Portal Routes */}
@@ -216,7 +241,9 @@ export function AppRoutes() {
         path="/:slug/portal"
         element={
           <ProtectedRoute>
-            <PortalLayout />
+            <VerificationGuard>
+              <PortalLayout />
+            </VerificationGuard>
           </ProtectedRoute>
         }
       >

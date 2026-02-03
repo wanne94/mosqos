@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
 import { Users, Edit, Download, CreditCard, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import { EditDonationModal } from '../components/EditDonationModal'
 import { DonateModal } from '../components/DonateModal'
 import { NewDonationModal } from '../components/NewDonationModal'
 import { useDonations } from '../hooks'
 import { useHouseholds } from '@/features/households/hooks'
 import type { Donation } from '../types/donations.types'
+import { generateDonationReceipt } from '../utils/generateDonationReceipt'
 
 interface DonorWithTotals {
   id: string
@@ -85,8 +87,39 @@ export default function DonorsPage() {
   }
 
   const handleDownloadReceipt = async (donation: Donation) => {
-    // TODO: Implement PDF generation
-    console.log('Download receipt for donation:', donation.id)
+    if (!currentOrganization) {
+      toast.error('Organization not found')
+      return
+    }
+
+    try {
+      // Format address from organization fields
+      const addressParts = [
+        currentOrganization.address_line1,
+        currentOrganization.address_line2,
+        currentOrganization.city,
+        currentOrganization.state,
+        currentOrganization.postal_code,
+      ].filter(Boolean)
+      const formattedAddress = addressParts.length > 0 ? addressParts.join(', ') : undefined
+
+      generateDonationReceipt({
+        donation,
+        organization: {
+          name: currentOrganization.name,
+          address: formattedAddress,
+          phone: currentOrganization.contact_phone || undefined,
+          email: currentOrganization.contact_email || undefined,
+          website: currentOrganization.website || undefined,
+        },
+        language: 'en',
+        action: 'download',
+      })
+      toast.success('Receipt downloaded successfully')
+    } catch (error) {
+      console.error('Error generating receipt:', error)
+      toast.error('Failed to generate receipt')
+    }
   }
 
   const handleExportDonors = () => {

@@ -70,9 +70,7 @@ async function importJsPDF(): Promise<{
   jsPDF: JsPDFConstructor
   autoTable: AutoTableFunction
 }> {
-  // @ts-expect-error - jspdf is an optional dependency, dynamically imported at runtime
   const jspdfModule = await import('jspdf')
-  // @ts-expect-error - jspdf-autotable is an optional dependency, dynamically imported at runtime
   const autoTableModule = await import('jspdf-autotable')
 
   return {

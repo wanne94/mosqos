@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 import { supabase } from '@/lib/supabase/client'
 
@@ -10,6 +10,16 @@ interface Organization {
   logo_url: string | null
   settings: Record<string, unknown> | null
   country_id: string | null
+  // Address
+  address_line1: string | null
+  address_line2: string | null
+  city: string | null
+  state: string | null
+  postal_code: string | null
+  // Contact
+  contact_email: string | null
+  contact_phone: string | null
+  website: string | null
 }
 
 interface OrganizationMembership {
@@ -37,12 +47,29 @@ const DEV_ORGANIZATION: Organization = {
   logo_url: null,
   settings: {},
   country_id: null,
+  // Address
+  address_line1: '123 Main Street',
+  address_line2: null,
+  city: 'Birmingham',
+  state: 'West Midlands',
+  postal_code: 'B10 0RG',
+  // Contact
+  contact_email: 'info@greenlane.org',
+  contact_phone: '+44 121 123 4567',
+  website: 'https://greenlane.org',
 }
 
 export function OrganizationProvider({ children }: { children: ReactNode }) {
   const { user, isDevMode } = useAuth()
-  const { slug } = useParams<{ slug: string }>()
+  const location = useLocation()
   const navigate = useNavigate()
+
+  // Extract slug from pathname since OrganizationProvider is outside of Routes
+  // URL patterns: /:slug/admin/... or /:slug/portal/...
+  const pathParts = location.pathname.split('/').filter(Boolean)
+  const slug = pathParts.length > 0 && (pathParts[1] === 'admin' || pathParts[1] === 'portal')
+    ? pathParts[0]
+    : undefined
 
   const [currentOrganization, setCurrentOrganization] = useState<Organization | null>(null)
   const [organizations, setOrganizations] = useState<OrganizationMembership[]>([])
@@ -60,10 +87,19 @@ export function OrganizationProvider({ children }: { children: ReactNode }) {
     if (isDevMode) {
       const userRole = user.user_metadata?.role as string
 
-      // Platform admin doesn't need organization membership
+      // Platform admin has access to all organizations (use DEV_ORGANIZATION for testing)
       if (userRole === 'admin') {
-        setOrganizations([])
-        setCurrentOrganization(null)
+        const membership: OrganizationMembership = {
+          organization: DEV_ORGANIZATION,
+          isOwner: true,
+          isDelegate: true,
+          permissions: ['*'],
+        }
+        setOrganizations([membership])
+        // Set current organization if on an org-specific route
+        if (slug) {
+          setCurrentOrganization(DEV_ORGANIZATION)
+        }
         setIsLoading(false)
         return
       }

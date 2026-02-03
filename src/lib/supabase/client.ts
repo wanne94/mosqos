@@ -26,6 +26,10 @@ export const supabase = createClient<Database>(
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+      // Flow type determines session duration behavior
+      // 'implicit' = shorter lived sessions (better for mobile)
+      // 'pkce' = longer lived sessions (better for desktop/web)
+      flowType: 'pkce',
     },
   }
 )

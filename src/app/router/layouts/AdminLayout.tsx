@@ -16,6 +16,7 @@ import {
   ChevronDown,
   BarChart3,
   LayoutDashboard,
+  Calendar,
 } from 'lucide-react'
 import { useAuth } from '@/app/providers/AuthProvider'
 import { useOrganization } from '@/app/providers/OrganizationProvider'
@@ -28,6 +29,7 @@ const navItems = [
   { path: 'people', label: 'People', icon: Users },
   { path: 'donors', label: 'Donors', icon: DollarSign },
   { path: 'expenses', label: 'Expenses', icon: DollarSign },
+  { path: 'events', label: 'Events', icon: Calendar },
   { path: 'education', label: 'Education', icon: GraduationCap },
   { path: 'cases', label: 'Cases', icon: FileText },
   { path: 'umrah', label: 'Umrah', icon: Plane },
